@@ -1,0 +1,124 @@
+/* Free agency (hub phase 7): day bar, RFA card, market list with open rows, roster sheet, offer sheet.
+   Paper colours match EndSeason.css / Draft.css; tokens come from .ember-theme. */
+
+.fa-root { display: flex; flex-direction: column; gap: 12px; }
+.fa-error { margin: 0; padding: 8px 12px; border-radius: 7px; background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.4); color: #fda4af; font-size: 14px; }
+.btn.fa-ink { background: transparent; color: #1a130e; border-color: #8a7a68; }
+.btn.fa-ink:hover:not(:disabled) { background: rgba(26, 19, 14, 0.08); }
+
+/* Day bar */
+.fa-daybar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 8px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; }
+.fa-day { font-family: var(--font-display); font-size: 21px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.fa-recap { flex: 1; min-width: 0; font-size: 13.5px; color: var(--text-secondary); }
+.fa-recap b { color: var(--primary-hover); }
+.fa-recap .is-yours { color: var(--text-primary); font-weight: 700; }
+.fa-daybar .btn { font-family: var(--font-display); font-size: 15px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+
+/* RFA */
+.fa-rfa { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; border: 2px solid var(--primary); }
+.fa-rfa > div:first-child { flex: 1; min-width: 260px; }
+.fa-rfa .eos-kicker { margin-bottom: 4px; }
+.fa-rfa-line { margin: 0; font-size: 14px; }
+.fa-rfa-actions { display: flex; gap: 8px; }
+.fa-rfa-actions .btn { font-family: var(--font-display); font-size: 15px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+
+/* Layout */
+.fa-grid { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 12px; align-items: start; }
+.fa-market { min-width: 0; }
+.fa-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.fa-views { display: inline-flex; border: 1px solid #8a7a68; border-radius: 6px; overflow: hidden; }
+.fa-views button { padding: 3px 10px; border: 0; background: transparent; cursor: pointer; font-family: var(--font-display); font-size: 13px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; color: #6d5640; }
+.fa-views button[aria-pressed='true'] { background: #1a130e; color: #f7efe2; }
+.fa-search { margin-left: auto; padding: 4px 8px; border: 1px solid #8a7a68; border-radius: 6px; background: #fff8ec; color: #1a130e; font: inherit; font-size: 13.5px; min-width: 180px; }
+
+/* Table */
+.fa-table { width: 100%; margin-top: 8px; border-collapse: collapse; font-size: 14px; }
+.fa-table th { padding: 4px 6px; text-align: left; font-family: var(--font-display); font-size: 12px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #8a7a68; white-space: nowrap; }
+.fa-table th button { padding: 0; border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+.fa-table td { padding: 6px; border-top: 1px dashed rgba(26, 19, 14, 0.18); vertical-align: middle; }
+.fa-table tr.is-yours td { background: rgba(255, 106, 26, 0.12); }
+.fa-row { cursor: pointer; }
+.fa-row:hover td { background: rgba(255, 255, 255, 0.35); }
+.fa-row.is-open td, .fa-open > td { background: #fff1dd; }
+.fa-open > td { border-top: 0; padding: 4px 12px 14px; }
+.fa-pos { display: inline-block; width: 30px; margin-right: 8px; text-align: center; border: 1.5px solid #8a5a2a; border-radius: 4px; font-family: var(--font-display); font-size: 12px; font-weight: 800; color: #8a5a2a; }
+.fa-tag { margin-left: 6px; padding: 0 5px; border: 1.5px solid #8a5a2a; border-radius: 4px; font-style: normal; font-family: var(--font-display); font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; color: #8a5a2a; }
+.fa-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fa-muted { color: #6d5640; font-size: 13px; }
+.fa-empty { color: #8a7a68; font-style: italic; text-align: center; }
+.fa-act { text-align: right; white-space: nowrap; }
+.fa-act .btn { margin-left: 4px; padding: 3px 10px; font-family: var(--font-display); font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.fa-chance { padding: 0 6px; border: 1.5px solid currentColor; border-radius: 4px; font-family: var(--font-display); font-size: 12px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; }
+.fa-chance.is-leading { color: #2f7d4f; }
+.fa-chance.is-behind { color: #b42318; }
+.fa-chance.is-no-offer { color: #8a7a68; }
+
+/* Open row */
+.fa-open-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; }
+.fa-race-sub { margin: 2px 0 8px; font-size: 12.5px; color: #6d5640; }
+.fa-race-rows { display: grid; grid-template-columns: minmax(130px, auto) minmax(80px, 1fr) 32px; gap: 6px 10px; align-items: center; font-size: 13px; }
+.fa-race-team { min-width: 0; }
+.fa-race-team small { display: block; font-size: 11px; color: #8a5a2a; font-weight: 700; }
+.fa-race-team.is-yours b { color: #c2410c; }
+.fa-race-track { position: relative; height: 16px; border-radius: 8px; background: rgba(26, 19, 14, 0.08); }
+.fa-race-bar { position: absolute; top: 3px; bottom: 3px; left: 0; border-radius: 5px; background: #8a7a68; transition: width 0.25s ease; }
+.fa-race-bar.is-yours { background: var(--primary); }
+.fa-race-line { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: #1a130e; }
+.fa-race-score { font-family: var(--font-display); font-size: 17px; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+.fa-race-team small.fa-raise { color: #c2410c; font-weight: 800; }
+.fa-out { opacity: 0.45; }
+.fa-tag.is-hot { border-color: #c2410c; color: #c2410c; }
+.fa-night-toggle { background: none; border: 0; padding: 0; color: var(--primary-hover); font: inherit; font-weight: 700; cursor: pointer; }
+.fa-night { display: flex; flex-direction: column; gap: 6px; padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; font-size: 13.5px; color: var(--text-secondary); }
+.fa-battle { padding: 6px 10px; border-left: 3px solid var(--border); }
+.fa-battle.is-yours { border-left-color: var(--primary); }
+.fa-battle-head b { color: var(--text-primary); }
+.fa-battle-sides { margin-top: 2px; font-size: 12.5px; }
+.fa-night .is-yours { color: var(--text-primary); font-weight: 700; }
+.fa-night-title { font-family: var(--font-display); font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2px; }
+.fa-night-muted { opacity: 0.7; }
+.fa-night-more { align-self: flex-start; background: none; border: 0; padding: 0; color: var(--primary-hover); font: inherit; font-weight: 700; cursor: pointer; }
+.fa-race-verdict { margin: 10px 0 0; font-size: 13.5px; font-weight: 700; }
+.fa-race-verdict.is-good { color: #2f7d4f; }
+.fa-race-note { margin: 2px 0 0; font-size: 12px; color: #8a7a68; }
+.fa-rival { margin: 6px 0 0; font-size: 13px; }
+.fa-why dl { margin: 4px 0 0; }
+.fa-why dl div { display: flex; justify-content: space-between; gap: 10px; padding: 3px 0; border-bottom: 1px dotted rgba(26, 19, 14, 0.2); font-size: 13px; }
+.fa-why dt { color: #3a2a1e; }
+.fa-why dd { margin: 0; font-family: var(--font-display); font-size: 15px; font-weight: 800; }
+.fa-why .eos-up, .fa-why .eos-down { font-size: 15px; }
+.fa-why-foot { margin: 6px 0 0; font-size: 12px; color: #8a7a68; }
+.fa-why-reject { margin: 6px 0 0; padding: 8px 10px; border-radius: 6px; background: rgba(180, 35, 24, 0.1); color: #8f1d14; font-size: 13.5px; font-weight: 600; }
+
+/* Roster sheet */
+.fa-roster { position: sticky; top: 12px; }
+.fa-roster .eos-kicker { margin-bottom: 4px; }
+.fa-roster-pos { margin-top: 6px; }
+.fa-roster-label { display: block; font-family: var(--font-display); font-size: 13px; font-weight: 800; letter-spacing: 1px; }
+.fa-slot { display: flex; justify-content: space-between; gap: 6px; padding: 3px 6px; font-size: 13px; border-bottom: 1px dotted rgba(26, 19, 14, 0.2); }
+.fa-slot.is-open { margin: 3px 0; border: 1.5px dashed #cdb792; border-radius: 5px; color: #8a7a68; }
+.fa-slot.is-focus { margin: 3px 0; border: 1.5px dashed #c2410c; border-radius: 5px; color: #c2410c; font-weight: 700; }
+.fa-new { margin-left: 6px; padding: 0 5px; border-radius: 4px; background: rgba(47, 125, 79, 0.15); color: #2f7d4f; font-style: normal; font-family: var(--font-display); font-size: 11px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; }
+.fa-money { margin-top: 10px; padding-top: 8px; border-top: 1px solid #cdb792; }
+.fa-money div { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; font-size: 13px; }
+.fa-money span { color: #6d5640; }
+
+@media (max-width: 1000px) {
+  .fa-grid { grid-template-columns: minmax(0, 1fr); }
+  .fa-roster { position: static; order: -1; }
+  .fa-open-grid { grid-template-columns: minmax(0, 1fr); }
+  .fa-search { margin-left: 0; }
+}
+
+/* Offer sheet (inside the open row) */
+.fa-sheet .eos-kicker { margin-bottom: 4px; }
+.fa-slider { width: 100%; margin: 6px 0 2px; accent-color: var(--primary); }
+.fa-slider-marks { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 12px; color: #6d5640; }
+.fa-slider-marks button { padding: 0; border: 0; background: transparent; color: #c2410c; font: inherit; font-weight: 700; cursor: pointer; text-decoration: underline dotted; }
+.fa-controls { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+.fa-controls .eos-kicker { display: block; margin-bottom: 3px; }
+.fa-paid { margin: 12px 0 0; font-size: 13.5px; }
+.fa-paid.is-bad { color: #8f1d14; font-weight: 600; }
+.fa-sheet-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.fa-sheet-actions .btn { padding: 5px 14px; font-family: var(--font-display); font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.fa-sheet .fa-why { margin-top: 12px; }

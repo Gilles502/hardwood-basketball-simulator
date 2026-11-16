@@ -1,0 +1,119 @@
+/* Finances & CBA ("the business pages"). Tokens come from .ember-theme; the header reuses dash-* from Dashboard.css.
+   One cream newspaper sheet: masthead, headline, stock-listing table of every payroll and side columns. */
+
+.fin-root { display: flex; flex-direction: column; gap: 14px; }
+
+.fin-empty {
+  padding: 40px 24px; text-align: center; color: var(--text-secondary);
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+}
+
+.fin-paper {
+  --ink: #1a130e;
+  --ink-soft: #3a2a1e;
+  --ink-muted: #6d5640;
+  --rule: rgba(26, 19, 14, 0.25);
+  --up: #b42318;
+  --down: #2f7d4f;
+  padding: 16px 20px 18px;
+  background: linear-gradient(180deg, #f7efe2, #efe3cf);
+  color: var(--ink);
+  border: 1px solid #cdb792;
+  border-radius: 10px;
+}
+
+.fin-mast {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  padding-bottom: 6px; margin-bottom: 12px; border-bottom: 3px double var(--ink);
+}
+.fin-mast b { font-family: var(--font-display); font-size: 16px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
+.fin-mast span { font-size: 13px; color: var(--ink-muted); }
+
+.fin-headline {
+  margin: 0; font-family: var(--font-display); font-size: 42px; font-weight: 800; line-height: 0.95;
+  text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink);
+}
+.fin-headline em { font-style: normal; color: #c2410c; }
+.fin-dek { max-width: 900px; margin: 8px 0 14px; font-size: 14.5px; line-height: 1.5; color: var(--ink-soft); }
+
+.fin-grid {
+  display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 20px;
+  padding-top: 12px; border-top: 1px solid var(--rule);
+}
+
+/* Stock listing */
+.fin-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; }
+.fin-col-team { width: 34%; }
+.fin-col-owner { width: 15%; }
+.fin-table th {
+  padding: 4px 6px; text-align: right; border-bottom: 2px solid var(--ink);
+  font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--ink-muted); cursor: default;
+}
+.fin-table th:first-child { text-align: left; }
+.fin-table td {
+  padding: 4px 6px; text-align: right; white-space: nowrap; border-bottom: 1px dotted var(--rule);
+  font-family: var(--font-display); font-size: 15px; font-weight: 700;
+}
+.fin-table td:first-child { text-align: left; overflow: hidden; text-overflow: ellipsis; }
+.fin-table tbody tr:not(.fin-group) { cursor: pointer; }
+.fin-table tbody tr:not(.fin-group):hover td { background: rgba(194, 65, 12, 0.08); }
+.fin-table td.fin-owner { font-family: var(--font-sans); font-size: 12px; font-weight: 500; color: var(--ink-muted); }
+
+.fin-group td {
+  padding: 5px 8px; text-align: left; background: var(--ink); color: #f7efe2; border-bottom: none;
+  font-size: 13px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase;
+}
+.fin-group-second_apron td, .fin-group-first_apron td { box-shadow: inset 4px 0 0 #b42318; }
+.fin-group-tax td { box-shadow: inset 4px 0 0 #c2410c; }
+.fin-group-under_cap td { box-shadow: inset 4px 0 0 #2f7d4f; }
+.fin-group-under_floor td { box-shadow: inset 4px 0 0 #6d5bd0; }
+
+.fin-team {
+  padding: 0; border: 0; background: transparent; cursor: pointer; color: inherit;
+  font-family: var(--font-sans); font-size: 13.5px; font-weight: 600;
+}
+.fin-team:hover, .fin-player:hover { color: #c2410c; text-decoration: underline; }
+.fin-you {
+  margin-left: 6px; padding: 0 5px; border-radius: 3px; background: var(--primary); color: #1a0c04;
+  font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+}
+.fin-me td, .fin-line.fin-me { background: rgba(255, 106, 26, 0.14); }
+.fin-me td:first-child { box-shadow: inset 3px 0 0 var(--primary); }
+
+.fin-up { color: var(--up); }
+.fin-down { color: var(--down); }
+.fin-foot { margin: 8px 0 0; font-size: 12px; font-style: italic; color: var(--ink-muted); }
+
+/* Side columns */
+.fin-side { display: flex; flex-direction: column; gap: 16px; }
+.fin-box h4 {
+  margin: 0 0 6px; padding-bottom: 3px; border-bottom: 2px solid var(--ink);
+  font-family: var(--font-display); font-size: 15px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase;
+}
+.fin-line {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  padding: 4px 2px; border-bottom: 1px dotted var(--rule); font-size: 13px;
+}
+.fin-line > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fin-line small { margin-left: 6px; font-size: 11px; color: var(--ink-muted); }
+.fin-line em { flex: none; font-style: normal; font-family: var(--font-display); font-size: 16px; font-weight: 800; }
+.fin-player {
+  padding: 0; border: 0; background: transparent; cursor: pointer; color: inherit;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+}
+.fin-none { margin: 4px 0; font-size: 12.5px; font-style: italic; color: var(--ink-muted); }
+
+.fin-team:focus-visible, .fin-player:focus-visible { outline: 2px solid #c2410c; outline-offset: 2px; }
+
+@media (max-width: 1100px) {
+  .fin-grid { grid-template-columns: minmax(0, 1fr); }
+  .fin-headline { font-size: 34px; }
+}
+@media (max-width: 640px) {
+  .fin-paper { padding: 12px; }
+  .fin-col-owner, .fin-table th:last-child, .fin-table td:last-child { display: none; }
+  .fin-col-team { width: 40%; }
+}
+
+.fin-root .dash-badges a.btn { text-decoration: none; }

@@ -1,0 +1,25 @@
+.live-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.live-dot::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent);
+}
+
+.live-dot-live {
+  color: var(--success, #4ade80);
+}
+
+.live-dot-offline {
+  color: var(--warning, #facc15);
+}

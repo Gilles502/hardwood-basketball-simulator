@@ -1,0 +1,37 @@
+/* Hardwood & Ember theme tokens. Scoped to .ember-theme on purpose: the rest of the app keeps the
+   :root theme from index.css. To make this look global later, move this block to :root. */
+
+.ember-theme {
+  --bg-app: #14100d;
+  --bg-sidebar: #0e0a07;
+  --bg-card: #241a13;
+  --bg-card-hover: #1a130e;
+
+  --primary: #ff6a1a;
+  --primary-hover: #ff8a4a;
+  --primary-trans: rgba(255, 106, 26, 0.16);
+
+  --accent: #c9a27a;
+  --accent-hover: #e0c19a;
+  --accent-trans: rgba(201, 162, 122, 0.16);
+
+  /* Status colors: kept clearly apart from the orange primary (rose, yellow, sky). */
+  --success: #4ade80;
+  --danger: #f43f5e;
+  --warning: #facc15;
+  --info: #38bdf8;
+
+  --text-primary: #f5ede1;
+  --text-secondary: #d9c9b4;
+  --text-muted: #c9a27a;
+
+  --border: #3a2a1e;
+  --border-hover: #5b4636;
+  --border-subtle: #2a1f17;
+
+  --font-sans: 'Barlow', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Barlow Condensed', 'Barlow', 'Inter', sans-serif;
+
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}

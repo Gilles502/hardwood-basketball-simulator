@@ -1,0 +1,14 @@
+[
+  {
+    "version": "0.1.0",
+    "date": "2026-11-16",
+    "items": [
+      { "kind": "new", "text": "First public release: a fictional 2002 league, with real-name leagues as mods" },
+      { "kind": "new", "text": "CPU general managers with their own plans, wishes and trades" },
+      { "kind": "new", "text": "Contracts, free-agency auctions and the draft run by the same AI GMs" },
+      { "kind": "new", "text": "Day-by-day live simulation with a Stop button" },
+      { "kind": "new", "text": "League Analytics with rebounding, clutch and shot-zone stats" },
+      { "kind": "fix", "text": "Saves are written all-or-nothing, with a backup copy" }
+    ]
+  }
+]

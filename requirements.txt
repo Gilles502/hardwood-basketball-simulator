@@ -1,0 +1,3 @@
+# Runtime dependencies of the game (from source). Build-only tools: requirements-build.txt.
+flask==3.1.2
+pywebview==6.2.1

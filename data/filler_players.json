@@ -1,0 +1,2936 @@
+[
+  {
+    "nome": "Arthur Schneider",
+    "ruolo": "PG",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 70, "mid_range_shot_rating": 72, "three_point_shot_rating": 76, "free_throw_rating": 78,
+      "shot_iq": 72, "passing_accuracy": 75, "ball_handling": 75, "passing_vision": 72,
+      "interior_defense_rating": 38, "perimeter_defense_rating": 68, "steal_rating": 65, "block_rating": 30,
+      "strength": 60, "speed": 78, "acceleration": 77, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 28, "defensive_rebound_rating": 45
+    },
+    "tendenze": {
+      "touch_tendency": 70, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 65, "three_point_shot_tendency": 65,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 5, "pass_out_of_shot_tendency": 35, "dish_to_open_man_tendency": 50
+    }
+  },
+  {
+    "nome": "Marius Fischer",
+    "ruolo": "SF",
+    "eta": 21,
+    "potenziale": 77,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 75, "three_point_shot_rating": 80, "free_throw_rating": 80,
+      "shot_iq": 75, "passing_accuracy": 65, "ball_handling": 70, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 68, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 80,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Julian Garcia",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 70, "mid_range_shot_rating": 68, "three_point_shot_rating": 72, "free_throw_rating": 70,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 55,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "David Schmidt",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Ethan Williams",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 68,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Maximilien Dubois",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 79,
+    "valutazione": 72,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 75, "three_point_shot_rating": 78, "free_throw_rating": 80,
+      "shot_iq": 75, "passing_accuracy": 80, "ball_handling": 78, "passing_vision": 82,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 68, "block_rating": 30,
+      "strength": 65, "speed": 78, "acceleration": 77, "vertical": 70, "stamina": 80,
+      "offensive_rebound_rating": 28, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 70,
+      "drive_to_basket_tendency": 65, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 70
+    }
+  },
+  {
+    "nome": "Liam Johnson",
+    "ruolo": "SF",
+    "eta": 19,
+    "potenziale": 78,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 82,
+      "shot_iq": 78, "passing_accuracy": 60, "ball_handling": 72, "passing_vision": 58,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 68, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 45
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 85, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 80,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 10, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Lukas Miller",
+    "ruolo": "PF",
+    "eta": 22,
+    "potenziale": 77,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 75,
+      "shot_iq": 72, "passing_accuracy": 65, "ball_handling": 70, "passing_vision": 60,
+      "interior_defense_rating": 55, "perimeter_defense_rating": 75, "steal_rating": 68, "block_rating": 55,
+      "strength": 72, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 80,
+      "offensive_rebound_rating": 45, "defensive_rebound_rating": 60
+    },
+    "tendenze": {
+      "touch_tendency": 70, "spot_up_shot_tendency": 65, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 20, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 35
+    }
+  },
+  {
+    "nome": "Noah Taylor",
+    "ruolo": "SG",
+    "eta": 20,
+    "potenziale": 79,
+    "valutazione": 72,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 65, "three_point_shot_rating": 72, "free_throw_rating": 70,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 68, "passing_vision": 58,
+      "interior_defense_rating": 72, "perimeter_defense_rating": 68, "steal_rating": 60, "block_rating": 70,
+      "strength": 82, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 80,
+      "offensive_rebound_rating": 65, "defensive_rebound_rating": 75
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 45, "mid_range_shot_tendency": 35, "three_point_shot_tendency": 40,
+      "drive_to_basket_tendency": 45, "post_up_tendency": 60, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Gabriel Ivanov",
+    "ruolo": "C",
+    "eta": 21,
+    "potenziale": 78,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 80, "mid_range_shot_rating": 35, "three_point_shot_rating": 20, "free_throw_rating": 60,
+      "shot_iq": 55, "passing_accuracy": 45, "ball_handling": 40, "passing_vision": 35,
+      "interior_defense_rating": 82, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 78,
+      "strength": 88, "speed": 55, "acceleration": 50, "vertical": 68, "stamina": 78,
+      "offensive_rebound_rating": 78, "defensive_rebound_rating": 82
+    },
+    "tendenze": {
+      "touch_tendency": 40, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 10, "post_up_tendency": 85, "pass_out_of_shot_tendency": 10, "dish_to_open_man_tendency": 10
+    }
+  },
+  {
+    "nome": "Samuel Henderson",
+    "ruolo": "PG",
+    "eta": 19,
+    "potenziale": 78,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 68, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 75,
+      "shot_iq": 70, "passing_accuracy": 78, "ball_handling": 75, "passing_vision": 75,
+      "interior_defense_rating": 35, "perimeter_defense_rating": 68, "steal_rating": 60, "block_rating": 30,
+      "strength": 60, "speed": 75, "acceleration": 74, "vertical": 68, "stamina": 78,
+      "offensive_rebound_rating": 28, "defensive_rebound_rating": 45
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 5, "pass_out_of_shot_tendency": 35, "dish_to_open_man_tendency": 70
+    }
+  },
+  {
+    "nome": "Alexander White",
+    "ruolo": "SF",
+    "eta": 22,
+    "potenziale": 79,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 80, "three_point_shot_rating": 84, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 70, "ball_handling": 75, "passing_vision": 65,
+      "interior_defense_rating": 42, "perimeter_defense_rating": 72, "steal_rating": 68, "block_rating": 38,
+      "strength": 70, "speed": 80, "acceleration": 81, "vertical": 78, "stamina": 83,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 85, "spot_up_shot_tendency": 70, "mid_range_shot_tendency": 75, "three_point_shot_tendency": 80,
+      "drive_to_basket_tendency": 65, "post_up_tendency": 10, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Anton Bell",
+    "ruolo": "PF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 65, "ball_handling": 70, "passing_vision": 60,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 50,
+      "strength": 70, "speed": 75, "acceleration": 74, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 20, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Stefan Hill",
+    "ruolo": "SG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 80, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 75,
+      "shot_iq": 75, "passing_accuracy": 65, "ball_handling": 70, "passing_vision": 60,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 65,
+      "strength": 85, "speed": 70, "acceleration": 68, "vertical": 68, "stamina": 80,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 70, "spot_up_shot_tendency": 50, "mid_range_shot_tendency": 40, "three_point_shot_tendency": 50,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 60, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 35
+    }
+  },
+  {
+    "nome": "Piotr Kowalski",
+    "ruolo": "C",
+    "eta": 22,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 82, "mid_range_shot_rating": 40, "three_point_shot_rating": 25, "free_throw_rating": 65,
+      "shot_iq": 60, "passing_accuracy": 50, "ball_handling": 45, "passing_vision": 40,
+      "interior_defense_rating": 85, "perimeter_defense_rating": 45, "steal_rating": 40, "block_rating": 80,
+      "strength": 90, "speed": 55, "acceleration": 50, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 80, "defensive_rebound_rating": 85
+    },
+    "tendenze": {
+      "touch_tendency": 40, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 10, "post_up_tendency": 80, "pass_out_of_shot_tendency": 10, "dish_to_open_man_tendency": 10
+    }
+  },
+  {
+    "nome": "Marko Vuković",
+    "ruolo": "PG",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 68, "mid_range_shot_rating": 70, "three_point_shot_rating": 72, "free_throw_rating": 75,
+      "shot_iq": 70, "passing_accuracy": 75, "ball_handling": 78, "passing_vision": 75,
+      "interior_defense_rating": 35, "perimeter_defense_rating": 65, "steal_rating": 60, "block_rating": 28,
+      "strength": 58, "speed": 78, "acceleration": 77, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 25, "defensive_rebound_rating": 40
+    },
+    "tendenze": {
+      "touch_tendency": 70, "spot_up_shot_tendency": 50, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 55,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 5, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 60
+    }
+  },
+  {
+    "nome": "Jason Clark",
+    "ruolo": "SF",
+    "eta": 21,
+    "potenziale": 78,
+    "valutazione": 72,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 85, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 65, "ball_handling": 75, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 65, "block_rating": 35,
+      "strength": 68, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 80,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 85, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 80,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 10, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Nikolai Petrov",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 68,
+    "abilita": {
+      "close_shot_rating": 70, "mid_range_shot_rating": 65, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 65, "passing_accuracy": 55, "ball_handling": 65, "passing_vision": 50,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 50,
+      "strength": 68, "speed": 75, "acceleration": 74, "vertical": 75, "stamina": 75,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 50, "mid_range_shot_tendency": 40, "three_point_shot_tendency": 50,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Adam Hughes",
+    "ruolo": "SG",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 60, "three_point_shot_rating": 68, "free_throw_rating": 65,
+      "shot_iq": 65, "passing_accuracy": 55, "ball_handling": 60, "passing_vision": 50,
+      "interior_defense_rating": 68, "perimeter_defense_rating": 60, "steal_rating": 50, "block_rating": 60,
+      "strength": 78, "speed": 68, "acceleration": 65, "vertical": 65, "stamina": 75,
+      "offensive_rebound_rating": 55, "defensive_rebound_rating": 65
+    },
+    "tendenze": {
+      "touch_tendency": 50, "spot_up_shot_tendency": 30, "mid_range_shot_tendency": 20, "three_point_shot_tendency": 30,
+      "drive_to_basket_tendency": 30, "post_up_tendency": 50, "pass_out_of_shot_tendency": 15, "dish_to_open_man_tendency": 20
+    }
+  },
+  {
+    "nome": "Jacob Schneider",
+    "ruolo": "C",
+    "eta": 22,
+    "potenziale": 77,
+    "valutazione": 68,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 50,
+      "shot_iq": 45, "passing_accuracy": 35, "ball_handling": 30, "passing_vision": 25,
+      "interior_defense_rating": 78, "perimeter_defense_rating": 35, "steal_rating": 30, "block_rating": 70,
+      "strength": 82, "speed": 50, "acceleration": 45, "vertical": 65, "stamina": 70,
+      "offensive_rebound_rating": 70, "defensive_rebound_rating": 75
+    },
+    "tendenze": {
+      "touch_tendency": 30, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 75, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Charles Johnson",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Julian Davies",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Daniel Rodriguez",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Maximus Brown",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Oskar Berg",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Leo Svensson",
+    "ruolo": "PG",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 70, "mid_range_shot_rating": 72, "three_point_shot_rating": 76, "free_throw_rating": 78,
+      "shot_iq": 72, "passing_accuracy": 75, "ball_handling": 75, "passing_vision": 72,
+      "interior_defense_rating": 38, "perimeter_defense_rating": 68, "steal_rating": 65, "block_rating": 30,
+      "strength": 60, "speed": 78, "acceleration": 77, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 28, "defensive_rebound_rating": 45
+    },
+    "tendenze": {
+      "touch_tendency": 70, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 65, "three_point_shot_tendency": 65,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 5, "pass_out_of_shot_tendency": 35, "dish_to_open_man_tendency": 50
+    }
+  },
+  {
+    "nome": "Benjamin Lee",
+    "ruolo": "SF",
+    "eta": 21,
+    "potenziale": 77,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 75, "three_point_shot_rating": 80, "free_throw_rating": 80,
+      "shot_iq": 75, "passing_accuracy": 65, "ball_handling": 70, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 68, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 80,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Lucas Müller",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 70, "mid_range_shot_rating": 68, "three_point_shot_rating": 72, "free_throw_rating": 70,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 55,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Oliver Martin",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Paul Andersen",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 68,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Louis Johnson",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Michael Smith",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "David Wilson",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Robert Davis",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "William Garcia",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Joseph Rodriguez",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 78,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 68, "mid_range_shot_rating": 70, "three_point_shot_rating": 72, "free_throw_rating": 75,
+      "shot_iq": 70, "passing_accuracy": 78, "ball_handling": 75, "passing_vision": 75,
+      "interior_defense_rating": 35, "perimeter_defense_rating": 68, "steal_rating": 60, "block_rating": 28,
+      "strength": 58, "speed": 78, "acceleration": 77, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 25, "defensive_rebound_rating": 40
+    },
+    "tendenze": {
+      "touch_tendency": 70, "spot_up_shot_tendency": 50, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 55,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 5, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 60
+    }
+  },
+  {
+    "nome": "Charles Martinez",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 79,
+    "valutazione": 72,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 85, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 65, "ball_handling": 75, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 65, "block_rating": 35,
+      "strength": 68, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 80,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 85, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 80,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 10, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Thomas Hernandez",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 78,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 70, "mid_range_shot_rating": 65, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 65, "passing_accuracy": 55, "ball_handling": 65, "passing_vision": 50,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 50,
+      "strength": 68, "speed": 75, "acceleration": 74, "vertical": 75, "stamina": 75,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 50, "mid_range_shot_tendency": 40, "three_point_shot_tendency": 50,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Daniel Lee",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 77,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 60, "three_point_shot_rating": 68, "free_throw_rating": 65,
+      "shot_iq": 65, "passing_accuracy": 55, "ball_handling": 60, "passing_vision": 50,
+      "interior_defense_rating": 68, "perimeter_defense_rating": 60, "steal_rating": 50, "block_rating": 60,
+      "strength": 78, "speed": 68, "acceleration": 65, "vertical": 65, "stamina": 75,
+      "offensive_rebound_rating": 55, "defensive_rebound_rating": 65
+    },
+    "tendenze": {
+      "touch_tendency": 50, "spot_up_shot_tendency": 30, "mid_range_shot_tendency": 20, "three_point_shot_tendency": 30,
+      "drive_to_basket_tendency": 30, "post_up_tendency": 50, "pass_out_of_shot_tendency": 15, "dish_to_open_man_tendency": 20
+    }
+  },
+  {
+    "nome": "Matthew Clark",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 50,
+      "shot_iq": 45, "passing_accuracy": 35, "ball_handling": 30, "passing_vision": 25,
+      "interior_defense_rating": 78, "perimeter_defense_rating": 35, "steal_rating": 30, "block_rating": 70,
+      "strength": 82, "speed": 50, "acceleration": 45, "vertical": 65, "stamina": 70,
+      "offensive_rebound_rating": 70, "defensive_rebound_rating": 75
+    },
+    "tendenze": {
+      "touch_tendency": 30, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 75, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Anton Davies",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 79,
+    "valutazione": 72,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Mark Miller",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Paul Wilson",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Steven Moore",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Andrew Taylor",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Kenneth Anderson",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Kevin Thomas",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Brian Jackson",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "George White",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Timothy Harris",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Ronald Martin",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Jayson Thompsen",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Jeffrey Garcia",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Gary Martinez",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Frank Robinson",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Nicholas Clark",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Eric Rodriguez",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Stephen Lewis",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Larry Lee",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Justin Walker",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Scott Hall",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Brandon Allen",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Benjamin Young",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Patrick Hernandez",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Samuel King",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Gregory Wright",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Raymond Lopez",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Jeremy Hill",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Dennis Scott",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Walter Green",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Peter Adams",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Harold Baker",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Arthur Gonzalez",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Tyler Nelson",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Ethan Carter",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Noah Mitchell",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Liam Perez",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Mason Roberts",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Jacob Turner",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "William Phillips",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Lucas Campbell",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Alexander Parker",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Elijah Evans",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "James Edwards",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Benjamin Collins",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Oliver Stewart",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Michael Sanchez",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Ethan Morris",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Daniel Rogers",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Caleb Reed",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Aiden Cook",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Jackson Morgan",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Sebastian Bell",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Julian Murphy",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Gabriel Bailey",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Samuel River",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Owen Cooper",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Wyatt Richardson",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Carter Cox",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Luke Howard",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Henry Ward",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Adam Torres",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Jack Peterson",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Jayden Gray",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Dylan Ramirez",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Christopher James",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Jaxon Watson",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Leo Brooks",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Ezra Kelly",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Anthony Sanders",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Isaiah Price",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Joshua Bennett",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Maël Wood",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Noah Barnes",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Louis Ross",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Léo Henderson",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Gabriel Coleman",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Arthur Jenkins",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Raphaël Perry",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Adam Powell",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Jules Long",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Hugo Patterson",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Lucas Hughes",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Liam Flores",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Ethan Washington",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Paul Butler",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Nathan Simmons",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Sacha Foster",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Alexis Gómez",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Antoine Hernández",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Clément Díaz",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Eliott Moreno",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Alexandre Muñoz",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Valentin Álvarez",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Mathis Romero",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Théo Alonso",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Oscar Rubio",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Felix Serrano",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "David Guerrero",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Max Ortiz",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Leo Molina",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Ben Castro",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Jonas Núñez",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Finn Marín",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Emil Iglesias",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Paul Vega",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Lukas Diez",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Leon Blanco",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Louis Cano",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Noah Delgado",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Julian Ferrer",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Linus Calvo",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Milo Ramos",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Anton Gil",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Filip Gallego",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Dominik Vázquez",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Jakub Silva",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Jan Costa",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  },
+  {
+    "nome": "Tomas Oliveira",
+    "ruolo": "SG",
+    "eta": 22,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 60, "three_point_shot_rating": 70, "free_throw_rating": 68,
+      "shot_iq": 68, "passing_accuracy": 60, "ball_handling": 65, "passing_vision": 55,
+      "interior_defense_rating": 70, "perimeter_defense_rating": 65, "steal_rating": 55, "block_rating": 65,
+      "strength": 80, "speed": 70, "acceleration": 68, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 60, "defensive_rebound_rating": 70
+    },
+    "tendenze": {
+      "touch_tendency": 60, "spot_up_shot_tendency": 40, "mid_range_shot_tendency": 30, "three_point_shot_tendency": 35,
+      "drive_to_basket_tendency": 40, "post_up_tendency": 50, "pass_out_of_shot_tendency": 20, "dish_to_open_man_tendency": 25
+    }
+  },
+  {
+    "nome": "Marek Santos",
+    "ruolo": "C",
+    "eta": 20,
+    "potenziale": 77,
+    "valutazione": 69,
+    "abilita": {
+      "close_shot_rating": 78, "mid_range_shot_rating": 30, "three_point_shot_rating": 15, "free_throw_rating": 55,
+      "shot_iq": 50, "passing_accuracy": 40, "ball_handling": 35, "passing_vision": 30,
+      "interior_defense_rating": 80, "perimeter_defense_rating": 40, "steal_rating": 35, "block_rating": 75,
+      "strength": 85, "speed": 60, "acceleration": 55, "vertical": 70, "stamina": 75,
+      "offensive_rebound_rating": 75, "defensive_rebound_rating": 80
+    },
+    "tendenze": {
+      "touch_tendency": 35, "spot_up_shot_tendency": 5, "mid_range_shot_tendency": 5, "three_point_shot_tendency": 0,
+      "drive_to_basket_tendency": 5, "post_up_tendency": 80, "pass_out_of_shot_tendency": 5, "dish_to_open_man_tendency": 5
+    }
+  },
+  {
+    "nome": "Petr Sousa",
+    "ruolo": "PG",
+    "eta": 21,
+    "potenziale": 80,
+    "valutazione": 73,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 80, "free_throw_rating": 85,
+      "shot_iq": 80, "passing_accuracy": 82, "ball_handling": 80, "passing_vision": 85,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 72, "steal_rating": 70, "block_rating": 35,
+      "strength": 68, "speed": 80, "acceleration": 80, "vertical": 75, "stamina": 82,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 50
+    },
+    "tendenze": {
+      "touch_tendency": 80, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 70, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 70, "post_up_tendency": 5, "pass_out_of_shot_tendency": 40, "dish_to_open_man_tendency": 85
+    }
+  },
+  {
+    "nome": "Jiri Pereira",
+    "ruolo": "SF",
+    "eta": 20,
+    "potenziale": 78,
+    "valutazione": 71,
+    "abilita": {
+      "close_shot_rating": 75, "mid_range_shot_rating": 78, "three_point_shot_rating": 82, "free_throw_rating": 80,
+      "shot_iq": 78, "passing_accuracy": 65, "ball_handling": 72, "passing_vision": 60,
+      "interior_defense_rating": 40, "perimeter_defense_rating": 70, "steal_rating": 60, "block_rating": 35,
+      "strength": 65, "speed": 75, "acceleration": 74, "vertical": 70, "stamina": 78,
+      "offensive_rebound_rating": 30, "defensive_rebound_rating": 48
+    },
+    "tendenze": {
+      "touch_tendency": 75, "spot_up_shot_tendency": 80, "mid_range_shot_tendency": 60, "three_point_shot_tendency": 75,
+      "drive_to_basket_tendency": 50, "post_up_tendency": 8, "pass_out_of_shot_tendency": 30, "dish_to_open_man_tendency": 40
+    }
+  },
+  {
+    "nome": "Adam Lima",
+    "ruolo": "PF",
+    "eta": 19,
+    "potenziale": 79,
+    "valutazione": 70,
+    "abilita": {
+      "close_shot_rating": 72, "mid_range_shot_rating": 70, "three_point_shot_rating": 75, "free_throw_rating": 72,
+      "shot_iq": 70, "passing_accuracy": 60, "ball_handling": 70, "passing_vision": 58,
+      "interior_defense_rating": 50, "perimeter_defense_rating": 72, "steal_rating": 65, "block_rating": 50,
+      "strength": 70, "speed": 78, "acceleration": 77, "vertical": 75, "stamina": 78,
+      "offensive_rebound_rating": 40, "defensive_rebound_rating": 55
+    },
+    "tendenze": {
+      "touch_tendency": 65, "spot_up_shot_tendency": 60, "mid_range_shot_tendency": 50, "three_point_shot_tendency": 60,
+      "drive_to_basket_tendency": 60, "post_up_tendency": 15, "pass_out_of_shot_tendency": 25, "dish_to_open_man_tendency": 30
+    }
+  }
+]

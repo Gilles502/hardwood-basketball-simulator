@@ -1,0 +1,129 @@
+/* Trade History "wire": stat strip, filters, feed grouped by date. Tokens come from .ember-theme.
+   Pills (.tf-pill) and chips (.tm-chip) are shared with the Trade pages (pages/trades/*.css). */
+
+.tw-root { display: flex; flex-direction: column; gap: 14px; }
+
+.tw-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+.tw-stat {
+  flex: 1; min-width: 160px; padding: 12px 16px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+}
+.tw-stat span {
+  display: block;
+  font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.tw-stat b { display: block; font-family: var(--font-display); font-size: 32px; font-weight: 800; line-height: 1; }
+.tw-stat b.is-text { font-size: 22px; padding-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.tw-filters { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tw-search {
+  flex: 1; min-width: 220px; display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text-muted);
+}
+.tw-search:focus-within { border-color: var(--primary); }
+.tw-search input { flex: 1; background: none; border: none; outline: none; font-size: 14px; color: var(--text-primary); }
+.tw-filters .tf-pills { margin-top: 0; }
+.tw-select {
+  padding: 7px 10px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
+  font-size: 14px; color: var(--text-primary); cursor: pointer;
+}
+.tw-select:focus-visible, .tw-refresh:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.tw-refresh {
+  display: inline-flex; padding: 8px;
+  background: none; border: 1px solid var(--border-hover); border-radius: 6px;
+  color: var(--text-secondary); cursor: pointer;
+}
+.tw-refresh:hover { border-color: var(--primary); color: var(--text-primary); }
+
+.tw-day {
+  margin: 8px 0;
+  font-family: var(--font-display); font-size: 14px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tw-item { margin-bottom: 8px; border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; background: var(--bg-card); }
+.tw-item.is-three { border-left-color: var(--accent); }
+.tw-wire {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center;
+  padding: 12px 14px; cursor: pointer;
+}
+.tw-wire:hover { background: var(--bg-card-hover); }
+.tw-wire:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.tw-crests { display: flex; }
+.tw-crests .team-crest + .team-crest { margin-left: -8px; box-shadow: -2px 0 0 var(--bg-card); }
+.tw-headline { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.tw-tag {
+  margin-left: 8px; padding: 1px 8px; border-radius: 3px;
+  background: var(--border); color: var(--text-primary);
+  font-family: var(--font-display); font-size: 12px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; vertical-align: 1px;
+}
+.tw-tag.is-three { background: var(--accent); color: #1a0c04; }
+.tw-tag.is-mine { background: var(--primary); color: #1a0c04; }
+.tw-tag.is-winner { background: rgba(74, 222, 128, 0.16); color: var(--success); }
+.tw-why { margin-top: 2px; font-size: 13px; color: var(--text-secondary); }
+.tw-assets { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px; }
+.tw-gets { display: inline-flex; align-items: center; flex-wrap: wrap; }
+.tw-gets em {
+  margin-right: 6px; font-style: normal;
+  font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.tw-gets small { color: var(--text-muted); }
+.tw-side { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.tw-grades { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.tw-grade {
+  padding: 1px 8px; border-radius: 4px;
+  background: var(--border); color: var(--text-primary);
+  font-family: var(--font-display); font-size: 13px; font-weight: 800; letter-spacing: 1px;
+}
+.tw-grade.is-a { background: rgba(74, 222, 128, 0.16); color: var(--success); }
+.tw-grade.is-b { background: rgba(56, 189, 248, 0.16); color: var(--info); }
+.tw-grade.is-c { background: rgba(250, 204, 21, 0.16); color: var(--warning); }
+.tw-grade.is-d, .tw-grade.is-f { background: rgba(244, 63, 94, 0.16); color: var(--danger); }
+.tw-more { display: inline-flex; align-items: center; gap: 2px; font-size: 13px; color: var(--text-muted); }
+
+.tw-detail { padding: 4px 16px 16px; background: var(--bg-sidebar); border-top: 1px solid var(--border); border-radius: 0 0 8px 0; }
+.tw-reason { margin: 12px 0 4px; font-size: 14px; font-style: italic; color: var(--text-secondary); }
+.tw-notebook { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 10px; }
+.tw-gm { min-width: 0; padding: 10px 12px; background: var(--bg-card); border-radius: 8px; }
+.tw-gm b { font-size: 14px; color: var(--text-primary); }
+.tw-gm-who { margin-bottom: 6px; font-size: 12.5px; color: var(--text-muted); }
+.tw-gm-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.tw-chip { padding: 1px 8px; border-radius: 10px; background: var(--border); font-size: 12px; color: var(--text-primary); }
+.tw-chip.is-plan { background: rgba(74, 222, 128, 0.16); color: var(--success); }
+.tw-chip.is-trait { background: var(--accent-trans); color: var(--accent-hover); }
+.tw-chip.is-need { background: rgba(250, 204, 21, 0.16); color: var(--warning); }
+.tw-gm-reasons { margin: 8px 0 0 16px; padding: 0; font-size: 13px; line-height: 1.5; color: var(--text-secondary); }
+.tw-gm-reasons li { margin: 3px 0; }
+.tw-teams { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 10px; }
+.tw-team { min-width: 0; }
+.tw-team-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.tw-team-head b { font-family: var(--font-display); font-size: 19px; letter-spacing: 0.5px; }
+.tw-cap {
+  margin: 8px 0 4px;
+  font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase;
+}
+.tw-cap.is-in { color: var(--primary-hover); }
+.tw-cap.is-out { color: var(--info); }
+.tw-player { padding: 6px 10px; margin-bottom: 4px; background: var(--bg-card); border-radius: 6px; font-size: 14px; }
+.tw-pos {
+  margin-left: 8px; padding: 0 6px; border-radius: 3px; background: var(--border);
+  font-family: var(--font-display); font-size: 12px; font-weight: 800;
+}
+.tw-player-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 2px; font-size: 12.5px; color: var(--text-muted); }
+.tw-ovr { font-family: var(--font-display); font-size: 14px; font-weight: 800; color: var(--primary-hover); }
+.tw-pick { padding: 5px 10px; margin-bottom: 4px; background: var(--bg-card); border-radius: 6px; font-size: 13.5px; color: var(--text-secondary); }
+.tw-none { font-size: 13px; font-style: italic; color: var(--text-muted); }
+.tw-post { display: flex; justify-content: space-between; margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--border); font-size: 13px; color: var(--text-secondary); }
+.tw-post .is-up { color: var(--success); font-weight: 700; }
+.tw-post .is-down { color: var(--danger); font-weight: 700; }
+.tw-verdict { margin: 8px 0 0; font-size: 13px; line-height: 1.5; color: var(--text-secondary); }
+
+@media (max-width: 900px) {
+  .tw-wire { grid-template-columns: auto minmax(0, 1fr); }
+  .tw-side { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; }
+}

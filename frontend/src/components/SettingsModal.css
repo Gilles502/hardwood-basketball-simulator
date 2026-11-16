@@ -1,0 +1,40 @@
+/* Settings window. Tokens come from .ember-theme (see ModalShell.css). */
+.st-body { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 22px; overflow-y: auto; }
+.st-section { display: flex; flex-direction: column; }
+.st-heading {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.st-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+.st-label { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.st-label > span { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+.st-label small { font-size: 12px; color: var(--text-secondary); }
+.st-path { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); overflow-wrap: anywhere; }
+.st-label small.st-error { color: #ef4444; }
+.st-value { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+.st-seg { display: inline-flex; flex-shrink: 0; border: 1px solid var(--border-hover); border-radius: 8px; overflow: hidden; }
+.st-seg-btn {
+  padding: 7px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.st-seg-btn + .st-seg-btn { border-left: 1px solid var(--border-hover); }
+.st-seg-btn:hover { color: var(--text-primary); }
+.st-seg-btn.is-active { background: var(--primary-trans); color: var(--primary); font-weight: 800; }
+.st-open { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }

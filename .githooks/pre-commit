@@ -1,0 +1,4 @@
+#!/bin/sh
+# Blocks commits that would publish private or real-player data. Enable once per clone:
+#   git config core.hooksPath .githooks
+exec python scripts/check_commit.py

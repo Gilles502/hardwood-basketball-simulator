@@ -1,0 +1,3 @@
+# Build-only tools for the packaged Hardwood.exe (scripts/build_exe.py). The game itself does not need them.
+pyinstaller==6.22.3
+pywebview==6.2.1

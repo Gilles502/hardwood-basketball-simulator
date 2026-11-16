@@ -1,0 +1,287 @@
+/* In-game sidebar. Tokens come from .ember-theme on the app container. */
+
+.as-sidebar {
+  width: 232px;
+  padding: 14px 10px 12px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-subtle);
+  gap: 0;
+}
+
+.as-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 6px 12px;
+}
+
+.as-logo {
+  flex: none;
+}
+
+.as-wordmark {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.3em;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: 1.5px;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.as-wordmark-accent {
+  color: var(--primary);
+}
+
+.as-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: linear-gradient(160deg, var(--bg-card), var(--bg-card-hover));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.as-team-text {
+  min-width: 0;
+}
+
+.as-team-name {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.15;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.as-team-meta {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.as-dateline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+  padding: 4px 6px 8px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+.as-nav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 2px;
+}
+
+.as-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.as-nav::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.as-item,
+.as-group-head,
+.as-quicksave,
+.as-icon-btn,
+.as-mainmenu {
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+.as-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  background: transparent;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: 6px;
+  text-align: left;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.as-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.as-item.is-active {
+  background: linear-gradient(90deg, rgba(255, 106, 26, 0.18), rgba(255, 106, 26, 0));
+  border-left-color: var(--primary);
+  color: var(--text-primary);
+}
+
+.as-item svg {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.as-item.is-active svg {
+  color: var(--primary);
+}
+
+.as-group {
+  margin-top: 6px;
+}
+
+.as-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 10px 4px;
+  background: none;
+  border: none;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.as-group-head:hover {
+  color: var(--text-primary);
+}
+
+.as-chevron {
+  transition: transform 0.15s ease;
+}
+
+.as-chevron.is-closed {
+  transform: rotate(-90deg);
+}
+
+.as-badge {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--primary);
+  color: #150b04;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.as-badge-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.as-footer {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.as-footer-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.as-quicksave {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 6px;
+  white-space: nowrap;
+  background: var(--primary-trans);
+  border: 1px solid var(--border-hover);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.as-quicksave:hover,
+.as-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.as-icon-btn {
+  width: 32px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+}
+
+.as-mainmenu {
+  width: 100%;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.as-mainmenu:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.as-version {
+  padding: 4px 10px 0;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.as-sidebar button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (max-height: 760px) {
+  .as-brand { padding-bottom: 8px; }
+  .as-wordmark { font-size: 15px; }
+  .as-item { padding: 5px 10px; }
+  .as-team { padding: 8px; }
+}
+
+/* Locked while a live sim run is going (Quick Save, Save Manager, Main menu). */
+.as-footer button:disabled { opacity: 0.45; cursor: not-allowed; }

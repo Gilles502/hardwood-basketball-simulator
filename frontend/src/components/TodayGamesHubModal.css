@@ -1,0 +1,71 @@
+/* Gameday Hub: tonight's games as one cream scorer's sheet inside the shared ModalShell window. */
+
+.gh-layer { position: relative; z-index: 999; }
+
+.gh-strip {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 10px 20px; background: #120d0a; border-bottom: 1px solid var(--border);
+}
+.gh-cap { font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-muted); }
+.gh-strip b { font-family: var(--font-display); font-size: 17px; font-weight: 800; letter-spacing: 0.5px; }
+.gh-progress { flex: 1; min-width: 140px; height: 7px; overflow: hidden; border-radius: 4px; background: var(--border-subtle); }
+.gh-progress i { display: block; height: 100%; background: var(--primary); transition: width 0.3s ease; }
+.gh-sim-all { padding: 6px 14px; }
+.gh-done { font-family: var(--font-display); font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--success); }
+
+.gh-empty { padding: 40px 20px; text-align: center; color: var(--text-muted); }
+
+.gh-sheet {
+  margin: 16px 20px 20px; overflow: hidden;
+  background: linear-gradient(180deg, #f7efe2, #efe3cf); color: #1a130e;
+  border: 1px solid #cdb792; border-radius: 8px;
+}
+.gh-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.gh-table th {
+  padding: 8px 12px; text-align: left; border-bottom: 2px solid rgba(26, 19, 14, 0.3);
+  font-family: var(--font-display); font-size: 12px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #6d5640;
+}
+.gh-table td { padding: 9px 12px; vertical-align: middle; border-bottom: 1px dashed rgba(26, 19, 14, 0.16); }
+.gh-table tbody tr:last-child td { border-bottom: 0; }
+.gh-table tr.is-me td { background: rgba(255, 106, 26, 0.1); }
+.gh-table tr.is-me td:first-child { box-shadow: inset 4px 0 0 var(--primary); }
+.gh-num { width: 64px; }
+
+.gh-teams { display: flex; flex-direction: column; gap: 5px; }
+.gh-team { display: flex; align-items: center; gap: 8px; min-width: 0; font-weight: 700; }
+.gh-team.is-lo { color: #8a7a68; font-weight: 500; }
+.gh-team small { font-size: 12px; font-weight: 500; color: #8a7a68; white-space: nowrap; }
+.gh-team-link {
+  display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: transparent; cursor: pointer;
+  color: inherit; font: inherit; white-space: nowrap;
+}
+.gh-team-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.gh-team-link .team-crest { border-radius: 6px; }
+.gh-b2b {
+  padding: 0 4px; border: 1px solid #d97706; border-radius: 3px; color: #b45309;
+  font-family: var(--font-display); font-size: 10.5px; font-weight: 800; letter-spacing: 1px;
+}
+.gh-score { font-family: var(--font-display); font-size: 19px; font-weight: 800; line-height: 1.35; }
+.gh-status { width: 100px; font-family: var(--font-display); font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #8a7a68; }
+.gh-status.is-final { color: #15803d; }
+.gh-top-link { padding: 0; border: 0; background: transparent; cursor: pointer; text-align: left; font-size: 13px; color: #6d5640; }
+.gh-top-link:hover { color: #c2410c; }
+.gh-acts { width: 1%; text-align: right; white-space: nowrap; }
+.gh-acts > * + * { margin-left: 6px; }
+.gh-btn {
+  padding: 4px 11px; border: 1px solid rgba(26, 19, 14, 0.35); border-radius: 5px; background: transparent; cursor: pointer;
+  font-family: var(--font-display); font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #1a130e;
+}
+.gh-btn:hover:not(:disabled) { background: #1a130e; color: #f7efe2; }
+.gh-btn:disabled { opacity: 0.5; cursor: default; }
+.gh-link {
+  padding: 0; border: 0; background: transparent; cursor: pointer;
+  font-family: var(--font-display); font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #c2410c;
+}
+.gh-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.gh-btn:focus-visible, .gh-link:focus-visible, .gh-team-link:focus-visible, .gh-top-link:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.gh-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 900px) {
+  .gh-top, .gh-table th:nth-child(4) { display: none; }
+}

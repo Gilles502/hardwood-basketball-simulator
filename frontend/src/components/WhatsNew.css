@@ -1,0 +1,126 @@
+/* What's new card, changelog modal and team crest. Uses the main menu theme tokens
+   (defined on .mainmenu-container), so render these inside the main menu only. */
+
+.team-crest {
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-display, var(--font-sans));
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.whatsnew-card {
+  background: linear-gradient(160deg, var(--bg-card), var(--bg-card-hover));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.whatsnew-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.whatsnew-label {
+  font-family: var(--font-display, var(--font-sans));
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.whatsnew-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.whatsnew-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.whatsnew-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.whatsnew-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.whatsnew-item:last-child {
+  border-bottom: none;
+}
+
+.whatsnew-chip {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.whatsnew-chip-new {
+  background: var(--primary-trans);
+  color: var(--primary-hover);
+}
+
+.whatsnew-chip-fix {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+.whatsnew-link {
+  align-self: flex-start;
+  margin-top: 10px;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary-hover);
+}
+
+.whatsnew-link:hover {
+  color: var(--text-primary);
+}
+
+.whatsnew-link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Changelog window content (the window itself is ModalShell) */
+.changelog-body {
+  padding: 4px 24px 20px;
+}
+
+.changelog-release {
+  padding-top: 16px;
+}

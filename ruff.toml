@@ -1,0 +1,7 @@
+# Lint gate for the game code: real bugs and dead code only (no style rules).
+# Run:  ruff check core trades offseason
+target-version = "py313"
+extend-exclude = ["scratch", "frontend", "saves", "data"]
+
+[lint]
+select = ["F", "B", "E722", "E741", "S110"]

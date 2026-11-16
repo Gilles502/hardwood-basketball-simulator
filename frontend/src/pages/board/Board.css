@@ -1,0 +1,47 @@
+/* Front Office & Board: League GMs and GM market tabs. Tables and the card reuse the an-* classes (Analytics.css);
+   these are the front-office bits on top. Tokens from .ember-theme. */
+
+.fo-note { margin: 0; font-size: 14px; line-height: 1.45; color: var(--text-secondary); }
+.fo-traits { color: var(--text-secondary); white-space: normal; }
+.fo-you { background: var(--primary); color: var(--bg-sidebar); }
+
+.fo-plan { font-family: var(--font-display); font-size: 13.5px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; }
+.fo-plan-contender { color: var(--primary-hover); }
+.fo-plan-playoff { color: var(--accent-hover); }
+.fo-plan-middle { color: var(--text-secondary); }
+.fo-plan-rebuilder { color: var(--info); }
+.fo-plan-yr { font-weight: 600; letter-spacing: 0; color: var(--text-muted); }
+
+/* GM card (cream paper, like the Analytics cards) */
+.fo-card { max-height: calc(calc(100vh / var(--ui-zoom, 1)) - 24px); overflow-y: auto; }
+.fo-card-loading { height: 160px; }
+.fo-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0 2px; }
+.fo-chips .fo-chip { margin-left: 0; }
+.fo-plan-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.fo-plan-head b { font-family: var(--font-display); font-size: 22px; font-weight: 800; text-transform: uppercase; }
+.fo-plan-head span { font-size: 13px; opacity: 0.75; }
+.fo-quiet { opacity: 0.7; }
+
+.fo-history, .fo-moves { margin: 6px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.fo-history li { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 8px; font-size: 13px; }
+.fo-history li b { grid-row: span 2; font-variant-numeric: tabular-nums; }
+.fo-history li em { font-style: normal; opacity: 0.75; }
+.fo-moves li { display: grid; grid-template-columns: 104px minmax(0, 1fr); gap: 8px; font-size: 13px; line-height: 1.35; }
+.fo-move-when { font-weight: 700; white-space: nowrap; }
+.fo-move-text .fo-chip { margin-left: 0; margin-right: 4px; }
+
+.fo-career, .fo-notes { margin: 6px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.fo-career li { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 8px; align-items: start; font-size: 13px; line-height: 1.35; }
+.fo-career-main { display: flex; flex-wrap: wrap; column-gap: 6px; }
+.fo-career-years { opacity: 0.75; font-variant-numeric: tabular-nums; }
+.fo-career-rec { flex-basis: 100%; opacity: 0.85; }
+.fo-career-awards { flex-basis: 100%; font-style: italic; opacity: 0.85; }
+.fo-career .fo-chip { margin-left: 0; }
+.fo-career .fo-chip.is-current { background: var(--primary); color: var(--bg-sidebar); }
+.fo-notes { margin-top: 8px; font-size: 13px; opacity: 0.8; }
+.fo-notes li::before { content: "\2022\00a0\00a0"; }
+.fo-tag-gap { margin-left: 8px; vertical-align: middle; }
+
+@media (max-width: 640px) {
+  .fo-moves li { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}

@@ -1,0 +1,239 @@
+/* Shared window shell for every dialog in the Hardwood & Ember theme. Tokens come from .ember-theme. */
+
+.ms-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(8, 5, 3, 0.84);
+  backdrop-filter: blur(10px);
+}
+
+.ms-dialog {
+  width: 100%;
+  max-height: calc(90vh / var(--ui-zoom, 1));
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border-hover);
+  border-radius: 16px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  outline: none;
+  animation: msFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ms-dialog-tall {
+  height: calc(85vh / var(--ui-zoom, 1));
+}
+
+@keyframes msFadeIn {
+  from { opacity: 0; transform: scale(0.97) translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.ms-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255, 106, 26, 0.07) 0%, transparent 100%);
+  flex-shrink: 0;
+}
+
+.ms-title-group {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.ms-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--primary-trans);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ms-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  line-height: 1.05;
+  color: var(--text-primary);
+}
+
+.ms-subtitle {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.ms-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ms-close {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.ms-close:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.ms-extra {
+  flex-shrink: 0;
+}
+
+.ms-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.ms-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 14px 24px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-sidebar);
+  font-size: 12px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.ms-footer-end {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Standard buttons for footers and dialog actions */
+.ms-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.ms-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ms-btn-primary {
+  background: var(--primary);
+  color: #150b04;
+}
+
+.ms-btn-primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.ms-btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.ms-btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ms-dialog button:focus-visible,
+.ms-dialog input:focus-visible,
+.ms-dialog select:focus-visible,
+.ms-dialog [tabindex]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (max-height: 700px) {
+  .ms-dialog { max-height: calc(96vh / var(--ui-zoom, 1)); }
+  .ms-dialog-tall { height: calc(94vh / var(--ui-zoom, 1)); }
+  .ms-overlay { padding: 12px; }
+}
+
+/* Standard tab strip (pass as headerExtra) */
+.ms-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 24px;
+  background: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+
+.ms-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.ms-tab:hover {
+  color: var(--text-primary);
+}
+
+.ms-tab.is-active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* Native controls do not inherit the font by default (zero specificity so component classes still win) */
+:where(.ms-dialog) :is(button, input, select, textarea) {
+  font-family: inherit;
+}

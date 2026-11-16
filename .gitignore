@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Packaged build (scripts/build_exe.py)
+build/
+dist/
+*.zip
+
+# Game data written while running from source (the packaged game uses Documents\Hardwood instead)
+saves/
+logs/
+scratch/
+data/nba_sim.db
+data/leagues/built/
+data/leagues/active.json
+hardwood.lock
+*.log
+trades_history.txt
+trade_bids_details.txt
+triple_doubles_log.txt
+league_history.json
+hall_of_fame.json
+retired_players_ids.json
+player_careers.json
+franchise_records.json
+
+# Mods stay local (a real-names league must never be committed); only the guide is tracked
+mods/*
+!mods/README.md
+
+# Real-player data never goes in this repo
+data/nba_sim_2002.db
+data/nba_sim_modern.db
+data/nba_simulation.db
+data/nba_real_career_stats.json
+data/teams_data_*.json
+data/gm_roster_2002.json
+
+# Private notes and agent files
+docs/
+.claude/
+.superpowers/
+.agents/
+AGENTS.md
+GEMINI.md
+CLAUDE.md
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

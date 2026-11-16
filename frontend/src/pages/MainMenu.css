@@ -1,0 +1,380 @@
+/* File: frontend/src/pages/MainMenu.css */
+/* Hardwood & Ember main menu layout. The theme tokens come from the .ember-theme class
+   (styles/ember-theme.css), which this container also carries. */
+
+.mainmenu-container {
+  height: calc(100vh / var(--ui-zoom, 1));
+  width: calc(100vw / var(--ui-zoom, 1));
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-sans);
+}
+
+.mainmenu-container .fade-in {
+  animation: mainmenuFadeIn 0.35s ease both;
+}
+
+@keyframes mainmenuFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Atmospheric court backdrop (pure CSS) */
+.mainmenu-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 80% 15%, rgba(255, 106, 26, 0.10) 0%, transparent 50%),
+    radial-gradient(circle at 15% 95%, rgba(201, 162, 122, 0.06) 0%, transparent 45%),
+    linear-gradient(135deg, #100c09 0%, #14100d 100%);
+  z-index: 0;
+}
+
+.mainmenu-court-lines {
+  position: absolute;
+  right: -120px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 780px;
+  height: 780px;
+  border: 2px solid rgba(255, 106, 26, 0.08);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.mainmenu-court-lines::before {
+  content: '';
+  position: absolute;
+  inset: 150px;
+  border: 1.5px solid rgba(255, 106, 26, 0.07);
+  border-radius: 50%;
+}
+
+.mainmenu-court-lines::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 250px;
+  width: 300px;
+  height: 280px;
+  border-right: 2px dashed rgba(255, 106, 26, 0.07);
+}
+
+/* Left column: wordmark + menu */
+.mainmenu-sidebar {
+  width: clamp(300px, 26vw, 400px);
+  height: 100%;
+  background: rgba(14, 10, 7, 0.82);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  padding: 28px 20px 20px;
+  z-index: 10;
+  box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+}
+
+.mainmenu-brand {
+  margin-bottom: 22px;
+  padding-left: 14px;
+}
+
+.mainmenu-wordmark {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.mainmenu-logo {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.mainmenu-wordmark-accent {
+  color: var(--primary);
+}
+
+.mainmenu-version {
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.mainmenu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.mainmenu-btn {
+  background: transparent;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--text-secondary);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.mainmenu-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  transform: translateX(4px);
+}
+
+.mainmenu-btn:focus-visible,
+.spotlight-btn-continue:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.mainmenu-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mainmenu-btn-primary:not(:disabled) {
+  background: linear-gradient(90deg, rgba(255, 106, 26, 0.2), rgba(255, 106, 26, 0));
+  border-left-color: var(--primary);
+  color: var(--text-primary);
+}
+
+.mainmenu-btn-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.mainmenu-btn-primary:not(:disabled) .mainmenu-btn-icon,
+.mainmenu-btn:hover:not(:disabled) .mainmenu-btn-icon {
+  color: var(--primary);
+  background: var(--primary-trans);
+}
+
+.mainmenu-btn-text {
+  min-width: 0;
+}
+
+.mainmenu-btn-text h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.mainmenu-btn-text p {
+  margin: 1px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Right column: spotlight + What's new */
+.mainmenu-main {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  padding: 32px clamp(32px, 5vw, 80px);
+  z-index: 5;
+}
+
+.mainmenu-main > * {
+  width: 100%;
+  max-width: 720px;
+}
+
+.mainmenu-spotlight-card {
+  flex: none;
+  background: linear-gradient(160deg, var(--bg-card), var(--bg-card-hover));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+  position: relative;
+  overflow: hidden;
+}
+
+.mainmenu-spotlight-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), transparent);
+}
+
+.spotlight-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--primary);
+  background: var(--primary-trans);
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.spotlight-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.spotlight-team-title {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.4vw, 44px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.spotlight-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 18px 0 20px;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+}
+
+.spotlight-meta-item span {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.spotlight-meta-item strong {
+  font-size: 16px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.spotlight-record {
+  color: var(--success) !important;
+}
+
+.spotlight-date {
+  font-size: 14px !important;
+}
+
+.spotlight-btn-continue {
+  background: var(--primary);
+  color: #150b04;
+  border: none;
+  border-radius: 8px;
+  padding: 13px 26px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 20px rgba(255, 106, 26, 0.3);
+}
+
+.spotlight-btn-continue:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(255, 106, 26, 0.45);
+}
+
+/* What's new fills the remaining height and scrolls internally */
+.mainmenu-main > .whatsnew-card {
+  flex: 0 1 auto;
+}
+
+/* No-save welcome card */
+.mainmenu-empty-spotlight {
+  flex: none;
+}
+
+.empty-spotlight-title {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 800;
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.empty-spotlight-desc {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0 0 24px;
+  max-width: 52ch;
+}
+
+/* Short windows: drop the one-line descriptions first */
+@media (max-height: 700px) {
+  .mainmenu-btn-text p {
+    display: none;
+  }
+  .mainmenu-sidebar {
+    padding-top: 20px;
+  }
+  .mainmenu-brand {
+    margin-bottom: 14px;
+  }
+}
