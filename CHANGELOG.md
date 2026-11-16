@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.1 Early Access
+
+- Fixed: the game crashed at start when the zip was downloaded from GitHub and extracted with Explorer
+  (Windows blocked a file the game window needs). The game now unblocks its own files; if it still cannot,
+  it explains how to unblock the zip.
+
 ## v0.1.0 Early Access
 
 First public release.

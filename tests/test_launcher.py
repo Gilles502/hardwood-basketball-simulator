@@ -62,6 +62,29 @@ class TestLauncherHelpers(LauncherCase):
             self.assertTrue(os.path.isdir(os.path.join(self.tmp, folder)), folder)
 
 
+class TestUnblockDownloadedFiles(unittest.TestCase):
+    def test_removes_the_downloaded_mark_and_keeps_the_file(self):
+        root = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, root, True)
+        os.makedirs(os.path.join(root, "runtime"))
+        dll = os.path.join(root, "runtime", "Python.Runtime.dll")
+        with open(dll, "wb") as fh:
+            fh.write(b"dll")
+        try:
+            with open(dll + ":Zone.Identifier", "w") as fh:
+                fh.write("[ZoneTransfer]\nZoneId=3\n")
+        except OSError:
+            self.skipTest("file system without alternate data streams")
+        with open(os.path.join(root, "plain.txt"), "w") as fh:
+            fh.write("x")
+
+        self.assertEqual(launcher.unblock_downloaded_files(root), 1)
+        self.assertFalse(os.path.exists(dll + ":Zone.Identifier"))
+        with open(dll, "rb") as fh:
+            self.assertEqual(fh.read(), b"dll")
+        self.assertEqual(launcher.unblock_downloaded_files(root), 0)
+
+
 class TestWindowClose(LauncherCase):
     def test_close_autosaves_then_shuts_down(self):
         import server

@@ -4,7 +4,7 @@ A basketball front-office simulator for Windows. You take over a franchise in a 
 2002 and run it season after season: roster, contracts, the salary cap, trades, the draft, coaching and the
 owner's patience. Every other team is run by a CPU general manager with its own plan, wishes and trade logic.
 
-**Early Access, v0.1.0.** The league, teams and players are fictional. Leagues are plain data files, so other
+**Early Access, v0.1.1.** The league, teams and players are fictional. Leagues are plain data files, so other
 leagues can be added as mods (see [mods/README.md](mods/README.md)).
 
 Not affiliated with, endorsed by or connected to any real basketball league, team or player.
@@ -24,7 +24,7 @@ Not affiliated with, endorsed by or connected to any real basketball league, tea
 
 ## Install and play
 
-1. Download `Hardwood-v0.1.0.zip` from the [Releases](../../releases) page.
+1. Download the latest `Hardwood-vX.Y.Z.zip` from the [Releases](../../releases) page.
 2. Unzip it anywhere and run `Hardwood.exe`. No installer and no admin rights needed.
 3. Start a new career from the main menu.
 

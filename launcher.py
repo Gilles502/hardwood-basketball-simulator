@@ -22,6 +22,11 @@ WINDOW_SIZE = (1440, 900)
 WINDOW_MIN_SIZE = (1024, 700)
 READY_TIMEOUT_S = 60.0
 ALREADY_RUNNING = "Hardwood Basketball Simulator is already running."
+BLOCKED_FILES = (
+    "Windows blocked the game files because the zip was downloaded from the internet.\n\n"
+    "Fix: delete the game folder, right-click Hardwood-*.zip > Properties > tick 'Unblock' > OK, "
+    "then extract the zip again (outside Program Files)."
+)
 
 
 def find_free_port() -> int:
@@ -109,6 +114,23 @@ def on_window_closed(srv) -> None:
     srv.shutdown()
 
 
+def unblock_downloaded_files(root: str) -> int:
+    """Removes the 'downloaded from the internet' mark (the Zone.Identifier stream) from the game files.
+
+    Explorer copies that mark from a downloaded zip to every extracted file, and .NET Framework then refuses to
+    load pythonnet's Python.Runtime.dll, so the game window cannot open. Returns how many files were unblocked;
+    files it cannot change (read-only folder) are left alone."""
+    count = 0
+    for folder, _dirs, files in os.walk(root):
+        for name in files:
+            try:
+                os.remove(os.path.join(folder, name) + ":Zone.Identifier")
+                count += 1
+            except OSError:
+                pass
+    return count
+
+
 def show_error(message: str) -> None:
     try:
         import ctypes
@@ -153,10 +175,23 @@ def main(argv: list) -> int:
                 fh.write(str(port))
             srv.hardwood_thread.join()
             return 0
+        if getattr(sys, "frozen", False):
+            unblocked = unblock_downloaded_files(getattr(sys, "_MEIPASS", os.path.dirname(sys.executable)))
+            if unblocked:
+                print(f"Unblocked {unblocked} downloaded game files", flush=True)
         import webview
         webview.create_window(WINDOW_TITLE, url, width=WINDOW_SIZE[0], height=WINDOW_SIZE[1],
                               min_size=WINDOW_MIN_SIZE)
-        webview.start()
+        try:
+            webview.start()
+        except Exception as exc:
+            if "Python.Runtime" not in str(exc):
+                raise
+            # The GUI could not load before any window opened: pythonnet blocked (see unblock_downloaded_files).
+            _log_crash()
+            report(BLOCKED_FILES)
+            srv.shutdown()
+            return 1
         on_window_closed(srv)
         return 0
     except Exception:
