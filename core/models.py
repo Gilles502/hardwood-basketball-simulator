@@ -61,6 +61,72 @@ class Contract:
         if self.team_option: base += " [TO]"
         return base
 
+def _retired_key(player: Any) -> tuple:
+    """Same player = same name, DB id, age and ratings (generated names repeat across classes)."""
+    return (getattr(player, 'nome', None), getattr(player, 'db_id', None), getattr(player, 'eta', None),
+            getattr(player, 'valutazione', None), getattr(player, 'potenziale', None))
+
+
+def add_retired_player(torneo: Any, player: Any) -> bool:
+    """Adds `player` to torneo.giocatori_ritirati once. A 25-season save held 504 copies of players already there
+    (one player went through two retirement paths). Returns True when added."""
+    retired = getattr(torneo, 'giocatori_ritirati', None)
+    if retired is None:
+        return False
+    key = _retired_key(player)
+    if any(r is player or _retired_key(r) == key for r in retired):
+        return False
+    retired.append(player)
+    return True
+
+
+def unique_retired_players(players: list) -> list:
+    """`players` without repeats (first copy kept): cleans the retired list of saves written before the fix."""
+    seen, out = set(), []
+    for p in players:
+        key = _retired_key(p)
+        if key not in seen:
+            seen.add(key)
+            out.append(p)
+    return out
+
+
+def league_season_scales(torneo: Any) -> Dict[str, float]:
+    """How this season's production compares with the reference era (CONFIG.PROGRESSION.PVS_REFERENCE): a factor
+    per measure that brings a player's numbers back to that level (1.0 = same as 2002). The modern pace lifted
+    every PVS and every per-game total, so progression handed out OVR points to the whole league. Cached per season;
+    all 1.0 when too few players have real minutes (preseason, tests)."""
+    cfg = CONFIG.PROGRESSION
+    neutral = {key: 1.0 for key in ('off', 'def', 'pts', 'ast', 'reb')}
+    if torneo is None:
+        return neutral
+    season = getattr(torneo, 'season_number', None)
+    cached = getattr(torneo, '_league_season_scales', None)
+    if cached and cached[0] == season:
+        return cached[1]
+    players = [p for s in getattr(torneo, 'squadre', None) or [] for p in getattr(s, 'roster', None) or []]
+    players += list(getattr(torneo, 'free_agents_pool', None) or [])
+    sums = {key: 0.0 for key in neutral}
+    count = 0
+    for p in players:
+        stats = getattr(p, 'season_stats', None)
+        if stats is None or stats.minuti_giocati < cfg.PVS_SCALE_MIN_MINUTES:
+            continue
+        off_index, def_index = p.production_indexes()
+        per36 = 36.0 / stats.minuti_giocati
+        sums['off'] += off_index
+        sums['def'] += def_index
+        sums['pts'] += stats.punti * per36
+        sums['ast'] += stats.assist * per36
+        sums['reb'] += stats.rimbalzi * per36
+        count += 1
+    if count < cfg.PVS_SCALE_MIN_PLAYERS:
+        return neutral
+    scales = {key: (cfg.PVS_REFERENCE[key] / (sums[key] / count)) if sums[key] > 0 else 1.0 for key in neutral}
+    torneo._league_season_scales = (season, scales)
+    return scales
+
+
 def applica_regole_anni_opzioni_contratto(giocatore: Any, sync_salaries: bool = False):
     """
     Applies the automated NBA logic for Years Remaining and Options (PO / TO / Guaranteed):
@@ -792,6 +858,12 @@ class Giocatore:
     secondi_in_panchina_consecutivi: int = field(init=False, default=0)
     is_flight_risk: bool = field(init=False, default=False)
     walks_away: str = field(init=False, default="")   # why he will not re-sign ("asked out" / "hopeless team"), or ""
+    # Trade requests (core/front_office/trade_requests.py): saved, NOT reset by reset_for_season.
+    frustration: float = field(init=False, default=0.0)
+    trade_request: bool = field(init=False, default=False)
+    trade_request_since: str = field(init=False, default="")   # "Season 2004" / "Summer 2004", or ""
+    trade_request_weeks: int = field(init=False, default=0)      # weekly checks with the request open
+    trade_block_by_request: bool = field(init=False, default=False)   # the request put him on the user's block
     morale: int = field(init=False, default=75) # Starts from a neutral-positive value
     fvs: int = field(init=False, default=70) # Franchise Value Score
     contract: Optional[Contract] = None; game_stats: GameStats = field(default_factory=GameStats)
@@ -900,23 +972,38 @@ class Giocatore:
         self.energia = self.energia_iniziale
         self._calibra_e_calcola_posizioni()
         
-    def calcola_pvs(self):
+    def production_indexes(self) -> Tuple[float, float]:
+        """This season's offense and defense production per 36 minutes (the raw inputs of the PVS)."""
+        stats = self.season_stats
+        minuti = stats.minuti_giocati if stats.minuti_giocati > 0 else 1
+        pts_36 = (stats.punti / minuti) * 36
+        ast_36 = (stats.assist / minuti) * 36
+        to_36 = (stats.turnover / minuti) * 36
+        # Season TS% from the totals (advanced_game_stats only holds the last game: one cold night moved the PVS)
+        shots = (stats.tiri_tentati_2 + stats.tiri_tentati_3) + 0.44 * stats.tiri_liberi_tentati
+        ts_pct = (stats.punti / (2 * shots) * 100) if shots > 0 else 0.0
+        ts_factor = (ts_pct / 58.0) if ts_pct > 0 else 0.85
+        off_index = (pts_36 * ts_factor) + (ast_36 * 1.6) - (to_36 * 1.8)
+        stocks_36 = ((stats.steals + stats.blocks) / minuti) * 36
+        def_reb_36 = ((stats.rimbalzi * 0.75) / minuti) * 36
+        def_index = (stocks_36 * 4.5) + (def_reb_36 * 1.5)
+        return off_index, def_index
+
+    def calcola_pvs(self, scales: Optional[Dict[str, float]] = None):
+        """Performance score of the season. `scales` (league_season_scales) puts the production on the reference
+        era's level: without it a modern season's pace lifted every PVS over the OVR and fed OVR inflation."""
         stats = self.season_stats
         if stats.partite_giocate < 5 or stats.minuti_giocati < 100:
             base_score = float(self.ovr)
             self.performance_scores = PerformanceScores(base_score, base_score, base_score)
             return
 
-        ags = self.advanced_game_stats
-        minuti = stats.minuti_giocati if stats.minuti_giocati > 0 else 1
-        
+        off_index, def_index = self.production_indexes()
+        if scales:
+            off_index *= scales.get('off', 1.0)
+            def_index *= scales.get('def', 1.0)
+
         # --- 1. Offense Production Index (OPI) ---
-        pts_36 = (stats.punti / minuti) * 36
-        ast_36 = (stats.assist / minuti) * 36
-        to_36 = (stats.turnover / minuti) * 36
-        ts_factor = (ags.true_shooting_percentage / 58.0) if ags.true_shooting_percentage > 0 else 0.85
-        
-        off_index = (pts_36 * ts_factor) + (ast_36 * 1.6) - (to_36 * 1.8)
         if off_index > 20.0:
             off_pvs = 85.0 + (off_index - 20.0) * 1.20
         elif off_index > 13.0:
@@ -925,10 +1012,6 @@ class Giocatore:
             off_pvs = 70.0 + max(0.0, off_index - 8.0) * 1.00
         
         # --- 2. Defense Production Index (DPI) ---
-        stocks_36 = ((stats.steals + stats.blocks) / minuti) * 36
-        def_reb_36 = ((stats.rimbalzi * 0.75) / minuti) * 36
-        
-        def_index = (stocks_36 * 4.5) + (def_reb_36 * 1.5)
         raw_def_pvs = 75.0 + (def_index - 13.0) * 0.90
         
         base_def_rating = max(self.abilita.perimeter_defense_rating, self.abilita.interior_defense_rating)
@@ -1474,6 +1557,31 @@ class Giocatore:
             recupero *= 1.1
 
         self.stamina_stagionale = min(100.0, self.stamina_stagionale + recupero)
+    def _evolvi_potenziale(self, performance_delta: float, minuti_per_partita: float) -> int:
+        """Variable potential (CONFIG.PROGRESSION POT_*): a young player's ceiling moves each offseason.
+        Returns the change."""
+        cfg = CONFIG.PROGRESSION
+        if self.eta > cfg.POT_DRIFT_MAX_AGE:
+            return 0
+        breakout = cfg.POT_BREAKOUT_CHANCE
+        if performance_delta >= 3.0 and minuti_per_partita >= 18.0:
+            breakout += cfg.POT_BREAKOUT_STRONG_SEASON_BONUS
+        roll = random.random()
+        if roll < breakout:
+            change = random.randint(*cfg.POT_BREAKOUT_RANGE)
+        elif roll < breakout + cfg.POT_SETBACK_CHANCE:
+            change = -random.randint(*cfg.POT_SETBACK_RANGE)
+        else:
+            change = random.choice(cfg.POT_NOISE)
+        before = self.potenziale
+        self.potenziale = max(self.valutazione, min(99, self.potenziale + change))
+        return self.potenziale - before
+
+    def _aging_star_holds(self, performance_delta: float) -> bool:
+        """A veteran star (CONFIG.PROGRESSION.AGING_STAR_MIN_OVR) whose season was close to his OVR."""
+        cfg = CONFIG.PROGRESSION
+        return self.valutazione >= cfg.AGING_STAR_MIN_OVR and performance_delta >= cfg.AGING_STAR_GOOD_SEASON_DELTA
+
     def gestisci_progressione_offseason(self) -> Dict[str, int]:
         """
         REWORKED (v22.2 - User Audio Feedback):
@@ -1518,9 +1626,14 @@ class Giocatore:
         # 2. Computation of the base change (Age + Potential modulated by pt_factor and performance)
         cambio_valutazione = 0
         performance_delta = pvs - self.valutazione
-        pts_per_game = (self.season_stats.punti / gp) if gp > 0 else 0.0
-        ast_per_game = (self.season_stats.assist / gp) if gp > 0 else 0.0
-        reb_per_game = (self.season_stats.rimbalzi / gp) if gp > 0 else 0.0
+        star_holds = self._aging_star_holds(performance_delta)   # read on the OVR before this summer's change
+        self._evolvi_potenziale(performance_delta, minuti_per_partita)
+        # Per-game totals on the reference era's level (a 28 PPG season in a 116-point league is not 2002's)
+        torneo = getattr(self.squadra, 'torneo', None) if self.squadra else None
+        era = league_season_scales(torneo or ACTIVE_TOURNAMENT)
+        pts_per_game = (self.season_stats.punti / gp) * era['pts'] if gp > 0 else 0.0
+        ast_per_game = (self.season_stats.assist / gp) * era['ast'] if gp > 0 else 0.0
+        reb_per_game = (self.season_stats.rimbalzi / gp) * era['reb'] if gp > 0 else 0.0
         gap = self.potenziale - self.valutazione
 
         if self.eta <= 25:
@@ -1537,7 +1650,8 @@ class Giocatore:
                         dev_multiplier = 1.00
                     
                 guadagno_base = gap * cfg.DEV_FACTOR_POTENTIAL_GAP * pt_factor * dev_multiplier
-                cambio_valutazione = min(cfg.DEV_POINT_MAX_GAIN_PER_YEAR, round(guadagno_base))
+                # Half-up: Python's round(0.5) is 0 and froze 23-year-olds two points from their ceiling
+                cambio_valutazione = min(cfg.DEV_POINT_MAX_GAIN_PER_YEAR, math.floor(guadagno_base + 0.5))
 
             # Potential erosion for chronic bench players who never play
             if 22 <= self.eta <= 25 and gap > 0:
@@ -1551,7 +1665,7 @@ class Giocatore:
             if gap > 0:
                 dev_multiplier = 0.50 if performance_delta <= -4.0 else 1.00
                 guadagno_base = gap * 0.22 * pt_factor * dev_multiplier
-                base_gain = round(guadagno_base)
+                base_gain = math.floor(guadagno_base + 0.5)
                 if gap >= 4 and pt_factor >= 0.70 and base_gain < 1:
                     base_gain = 1
                 cambio_valutazione = min(3, base_gain)
@@ -1570,7 +1684,7 @@ class Giocatore:
             # PHASE 3B: End-of-Peak Transition (played at 31, now 32)
             # Absolute end of growth. If the season was MVP/superstar level, he stays stable (0),
             # otherwise the physiological -1 begins.
-            if performance_delta >= 3.0:
+            if performance_delta >= 3.0 or self._aging_star_holds(performance_delta):
                 cambio_valutazione = 0
             else:
                 cambio_valutazione = -1
@@ -1608,6 +1722,11 @@ class Giocatore:
                 cambio_valutazione -= 1
 
             cambio_valutazione = min(min_loss, cambio_valutazione)
+
+            # A star who still plays at his level ages slowly (LeBron, Nash, Duncan): stable to 34, then small losses
+            if self._aging_star_holds(performance_delta):
+                star_loss = next(loss for age, loss in CONFIG.PROGRESSION.AGING_STAR_LOSS if self.eta <= age)
+                cambio_valutazione = max(cambio_valutazione, star_loss)
 
         # 3. MERIT-BASED PUSH FROM REAL STATISTICAL PRODUCTION (Exclusive to players under 32)
         # If a young/prime player puts up true superstar numbers (e.g. 28-32 PPG) and has remaining potential,
@@ -1664,8 +1783,10 @@ class Giocatore:
 
             self.valutazione = min(limite_pot, self.valutazione)
             self.valutazione = max(40, min(99, self.valutazione))
+            # A breakout past the ceiling moves the ceiling (a quarter of a long save's league showed OVR > POT)
+            self.potenziale = max(self.potenziale, self.valutazione)
             
-            self._distribuisci_cambio_abilita(self.valutazione - valutazione_precedente)
+            self._distribuisci_cambio_abilita(self.valutazione - valutazione_precedente, star_holds=star_holds)
             self._calibra_e_calcola_posizioni()
 
         # Compute attribute deltas for player development UI
@@ -1703,7 +1824,9 @@ class Giocatore:
         return {'valutazione': ovr_diff}
 
 
-    def _distribuisci_cambio_abilita(self, cambio_ovr: int):
+    def _distribuisci_cambio_abilita(self, cambio_ovr: int, star_holds: bool = False):
+        """`star_holds`: an aging star who still plays at his level (_aging_star_holds) keeps his usage tendencies
+        and target minutes after 33; only his stamina still declines."""
         if cambio_ovr == 0: return
         punti_da_distribuire = abs(cambio_ovr) * CONFIG.PROGRESSION.DEV_SKILL_POINT_MULTIPLIER
         
@@ -1744,7 +1867,10 @@ class Giocatore:
                     setattr(self.abilita, attr, valore_attuale - 1)
 
         # Targeted decline for veterans over 33 to lower the accumulation of unrealistic shots/possessions
-        if self.eta >= 33:
+        if self.eta >= 33 and star_holds:
+            if hasattr(self.abilita, 'stamina'):
+                self.abilita.stamina = max(40, self.abilita.stamina - random.randint(3, 5))
+        elif self.eta >= 33:
             calo_tendenza = random.randint(3, 5)
             if hasattr(self.tendenze, 'touch_tendency'):
                 self.tendenze.touch_tendency = max(30, self.tendenze.touch_tendency - calo_tendenza)
@@ -1769,17 +1895,20 @@ class Giocatore:
 
         # ---- TENDENCY PROGRESSION ----
         # Tendencies develop proportionally to overall growth
+        # Usage (touch, hero ball) is left to the usage step below: these points pushed every star to touch 99.
+        usage_keys = CONFIG.PROGRESSION.USAGE_TENDENCY_PER_OVR
         punti_tendenze = abs(cambio_ovr) * max(1, (CONFIG.PROGRESSION.DEV_SKILL_POINT_MULTIPLIER // 2))
-        core_tendencies = [k for k, v in self.tendenze.__dict__.items() if v > 65]
+        core_tendencies = [k for k, v in self.tendenze.__dict__.items() if v > 65 and k not in usage_keys]
         if not core_tendencies: # Fallback if the player has no marked tendencies
-            core_tendencies = ['spot_up_shot_tendency', 'pass_out_of_shot_tendency', 'drive_to_basket_tendency', 'touch_tendency']
-            
+            core_tendencies = ['spot_up_shot_tendency', 'pass_out_of_shot_tendency', 'drive_to_basket_tendency']
+        other_tendencies = [k for k in self.tendenze.__annotations__.keys() if k not in usage_keys]
+
         for _ in range(punti_tendenze):
             if cambio_ovr > 0:
                 if random.random() < 0.65 and core_tendencies:
                     t_attr = random.choice(core_tendencies)
                 else:
-                    t_attr = random.choice(list(self.tendenze.__annotations__.keys()))
+                    t_attr = random.choice(other_tendencies)
                 
                 t_val_attuale = getattr(self.tendenze, t_attr)
                 if t_val_attuale < 99:
@@ -1791,7 +1920,38 @@ class Giocatore:
                     t_val_attuale = getattr(self.tendenze, t_attr)
                     if t_val_attuale > 20:
                         setattr(self.tendenze, t_attr, t_val_attuale - 1)
+
+        # Usage follows talent (the curated league's slope): a role player who becomes a star takes over games
+        # too. Generated prospects are born with a bench player's usage; veterans 33+ lose usage above.
+        if self.eta < 33:
+            for t_attr, per_ovr in usage_keys.items():
+                if hasattr(self.tendenze, t_attr):
+                    nuovo = getattr(self.tendenze, t_attr) + self._usage_step(t_attr, cambio_ovr, per_ovr)
+                    setattr(self.tendenze, t_attr, max(5, min(99, nuovo)))
         self.invalidate_trade_value_cache()
+
+    def _usage_target(self, t_attr: str):
+        """Where a usage tendency sits at this OVR on the curated league's slope (the rookie generator's line:
+        role mean + per-OVR points over the pivot), or None for a tendency the line does not cover."""
+        cfg = CONFIG.ROOKIEGEN
+        mean = cfg.ROLE_TENDENCIES.get(self.ruolo, {}).get(t_attr)
+        per_ovr = cfg.USAGE_TENDENCY_PER_OVR.get(t_attr)
+        if mean is None or per_ovr is None:
+            return None
+        return mean + per_ovr * (self.valutazione - cfg.ROLE_TENDENCY_PIVOT_OVR)
+
+    def _usage_step(self, t_attr: str, cambio_ovr: int, per_ovr: float) -> int:
+        """Points a usage tendency moves for an OVR change. A gain lifts it only up to its slope target +
+        CONFIG.PROGRESSION.USAGE_TARGET_MARGIN: a real player of a mod is born with his adult usage (Embiid 88, Love
+        74) and the full slope on top took both to 99, with 31 of the top 40 at touch 95+ after 25 seasons."""
+        step = round(abs(cambio_ovr) * per_ovr)
+        if cambio_ovr < 0:
+            return -step
+        target = self._usage_target(t_attr)
+        if target is None:
+            return step
+        room = target + CONFIG.PROGRESSION.USAGE_TARGET_MARGIN - getattr(self.tendenze, t_attr)
+        return max(0, min(step, round(room)))
 
     def decide_ritiro(self) -> bool:
         cfg = CONFIG.PROGRESSION
@@ -2180,6 +2340,16 @@ class Squadra:
         for giocatore in self.roster: giocatore.reset_for_game()
         self.scegli_quintetto_iniziale()
     
+    @staticmethod
+    def focus_rank_weights(gap1_2: float) -> list:
+        """Focus chances (%) of the 5 ranked players. A gap between #1 and #2 from 6 to 28 points of focus value moves
+        up to CONFIG.PLAYMAKING.SOLO_CARRY_P1_BONUS points to the #1 (a quarter from each of the others): Iverson
+        and T-Mac carry, Dallas and the Kings share. 8 (25% -> 33%); 14 for one day gave every lone star 30+ PPG
+        (Luka's assists came from the drive and kick-out passes, fixed in the engine)."""
+        ratio = min(1.0, max(0.0, (gap1_2 - 6.0) / 22.0))
+        bonus = ratio * CONFIG.PLAYMAKING.SOLO_CARRY_P1_BONUS
+        return [25.0 + bonus] + [w - bonus / 4.0 for w in (23.0, 20.0, 17.0, 15.0)]
+
     def _determina_focus_offensivo(self) -> Giocatore:
         """
         Determines the target player by penalizing those who already have a high shot volume
@@ -2286,15 +2456,7 @@ class Squadra:
             gap1_2 = max(0.0, valori_ordinati[0] - valori_ordinati[1])
             # If gap1_2 is small (<10): deep/stacked team (Dallas, Kings, Boston, Spurs) -> shared possessions
             # If gap1_2 is large (>24): solo carry (Iverson in Philly, T-Mac in Orlando) -> volume centralized on the 1st option
-            solo_carry_ratio = min(1.0, max(0.0, (gap1_2 - 6.0) / 22.0))
-            
-            p1_weight = 25.0 + solo_carry_ratio * 8.0   # from 25% to 33%
-            p2_weight = 23.0 - solo_carry_ratio * 2.0   # from 23% to 21%
-            p3_weight = 20.0 - solo_carry_ratio * 2.0   # from 20% to 18%
-            p4_weight = 17.0 - solo_carry_ratio * 2.0   # from 17% to 15%
-            p5_weight = 15.0 - solo_carry_ratio * 2.0   # from 15% to 13%
-            
-            prob_base = [p1_weight, p2_weight, p3_weight, p4_weight, p5_weight]
+            prob_base = self.focus_rank_weights(gap1_2)
         else:
             prob_base = [28, 23, 20, 16, 13]
 
@@ -2768,6 +2930,12 @@ class Squadra:
         return panchina[0] if panchina else None
 
     def reset_record_stagionale(self):
+        heal = CONFIG.INJURIES.OFFSEASON_HEAL_DAYS   # the summer heals: a spring torn ACL can still cost some autumn
+        for p in self.roster:
+            left = max(0, int(getattr(p, 'giorni_infortunio_rimanenti', 0) or 0) - heal)
+            p.giorni_infortunio_rimanenti = left
+            if left == 0:
+                p.infortunato, p.infortunio_nome, p.is_day_to_day, p.infortunio_impatto = False, None, False, 0.0
         self.vittorie = 0; self.sconfitte = 0
         self.punti_fatti_stagione = 0 
         self.punti_subiti_stagione = 0
@@ -2789,12 +2957,14 @@ class Squadra:
         3. Franchise player: the team's best player (if >= 82 OVR) or stars >= 86 OVR.
         4. MVP or All-NBA First Team award winners.
         """
+        from core.front_office.wishes import asked_out   # a saved trade request, not only this window's cache
         # Step 0: Reset the state for a clean new evaluation
         for g in self.roster:
             g.is_untouchable = False
 
         # 1. Reigning Champions rule: their core is sacred
-        if torneo and torneo.campione and torneo.campione.nome == self.nome:
+        champion_team = getattr(torneo, 'campione', None) if torneo else None
+        if champion_team and champion_team.nome == self.nome:
             nucleo_campione = sorted(self.roster, key=lambda p: p.ovr, reverse=True)[:7]
             for player in nucleo_campione:
                 player.is_untouchable = True
@@ -2805,7 +2975,7 @@ class Squadra:
         # No NBA franchise gives away its freshly drafted talents (e.g. Iguodala, LeBron, Wade, Bosh, Howard)
         for g in self.roster:
             if g.eta <= 23 and (g.potenziale >= 80 or g.ovr >= 76):
-                if not getattr(g, '_wants_out', False) and not g.is_flight_risk:
+                if not asked_out(g) and not g.is_flight_risk:
                     g.is_untouchable = True
 
         # 3. Protection of Superstars and Franchise Faces
@@ -2813,19 +2983,21 @@ class Squadra:
             tier = g.get_tier()
             if tier in ["Franchise Cornerstone", "Superstar"]:
                 is_expiring = g.contract and g.contract.anni_rimanenti <= 1
-                if not g.is_flight_risk and not getattr(g, '_wants_out', False) and not is_expiring:
+                if not g.is_flight_risk and not asked_out(g) and not is_expiring:
                     g.is_untouchable = True
 
         # 4. The best player of each franchise (if OVR >= 82) is the cornerstone
         if self.roster:
             top_player = max(self.roster, key=lambda p: p.ovr)
-            if top_player.ovr >= 82 and not getattr(top_player, '_wants_out', False) and not top_player.is_flight_risk:
+            if top_player.ovr >= 82 and not asked_out(top_player) and not top_player.is_flight_risk:
                 top_player.is_untouchable = True
 
         # 5. Protect the winners of major individual awards
         if torneo:
-            mvp_name = torneo.regular_season_mvp.nome if torneo.regular_season_mvp else None
-            all_nba_1st_team_names = {p.nome for p in torneo.all_nba_teams[0]} if torneo.all_nba_teams else set()
+            mvp = getattr(torneo, 'regular_season_mvp', None)
+            mvp_name = mvp.nome if mvp else None
+            all_nba = getattr(torneo, 'all_nba_teams', None)
+            all_nba_1st_team_names = {p.nome for p in all_nba[0]} if all_nba else set()
             for g in self.roster:
                 if g.nome == mvp_name or g.nome in all_nba_1st_team_names:
                     g.is_untouchable = True

@@ -180,6 +180,8 @@ from core.board_engine import (
 from core.front_office.seasons import ensure_season_marks
 from core.front_office.state import build_front_office, sync_user_seat, user_moves_team
 from core.front_office.plans import checkpoint_new_season
+from core.front_office import trade_requests
+from core.front_office.wishes import asked_out
 from core.front_office.view import gm_card, gm_market, league_table
 
 main_log = logging.getLogger('main_sim')
@@ -2338,12 +2340,7 @@ def api_draft_sim_to_user():
     if not ACTIVE_DRAFT_INSTANCE:
         return jsonify({"error": "Draft not started"}), 400
         
-    state = ACTIVE_DRAFT_INSTANCE.get_draft_state()
-    while not state.get("is_user_turn") and state.get("status") == "DRAFT_IN_PROGRESS":
-        state = ACTIVE_DRAFT_INSTANCE.simula_singolo_pick()
-        if state.get("ultimo_scambio"):
-            break
-        
+    state = ACTIVE_DRAFT_INSTANCE.simula_fino_utente()
     if state.get("status") == "COMPLETED":
         concludi_draft_logica()
         
@@ -2539,7 +2536,7 @@ def api_draft_propose_custom_trade():
         return jsonify({"error": f"Trade rules not met: {validation_msg}"}), 400
         
     from trades.trade_finder import TradeFinder
-    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore)
+    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore, manual=True)
     finder.begin_window("draft")   # the CPU's draft wishes count on draft night
     ai_accepted, ai_reason = finder.would_accept_trade_with_reason(
         partner_team, user_gives_assets, cpu_gives_assets, pick_protections=all_pick_protections
@@ -3116,6 +3113,7 @@ def nuova_stagione():
                             t_entry['is_finalized'] = True
 
         SIMULATION_TOURNAMENT._age_draft_picks()
+        SIMULATION_TOURNAMENT._fade_rivalries()
         SIMULATION_TOURNAMENT.season_number += 1
         SIMULATION_TOURNAMENT._gestisci_crescita_economica()
         checkpoint_new_season(SIMULATION_TOURNAMENT)  # GMs age; team plans reviewed (champion still known)
@@ -3190,6 +3188,8 @@ def nuova_stagione():
         # Reset team records
         for squadra in SIMULATION_TOURNAMENT.squadre:
             squadra.reset_record_stagionale()
+        from trades.windows import refresh_untouchables
+        refresh_untouchables(SIMULATION_TOURNAMENT)   # draft-night flags and last season's cores must not pile up
         
         # Generate the new authentic calendar for the new season!
         SIMULATION_TOURNAMENT.genera_calendario()
@@ -4016,7 +4016,7 @@ def trade_finder():
     asset_key = data.get('player_name', '')
     
     from trades.trade_finder import TradeFinder
-    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore)
+    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore, manual=True)
     
     user_team = SIMULATION_TOURNAMENT.squadra_giocatore
     if not user_team:
@@ -4265,7 +4265,7 @@ def validate_3_team_trade_endpoint():
 
     if is_valid:
         from trades.trade_finder import TradeFinder
-        finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore)
+        finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore, manual=True)
         
         gives_b = trade_data["team_b"]["gives_to_a"] + trade_data["team_b"]["gives_to_c"]
         receives_b = trade_data["team_a"]["gives_to_b"] + trade_data["team_c"]["gives_to_b"]
@@ -4385,7 +4385,7 @@ def execute_3_team_trade_endpoint():
         return jsonify({"error": f"Trade not CBA compliant: {validation_msg}"}), 400
         
     from trades.trade_finder import TradeFinder
-    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore)
+    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore, manual=True)
     
     # Check acceptance
     gives_b = trade_data["team_b"]["gives_to_a"] + trade_data["team_b"]["gives_to_c"]
@@ -4444,7 +4444,7 @@ def execute_4_team_trade_endpoint():
         return jsonify({"error": "One or more of the franchises involved were not found"}), 404
         
     from trades.trade_finder import TradeFinder
-    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, user_team)
+    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, user_team, manual=True)
     
     deal = finder.four_team_deal([team_a, team_b, team_c, team_d], flow)
     if deal is None:
@@ -4483,7 +4483,7 @@ def search_trades_by_need():
     archetype = data.get('archetype', None)
 
     from trades.trade_finder import TradeFinder
-    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, user_team)
+    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, user_team, manual=True)
     res = finder.find_trades_by_need(target_position=position, min_ovr=min_ovr, archetype=archetype)
     return jsonify(res)
 
@@ -4516,7 +4516,7 @@ def what_would_it_take():
         return jsonify({"error": f"Player '{player_name}' not found"}), 404
 
     from trades.trade_finder import TradeFinder
-    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, user_team)
+    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, user_team, manual=True)
     result = finder.calculate_what_would_it_take(target_player)
     return jsonify(result)
 
@@ -4532,7 +4532,7 @@ def get_multi_team_chains():
         return jsonify({"error": "No team selected"}), 400
 
     from trades.trade_finder import TradeFinder
-    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, user_team)
+    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, user_team, manual=True)
     chains = finder.find_multi_team_chain_trades()
     return jsonify({"chains": chains})
 
@@ -4795,6 +4795,8 @@ def get_user_trade_info():
     # Check if trade window is open
     trade_window_open, trade_window_message = user_trade_window(SIMULATION_TOURNAMENT, LEAGUE_STATE)
     
+    from trades.execution import can_set_pick_protection
+
     def serialize_team_assets(team):
         if not team:
             return {"players": [], "picks": []}
@@ -4862,7 +4864,8 @@ def get_user_trade_info():
                         "year": year,
                         "key": f"{year}:{pick_key}",
                         "display_name": display_str,
-                        "protection": prot
+                        "protection": prot,
+                        "can_protect": can_set_pick_protection(SIMULATION_TOURNAMENT, f"{year}:{pick_key}", team.nome)
                     })
         return {"players": players_data, "picks": picks_data}
         
@@ -4872,6 +4875,7 @@ def get_user_trade_info():
         "trade_window_open": trade_window_open,
         "trade_window_message": trade_window_message,
         "league_state": LEAGUE_STATE,
+        "pick_protection_options": list(CONFIG.TRADES.PICK_PROTECTIONS),
         "player_team_assets": serialize_team_assets(player_team),
         "partner_team_assets": serialize_team_assets(partner_team) if partner_team else {"players": [], "picks": []}
     }
@@ -4986,7 +4990,11 @@ def get_team_strategy_intel():
             p_info["tag"] = "On the Trade Block"
             trade_block.append(p_info)
             continue
-        if getattr(p, '_wants_out', False) or getattr(p, 'morale', 75) < 35:
+        if getattr(p, 'trade_request', False):
+            p_info["tag"] = "Asked for a trade"
+            trade_block.append(p_info)
+            continue
+        if asked_out(p) or getattr(p, 'morale', 75) < 35:
             p_info["tag"] = "Unhappy / Sell"
             trade_block.append(p_info)
             continue
@@ -5117,6 +5125,14 @@ def get_team_strategy_intel():
     })
 
 
+def user_deal_pick_terms(user_team, partner_team, data: dict) -> dict:
+    """The protection each pick of a 2-team user deal carries, from what the request asks for."""
+    from trades.execution import settle_pick_terms
+    return settle_pick_terms(SIMULATION_TOURNAMENT, [
+        (user_team.nome, data.get('giving_picks', []), data.get('giving_pick_protections') or {}),
+        (partner_team.nome, data.get('receiving_picks', []), data.get('receiving_pick_protections') or {})])
+
+
 @app.route('/api/validate-user-trade', methods=['POST'])
 def validate_user_trade():
     """
@@ -5137,27 +5153,8 @@ def validate_user_trade():
     partner_team_name = data.get('partner_team', '')
     giving_player_names = data.get('giving_players', [])
     giving_pick_keys = data.get('giving_picks', [])
-    giving_pick_protections = data.get('giving_pick_protections', {})
     receiving_player_names = data.get('receiving_players', [])
     receiving_pick_keys = data.get('receiving_picks', [])
-    receiving_pick_protections = data.get('receiving_pick_protections', {})
-    
-    all_pick_protections = {}
-    for prot_dict in [giving_pick_protections, receiving_pick_protections]:
-        if isinstance(prot_dict, dict):
-            for k, v in prot_dict.items():
-                all_pick_protections[k] = v
-                if ":" in k:
-                    p_short = k.split(":", 1)[1]
-                    all_pick_protections[p_short] = v
-    for pk in giving_pick_keys + receiving_pick_keys:
-        if pk not in all_pick_protections:
-            all_pick_protections[pk] = "Unprotected"
-            if ":" in pk:
-                all_pick_protections[pk.split(":", 1)[1]] = "Unprotected"
-            else:
-                for y in range(1, 6):
-                    all_pick_protections[f"{y}:{pk}"] = "Unprotected"
     
     partner_team = None
     for s in SIMULATION_TOURNAMENT.squadre:
@@ -5167,6 +5164,7 @@ def validate_user_trade():
             
     if not partner_team:
         return jsonify({"error": f"Partner team '{partner_team_name}' not found"}), 400
+    all_pick_protections = user_deal_pick_terms(user_team, partner_team, data)
         
     # Resolve player objects
     user_players = []
@@ -5205,7 +5203,7 @@ def validate_user_trade():
 
     if is_valid:
         from trades.trade_finder import TradeFinder
-        finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore)
+        finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore, manual=True)
         # Partner team (B) receives user gives (A) and gives partner gives (B)
         ai_accepted, ai_reason = finder.would_accept_trade_with_reason(partner_team, assets_a_gives, assets_b_gives, pick_protections=all_pick_protections)
         if ai_accepted:
@@ -5240,27 +5238,8 @@ def counter_offer_trade():
     partner_team_name = data.get('partner_team', '')
     giving_player_names = data.get('giving_players', [])
     giving_pick_keys = data.get('giving_picks', [])
-    giving_pick_protections = data.get('giving_pick_protections', {})
     receiving_player_names = data.get('receiving_players', [])
     receiving_pick_keys = data.get('receiving_picks', [])
-    receiving_pick_protections = data.get('receiving_pick_protections', {})
-    
-    all_pick_protections = {}
-    for prot_dict in [giving_pick_protections, receiving_pick_protections]:
-        if isinstance(prot_dict, dict):
-            for k, v in prot_dict.items():
-                all_pick_protections[k] = v
-                if ":" in k:
-                    p_short = k.split(":", 1)[1]
-                    all_pick_protections[p_short] = v
-    for pk in giving_pick_keys + receiving_pick_keys:
-        if pk not in all_pick_protections:
-            all_pick_protections[pk] = "Unprotected"
-            if ":" in pk:
-                all_pick_protections[pk.split(":", 1)[1]] = "Unprotected"
-            else:
-                for y in range(1, 6):
-                    all_pick_protections[f"{y}:{pk}"] = "Unprotected"
     
     partner_team = None
     for s in SIMULATION_TOURNAMENT.squadre:
@@ -5270,6 +5249,7 @@ def counter_offer_trade():
             
     if not partner_team:
         return jsonify({"error": f"Partner team '{partner_team_name}' not found"}), 400
+    all_pick_protections = user_deal_pick_terms(user_team, partner_team, data)
         
     user_players = [p for name in giving_player_names for p in user_team.roster if p.nome.lower() == name.lower()]
     partner_players = [p for name in receiving_player_names for p in partner_team.roster if p.nome.lower() == name.lower()]
@@ -5278,7 +5258,7 @@ def counter_offer_trade():
     assets_b_gives = partner_players + receiving_pick_keys
     
     from trades.trade_finder import TradeFinder
-    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore)
+    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore, manual=True)
     counter_res = finder.generate_counter_offer(partner_team, user_team, assets_a_gives, assets_b_gives, pick_protections=all_pick_protections)
     
     return jsonify(counter_res)
@@ -5304,27 +5284,8 @@ def execute_user_trade():
     partner_team_name = data.get('partner_team', '')
     giving_player_names = data.get('giving_players', [])
     giving_pick_keys = data.get('giving_picks', [])
-    giving_pick_protections = data.get('giving_pick_protections', {})
     receiving_player_names = data.get('receiving_players', [])
     receiving_pick_keys = data.get('receiving_picks', [])
-    receiving_pick_protections = data.get('receiving_pick_protections', {})
-    
-    all_pick_protections = {}
-    for prot_dict in [giving_pick_protections, receiving_pick_protections]:
-        if isinstance(prot_dict, dict):
-            for k, v in prot_dict.items():
-                all_pick_protections[k] = v
-                if ":" in k:
-                    p_short = k.split(":", 1)[1]
-                    all_pick_protections[p_short] = v
-    for pk in giving_pick_keys + receiving_pick_keys:
-        if pk not in all_pick_protections:
-            all_pick_protections[pk] = "Unprotected"
-            if ":" in pk:
-                all_pick_protections[pk.split(":", 1)[1]] = "Unprotected"
-            else:
-                for y in range(1, 6):
-                    all_pick_protections[f"{y}:{pk}"] = "Unprotected"
     
     partner_team = None
     for s in SIMULATION_TOURNAMENT.squadre:
@@ -5334,6 +5295,7 @@ def execute_user_trade():
             
     if not partner_team:
         return jsonify({"error": f"Partner team '{partner_team_name}' not found"}), 400
+    all_pick_protections = user_deal_pick_terms(user_team, partner_team, data)
         
     # Resolve player objects
     user_players = []
@@ -5369,7 +5331,7 @@ def execute_user_trade():
         return jsonify({"error": f"Trade rules not met: {validation_msg}"}), 400
         
     from trades.trade_finder import TradeFinder
-    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore)
+    finder = TradeFinder(SIMULATION_TOURNAMENT, SIMULATION_TOURNAMENT.squadre, SIMULATION_TOURNAMENT.squadra_giocatore, manual=True)
     
     ai_accepted, ai_reason = finder.would_accept_trade_with_reason(partner_team, assets_a_gives, assets_b_gives, pick_protections=all_pick_protections)
     if not ai_accepted:
@@ -5386,12 +5348,12 @@ def execute_user_trade():
     
     user_gives_picks_desc = []
     for k in giving_pick_keys:
-        prot = giving_pick_protections.get(k, "Unprotected")
+        prot = all_pick_protections.get(k, "Unprotected")
         user_gives_picks_desc.append(f"{k} ({prot})" if prot != "Unprotected" else k)
         
     partner_gives_picks_desc = []
     for k in receiving_pick_keys:
-        prot = receiving_pick_protections.get(k, "Unprotected")
+        prot = all_pick_protections.get(k, "Unprotected")
         partner_gives_picks_desc.append(f"{k} ({prot})" if prot != "Unprotected" else k)
         
     user_gives_str = ", ".join([p.nome for p in user_players] + user_gives_picks_desc)
@@ -5764,6 +5726,7 @@ def offer_extension():
         player.contract.team_option = team_opt
         player.is_flight_risk = False
         player.walks_away = ""
+        trade_requests.clear_request(player)   # he signed on: the request is over
         player.morale = min(100, player.morale + 5)
         
         opt_str = ""
@@ -5810,6 +5773,7 @@ def offer_extension():
         player.contract.team_option = team_opt
         player.is_flight_risk = False
         player.walks_away = ""
+        trade_requests.clear_request(player)   # he signed on: the request is over
         player.morale = min(100, player.morale + 5)
         
         opt_str = ""
@@ -7812,13 +7776,11 @@ def _trade_impact_list(torneo):
                 win_pct_post = round(wins_post / games_post, 3) if games_post > 0 else win_pct_pre
                 delta_win_pct = round((win_pct_post - win_pct_pre) * 100, 1)
 
-                curr_off = getattr(actual_team, 'offensive_rating', 105.0)
-                curr_def = getattr(actual_team, 'defensive_rating', 105.0)
-                curr_net = round(curr_off - curr_def, 1)
+                from trades.trade_finder import team_form
+                form_now = team_form(torneo, actual_team)
+                curr_net = form_now["net_rtg"]
                 delta_net_rtg = round(curr_net - net_rtg_pre, 1) if games_post > 0 else 0.0
-
-                stats_sq = getattr(actual_team, 'statistiche_squadra', None)
-                curr_ppg = round(stats_sq.punti_fatti / max(1, total_games_now), 1) if stats_sq and total_games_now > 0 else ppg_pre
+                curr_ppg = form_now["ppg"] if total_games_now > 0 else ppg_pre
                 delta_ppg = round(curr_ppg - ppg_pre, 1) if games_post > 0 else 0.0
             else:
                 # Historical finalized or fallback
@@ -7939,6 +7901,14 @@ def _trade_impact_list(torneo):
             })
 
     return trade_impact_res
+
+
+@app.route('/api/trade-requests', methods=['GET'])
+def get_trade_requests_api():
+    """League-wide list of players who asked to be traded (core/front_office/trade_requests.py)."""
+    if not SIMULATION_TOURNAMENT:
+        return jsonify({"requests": []})
+    return jsonify({"requests": trade_requests.request_list(SIMULATION_TOURNAMENT)})
 
 
 @app.route('/api/trade-history', methods=['GET'])

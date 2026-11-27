@@ -287,6 +287,11 @@ def serialize_player(player: Any) -> Dict[str, Any]:
         "giorni_cooldown_scambio": getattr(player, 'giorni_cooldown_scambio', 0),
         "is_flight_risk": getattr(player, 'is_flight_risk', False),
         "walks_away": getattr(player, 'walks_away', ""),
+        "frustration": float(getattr(player, 'frustration', 0.0)),
+        "trade_request": bool(getattr(player, 'trade_request', False)),
+        "trade_request_since": getattr(player, 'trade_request_since', ""),
+        "trade_request_weeks": int(getattr(player, 'trade_request_weeks', 0) or 0),
+        "trade_block_by_request": bool(getattr(player, 'trade_block_by_request', False)),
         "stamina_stagionale": getattr(player, 'stamina_stagionale', 100.0),
         "minuti_target": getattr(player, 'minuti_target', 0),
         "secondi_in_panchina_consecutivi": getattr(player, 'secondi_in_panchina_consecutivi', 0),
@@ -431,6 +436,11 @@ def deserialize_player(data: Dict[str, Any], squadra_obj: Optional[Any] = None) 
     g.giorni_cooldown_scambio = data.get("giorni_cooldown_scambio", 0)
     g.is_flight_risk = data.get("is_flight_risk", False)
     g.walks_away = data.get("walks_away", "")
+    g.frustration = float(data.get("frustration", 0.0))
+    g.trade_request = bool(data.get("trade_request", False))
+    g.trade_request_since = data.get("trade_request_since", "")
+    g.trade_request_weeks = int(data.get("trade_request_weeks", 0) or 0)
+    g.trade_block_by_request = bool(data.get("trade_block_by_request", False))
     g.stamina_stagionale = data.get("stamina_stagionale", 100.0)
     g.minuti_target = data.get("minuti_target", 0)
     g.secondi_in_panchina_consecutivi = data.get("secondi_in_panchina_consecutivi", 0)
@@ -903,6 +913,8 @@ def serialize_tournament_state(tournament_instance: Any, extra_playoff_data: Opt
         "current_day": cur_gameday,
         "_current_gameday": cur_gameday,
         "_trade_deadline_completed": bool(getattr(tournament_instance, '_trade_deadline_completed', False)),
+        "trade_requests_last_tick": getattr(tournament_instance, 'trade_requests_last_tick', None),
+        "trade_requests_summer": getattr(tournament_instance, 'trade_requests_summer', None),
         "starting_year": getattr(tournament_instance, 'starting_year', 2025),
         "anno_corrente": getattr(tournament_instance, 'anno_corrente', 2025),
         "league_state": getattr(tournament_instance, 'league_state', 'PRE_SEASON'),
@@ -1017,6 +1029,8 @@ def restore_tournament_state(tournament_instance: Any, state_data: Dict[str, Any
 
     if "season_number" in state_data:
         tournament_instance.season_number = state_data["season_number"]
+        if getattr(tournament_instance, 'rivalry_tracker', None) is not None:
+            tournament_instance.rivalry_tracker.current_season = state_data["season_number"]
         if hasattr(tournament_instance, 'update_dynamic_economy'):
             tournament_instance.update_dynamic_economy()
             
@@ -1024,6 +1038,8 @@ def restore_tournament_state(tournament_instance: Any, state_data: Dict[str, Any
     tournament_instance.current_day = cur_day
     tournament_instance._current_gameday = cur_day
     tournament_instance._trade_deadline_completed = state_data.get("_trade_deadline_completed", False)
+    tournament_instance.trade_requests_last_tick = state_data.get("trade_requests_last_tick")   # trade_requests.tick_due
+    tournament_instance.trade_requests_summer = state_data.get("trade_requests_summer")
         
     if "league_state" in state_data:
         tournament_instance.league_state = state_data["league_state"]
@@ -1199,7 +1215,9 @@ def restore_tournament_state(tournament_instance: Any, state_data: Dict[str, Any
     if "free_agents_pool" in state_data:
         tournament_instance.free_agents_pool = [deserialize_player(p_data, None) for p_data in state_data["free_agents_pool"]]
     if "giocatori_ritirati" in state_data:
-        tournament_instance.giocatori_ritirati = [deserialize_player(p_data, None) for p_data in state_data["giocatori_ritirati"]]
+        from core.models import unique_retired_players
+        tournament_instance.giocatori_ritirati = unique_retired_players(
+            [deserialize_player(p_data, None) for p_data in state_data["giocatori_ritirati"]])
     if "nuovi_free_agents" in state_data:
         tournament_instance.nuovi_free_agents = [deserialize_player(p_data, None) for p_data in state_data["nuovi_free_agents"]]
     if "unemployed_coaches" in state_data:

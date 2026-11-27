@@ -67,8 +67,8 @@ export const ClockStrip: React.FC<ClockStripProps> = ({
           <button type="button" className={`btn btn-secondary${auto ? ' is-on' : ''}`} onClick={onToggleAuto} disabled={locked && !auto}>
             {auto ? 'Pause' : 'Auto ▸'}
           </button>
-          <button type="button" className="btn btn-primary" onClick={onSimToUser} disabled={locked || auto || !yourNext}>
-            Sim to my pick
+          <button type="button" className="btn btn-primary" onClick={onSimToUser} disabled={locked || auto}>
+            {yourNext ? 'Sim to my pick' : 'Sim to end'}
           </button>
           <button type="button" className="btn btn-secondary" onClick={onToggleOrder} aria-expanded={showOrder}>
             {showOrder ? 'Hide order' : 'Full order'}

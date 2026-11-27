@@ -333,10 +333,10 @@ class TradeDemandTests(unittest.TestCase):
         star.morale = 40
         team.roster.append(star)
         t = make_torneo([team, make_team("O")], plans={"R": "REBUILDER", "O": "MIDDLE"})
-        for era, expected in ((ERA_2002, True), (ERA_INFLATED, False)):
-            with mock.patch.object(TradeFinder, "era", return_value=era):
-                finder(t).get_tradeable_players(team)
-            self.assertEqual(star._wants_out, expected)
+        for request in (True, False):   # the flag mirrors the open trade request, not today's morale
+            star.trade_request = request
+            finder(t).get_tradeable_players(team)
+            self.assertEqual(star._wants_out, request)
 
 
 if __name__ == "__main__":

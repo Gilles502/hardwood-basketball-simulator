@@ -12,7 +12,8 @@ from core.front_office.era_lines import EraLines
 from core.front_office.trade_brain import has_trait
 from core.roles import normalize_role
 
-__all__ = ["Wish", "WishContext", "KINDS", "build_wishes", "fulfils", "plan_hard_no", "wants_out"]
+__all__ = ["Wish", "WishContext", "KINDS", "build_wishes", "fulfils", "plan_hard_no", "wants_out", "asked_out",
+           "demands_out", "FED_UP"]
 
 KINDS: Tuple[str, ...] = (
     "NEED_STARTER", "WANT_STAR", "STAR_WANTS_OUT", "SELL_VETERANS", "WANT_PICKS", "WANT_YOUTH", "SHED_TAX",
@@ -111,29 +112,26 @@ def young_future(team, era: EraLines) -> bool:
 
 
 def wants_out(player, team, ctx: WishContext) -> bool:
-    """Today's star trade demand (trade_finder.get_tradeable_players), on this league's OVR lines."""
-    t, era = CONFIG.TRADES, ctx.era
-    if int(player.ovr) < era.star:
-        return False
-    win_rate = ctx.win_pct if ctx.games > t.DEMAND_MIN_GAMES else t.DEMAND_NEUTRAL_WIN_PCT
-    is_happy = player.morale >= t.DEMAND_HAPPY_MORALE
-    is_loyal_vet = player.morale >= t.DEMAND_LOYAL_MORALE and player.anni_nella_squadra >= t.DEMAND_LOYAL_YEARS
-    if is_happy or is_loyal_vet:
-        return False
-    has_young_future = young_future(team, era)
-    if (int(player.ovr) >= era.ovr_at(t.DEMAND_SUPERSTAR_OLD) and win_rate < t.DEMAND_SUPERSTAR_WIN_PCT
-            and player.eta >= t.DEMAND_SUPERSTAR_MIN_AGE):
-        tenure_bonus = player.anni_nella_squadra * t.DEMAND_TENURE_FACTOR
-        threshold = t.DEMAND_MORALE_BASE - tenure_bonus
-        if has_young_future and player.eta < t.DEMAND_PATIENT_AGE:
-            threshold = t.DEMAND_MORALE_PATIENT - tenure_bonus
-        return player.morale < threshold
-    if ctx.plan == "REBUILDER" and player.eta >= t.DEMAND_REBUILD_MIN_AGE:
-        threshold = t.DEMAND_REBUILD_MORALE
-        if has_young_future and player.eta <= t.DEMAND_REBUILD_MENTOR_MAX_AGE:
-            threshold = t.DEMAND_REBUILD_MENTOR_MORALE
-        return player.morale < threshold
-    return False
+    """The player has an open trade request (core/front_office/trade_requests.py: frustration built up over about a
+    season, important players only). `team` and `ctx` stay in the signature for the callers."""
+    return bool(getattr(player, 'trade_request', False))
+
+
+def asked_out(player) -> bool:
+    """For the exemptions (untouchable, young prospect, star premium): the saved request, or the window's cached
+    `_wants_out` flag (TradeFinder.get_tradeable_players). The cache alone is lost on a reload."""
+    return bool(getattr(player, 'trade_request', False) or getattr(player, '_wants_out', False))
+
+
+# A player under the request line who will not re-sign (contracts.walk_reason): he leaves in free agency, his team
+# does not shop him as a star who asked out.
+FED_UP = "fed up with the team"
+
+
+def demands_out(player, team, ctx: WishContext) -> bool:
+    """His team should move him: an open request, or a walk that is not just being fed up under the line."""
+    walks = getattr(player, 'walks_away', '')
+    return wants_out(player, team, ctx) or bool(walks and walks != FED_UP)
 
 
 # ---------------------------------------------------------------- building wishes
@@ -182,7 +180,7 @@ def build_wishes(team, ctx: WishContext, rng=None) -> List[Wish]:
 
     demanders = set()
     for p in roster:
-        if wants_out(p, team, ctx) or getattr(p, 'walks_away', ''):   # a player who will not re-sign wants out too
+        if demands_out(p, team, ctx):   # a star who will not re-sign wants out too
             demanders.add(p.nome)
             add("STAR_WANTS_OUT", f"{p.nome} asked to be traded.", player=p.nome)
 
@@ -330,7 +328,6 @@ def plan_hard_no(team, ctx: WishContext, receives: list, gives: list) -> Optiona
             if not fulfils(absorb, receives, gives, team, era):
                 return f"{name} is rebuilding: they won't take on {t.VETERAN_MIN_AGE}+ veterans"
 
-    asked_out = lambda p: bool(getattr(p, '_wants_out', False))
     if ctx.plan == "REBUILDER":   # a young player who is already good is the rebuild: it keeps him
         keep_line = era.ovr_at(t.REBUILDER_KEEP_YOUNG_MIN_OVR)
         for p in p_out:

@@ -186,13 +186,6 @@ class Draft:
                 nomi_gia_usati.add(p.nome)
         cfg = CONFIG.OFFSEASON
         cfg_rookie = CONFIG.ROOKIEGEN
-        archetipi_per_ruolo = {
-            'PG': ["Luka-Esque", "Floor General", "Tiratore dal Dribbling"],
-            'SG': ["3&D Guard", "Mid-Range Specialist", "Slasher Puro"],
-            'SF': ["Ala Rimbalzista", "Tiratrice Pura", "Two-Way Wing"],
-            'PF': ["Difensore/Rimbalzista", "Scoring Forward", "Stretch Four"],
-            'C': ["Centro Puro", "Unicorno", "Point Center"]
-        }
 
         for _ in range(num_da_generare):
             # 1. Determine origin and name, avoiding duplicates
@@ -204,6 +197,7 @@ class Draft:
                     nomi_gia_usati.add(nome)
                     break
 
+            eta = random.choices(list(cfg.ROOKIE_AGE_WEIGHTS), weights=list(cfg.ROOKIE_AGE_WEIGHTS.values()), k=1)[0]
             if is_filler:
                 # Fillers are generated with low OVR and low potential
                 valutazione = random.randint(58, 65)
@@ -216,8 +210,12 @@ class Draft:
                 is_project = 15 <= roll < 30
                 
                 # Generate the base rating using a bell (triangular) distribution
-                valutazione = int(random.triangular(cfg.ROOKIE_RATING_MIN, cfg.ROOKIE_RATING_MAX, (cfg.ROOKIE_RATING_MIN + cfg.ROOKIE_RATING_MAX) / 2))
-                potenziale = int(random.triangular(cfg.ROOKIE_POTENTIAL_MIN, cfg.ROOKIE_POTENTIAL_MAX, (cfg.ROOKIE_POTENTIAL_MIN + cfg.ROOKIE_POTENTIAL_MAX) / 2))
+                valutazione = int(random.triangular(cfg.ROOKIE_RATING_MIN, cfg.ROOKIE_RATING_MAX, cfg.ROOKIE_RATING_MODE))
+                potenziale = valutazione + int(random.triangular(cfg.ROOKIE_POT_GAP_MIN, cfg.ROOKIE_POT_GAP_MAX,
+                                                                 cfg.ROOKIE_POT_GAP_MODE))
+                # An older prospect is closer to his ceiling
+                age_scale = cfg.ROOKIE_POT_GAP_AGE_SCALE.get(eta, 1.0)
+                potenziale = valutazione + max(1, round((potenziale - valutazione) * age_scale))
 
                 if is_ready:
                     # NBA Ready: high OVR, but not excessive, Potential close to the OVR
@@ -244,6 +242,7 @@ class Draft:
                 
                 if random.uniform(0, 100) < cfg.GENERATIONAL_TALENT_CHANCE:
                     potenziale, valutazione, pedigree = random.randint(95, 99), random.randint(79, 83), "Generational Talent"
+                    eta = random.choice(cfg.GENERATIONAL_TALENT_AGES)
                 
                 # Absolute Global Cap after the pedigree
                 valutazione = max(58, min(84, valutazione))
@@ -251,11 +250,12 @@ class Draft:
             
             # 4. Create the player
             ruolo = random.choice(['PG', 'SG', 'SF', 'PF', 'C'])
-            archetipo = random.choice(archetipi_per_ruolo[ruolo])
+            weights = cfg_rookie.ARCHETYPE_WEIGHTS[ruolo]
+            archetipo = random.choices(list(weights), weights=list(weights.values()), k=1)[0]
             abilita, tendenze = self._genera_attributi_per_archetipo(ruolo, archetipo, valutazione, pedigree)
             
             rookie = Giocatore(
-                nome=nome, ruolo=ruolo, eta=random.randint(18, 23), 
+                nome=nome, ruolo=ruolo, eta=eta,
                 valutazione=valutazione, potenziale=potenziale, 
                 abilita=abilita, tendenze=tendenze, squadra=None,
                 provenance=provenance,
@@ -296,36 +296,39 @@ class Draft:
         defining_skills, supporting_skills, negative_skills = archetype_skills.get(archetipo, ([], [], []))
         is_elite = pedigree in ["Generational Talent", "Elite Scorer", "NBA Ready Prospect"]
         max_stat_cap = 95 if is_elite else 85
+        cfg = CONFIG.ROOKIEGEN
 
-        # 2. STRICT BASE PHYSIQUE (Nerf G speed, Fix C verticals)
+        # 2. ROLE PROFILE: every skill starts from the curated league's gap to OVR at this role
         fisico_base = {
-            'PG': {'speed': (72, 88), 'acceleration': (74, 89), 'strength': (35, 55), 'vertical': (60, 80), 'stamina': (75, 90)},
-            'SG':  {'speed': (68, 86), 'acceleration': (70, 86), 'strength': (42, 62), 'vertical': (65, 85), 'stamina': (75, 90)},
-            'SF': {'speed': (65, 80), 'acceleration': (65, 80), 'strength': (52, 75), 'vertical': (60, 85), 'stamina': (70, 88)},
-            'PF': {'speed': (50, 70), 'acceleration': (50, 70), 'strength': (68, 88), 'vertical': (60, 82), 'stamina': (65, 80)},
-            'C':  {'speed': (30, 50), 'acceleration': (30, 50), 'strength': (78, 97), 'vertical': (55, 78), 'stamina': (60, 75)}
+            'PG': {'speed': (72, 88), 'acceleration': (74, 89), 'strength': (35, 55), 'vertical': (60, 80)},
+            'SG': {'speed': (68, 86), 'acceleration': (70, 86), 'strength': (42, 62), 'vertical': (65, 85)},
+            'SF': {'speed': (65, 80), 'acceleration': (65, 80), 'strength': (52, 75), 'vertical': (60, 85)},
+            'PF': {'speed': (50, 70), 'acceleration': (50, 70), 'strength': (68, 88), 'vertical': (60, 82)},
+            'C':  {'speed': (30, 50), 'acceleration': (30, 50), 'strength': (78, 97), 'vertical': (55, 78)}
         }
+        offsets = dict(cfg.ROLE_SKILL_OFFSETS[ruolo])
+        offsets['three_point_shot_rating'] = offsets['three_point_shot_rating'] + round(
+            cfg.MODERN_THREE_RATING_SHIFT.get(ruolo, 0) * self._era_ratio())
 
         base_abilita = {}
         for key in Abilita.__annotations__:
             if key in fisico_base[ruolo]:
                 min_f, max_f = fisico_base[ruolo][key]
-                base_abilita[key] = int(random.triangular(min_f, max_f, (min_f + max_f)/2))
-                
-                # Archetype-specific physical boosts
+                value = int(random.triangular(min_f, max_f, (min_f + max_f) / 2))
                 if archetipo == "Slasher Puro" and key in ['speed', 'acceleration', 'vertical']:
-                    base_abilita[key] = min(max_stat_cap, base_abilita[key] + 10)
+                    value = value + 10
                 if archetipo == "Unicorno" and key == 'strength':
-                    base_abilita[key] = max(40, base_abilita[key] - 15) # Unicorns are frail
-            elif key in defining_skills:
-                boost = 12 if is_elite else 8
-                base_abilita[key] = min(max_stat_cap, int(random.triangular(valutazione + boost - 4, valutazione + boost + 6, valutazione + boost)))
-            elif key in supporting_skills:
-                base_abilita[key] = min(max_stat_cap - 5, int(random.triangular(valutazione, valutazione + 8, valutazione + 4)))
-            elif key in negative_skills:
-                base_abilita[key] = max(35, valutazione - int(random.triangular(15, 25, 20)))
+                    value = max(40, value - 15)   # Unicorns are frail
             else:
-                base_abilita[key] = max(45, valutazione - int(random.triangular(5, 15, 10)))
+                value = round(valutazione + offsets.get(key, -10) + random.gauss(0, cfg.ROLE_SKILL_NOISE))
+            if key in defining_skills:
+                boost = 12 if is_elite else 8
+                value = max(value, int(random.triangular(valutazione + boost - 4, valutazione + boost + 6, valutazione + boost)))
+            elif key in supporting_skills:
+                value = max(value, int(random.triangular(valutazione, valutazione + 8, valutazione + 4)))
+            elif key in negative_skills:
+                value = min(value, valutazione - int(random.triangular(15, 25, 20)))
+            base_abilita[key] = max(cfg.ROLE_SKILL_FLOOR, min(max_stat_cap, value))
 
         # 3. SAFETY NETS (Guarantee functionality in the game engine)
         if ruolo in ['C', 'PF']:
@@ -343,122 +346,54 @@ class Draft:
             elif flaw == "Turnover Machine":
                 base_abilita['offensive_iq_rating'] = max(40, base_abilita['offensive_iq_rating'] - 15)
 
-        # 5. TENDENCY GENERATION (THE ENGINE OF THE SIMULATION)
-        base_tendenze = {}
-        
-        # Touch Tendency (Usage base basato sul talento)
-        base_touch = 85 if is_elite else (75 if valutazione >= 78 else 55)
-        base_tendenze['touch_tendency'] = max(30, min(98, base_touch + random.randint(-5, 5)))
+        # 5. TENDENCIES: the role's mean, moved by his own ratings (shots) and by his OVR (usage)
+        a = base_abilita
+        role_t = cfg.ROLE_TENDENCIES[ruolo]
+        over_pivot = valutazione - cfg.ROLE_TENDENCY_PIVOT_OVR
 
-        # Shooting and Drives
-        three_rtg = base_abilita.get('three_point_shot_rating', 50)
-        base_tendenze['three_point_shot_tendency'] = max(5, min(95, three_rtg + random.randint(-5, 15)))
-        base_tendenze['mid_range_shot_tendency'] = max(10, min(90, base_abilita.get('mid_range_shot_rating', 50)))
-        
-        drive_base = base_abilita.get('acceleration', 50)
-        if base_tendenze['three_point_shot_tendency'] > 75:
-            drive_base -= 20 # Those who shoot from outside drive less
-        base_tendenze['drive_to_basket_tendency'] = max(10, min(95, drive_base))
-        
-        base_tendenze['post_up_tendency'] = max(5, min(95, base_abilita.get('post_control_rating', 40)))
-        base_tendenze['spot_up_shot_tendency'] = base_tendenze['three_point_shot_tendency'] + 10
+        def dev(skill):   # how far a skill sits from his role's profile
+            return a[skill] - (valutazione + offsets.get(skill, -10))
 
-        # Passing and Defense (Boosted to guarantee stable assists in the league over 20+ years)
-        pass_vis = base_abilita.get('passing_vision', 50)
-        if ruolo in ['PG', 'SG']:
-            pass_vis = max(68, pass_vis)
-        elif ruolo == 'SF':
-            pass_vis = max(58, pass_vis)
-        base_tendenze['dish_to_open_man_tendency'] = max(45, min(95, pass_vis + 15))
-        base_tendenze['pass_out_of_shot_tendency'] = max(35, min(85, base_tendenze['dish_to_open_man_tendency'] - 10))
-        base_tendenze['hero_ball_tendency'] = max(5, min(80, base_tendenze['touch_tendency'] - 25))
-        base_tendenze['foul_tendency'] = max(40, min(95, 85 - (base_abilita.get('defensive_iq_rating', 50) // 2)))
-        base_tendenze['putback_tendency'] = max(5, min(95, base_abilita.get('offensive_rebound_rating', 40)))
-        
-        # New key tendencies (Rebound & Playmaking)
-        off_reb = base_abilita.get('offensive_rebound_rating', 40)
-        def_reb = base_abilita.get('defensive_rebound_rating', 40)
-        avg_reb = (off_reb + def_reb) // 2
-        if three_rtg >= 75 or base_tendenze.get('three_point_shot_tendency', 40) >= 65:
-            avg_reb = int(avg_reb * 0.82)
-        base_tendenze['rebound_tendency'] = max(20, min(99, avg_reb + random.randint(-4, 4)))
-        
-        playmaking_base = int(pass_vis * 0.6 + base_abilita.get('passing_accuracy', 50) * 0.4)
-        if ruolo == 'PG':
-            playmaking_base = max(70, playmaking_base + 10)
-        elif ruolo == 'SG':
-            playmaking_base = max(45, playmaking_base)
-        base_tendenze['playmaking_tendency'] = max(15, min(99, playmaking_base + random.randint(-4, 4)))
-
-        # P&R Logica
+        t = {}
+        for key, mean in role_t.items():
+            t[key] = mean + cfg.USAGE_TENDENCY_PER_OVR.get(key, 0.0) * over_pivot + random.gauss(0, cfg.ROLE_TENDENCY_NOISE)
+        t['three_point_shot_tendency'] = (cfg.THREE_TENDENCY_SLOPE * (a['three_point_shot_rating'] - cfg.THREE_TENDENCY_ZERO_RATING)
+                                          + cfg.MODERN_THREE_TENDENCY_SHIFT * self._era_ratio()
+                                          + random.gauss(0, cfg.ROLE_TENDENCY_NOISE))
+        t['mid_range_shot_tendency'] += 0.5 * dev('mid_range_shot_rating')
+        t['drive_to_basket_tendency'] += 0.5 * (a['acceleration'] - 75)
+        t['post_up_tendency'] += 0.8 * dev('post_control_rating')
+        t['pass_out_of_shot_tendency'] += 0.6 * dev('passing_vision')
+        t['dish_to_open_man_tendency'] += 0.6 * dev('passing_vision')
+        t['playmaking_tendency'] += 0.6 * dev('passing_vision')
+        t['dunk_tendency'] += 0.6 * dev('dunk_rating')
+        t['putback_tendency'] += 0.5 * dev('offensive_rebound_rating')
+        t['rebound_tendency'] += 0.8 * dev('defensive_rebound_rating')
         if ruolo in ['PF', 'C']:
-            base_tendenze['roll_vs_pop_tendency'] = max(5, min(95, (three_rtg - base_abilita.get('close_shot_rating', 50)) + 50))
-        else:
-            base_tendenze['roll_vs_pop_tendency'] = 50
+            t['roll_vs_pop_tendency'] += 0.6 * dev('three_point_shot_rating')
 
-        # 6. ROLE PLAYER CLAMPS & ARCHETYPE OVERRIDES (The gameplay fix)
-        # Forces extreme behaviors ignoring the pure stats
-
-        # --- Playmakers ---
-        if archetipo == "Floor General": # CP3
-            base_tendenze['dish_to_open_man_tendency'] = max(88, base_tendenze['dish_to_open_man_tendency'])
-            base_tendenze['playmaking_tendency'] = max(90, base_tendenze.get('playmaking_tendency', 75))
-            base_tendenze['touch_tendency'] = min(75, base_tendenze['touch_tendency']) # Doesn't monopolize the shots, only the ball
-        elif archetipo == "Luka-Esque":
-            base_tendenze['touch_tendency'] = max(90, base_tendenze['touch_tendency'])
-            base_tendenze['playmaking_tendency'] = max(85, base_tendenze.get('playmaking_tendency', 75))
-            base_tendenze['hero_ball_tendency'] = max(70, base_tendenze['hero_ball_tendency'])
-
-        # --- Guards / Wings ---
-        elif archetipo in ["3&D Guard", "Tiratrice Pura", "Ala Rimbalzista", "Two-Way Wing"]: 
-            # Role players do NOT touch the ball.
-            base_tendenze['touch_tendency'] = min(50, base_tendenze['touch_tendency'])
-            base_tendenze['hero_ball_tendency'] = 5
-            base_tendenze['drive_to_basket_tendency'] = min(30, base_tendenze['drive_to_basket_tendency'])
-            if "Tirat" in archetipo or "3&D" in archetipo:
-                base_tendenze['spot_up_shot_tendency'] = 95
-            if "Rimbalzista" in archetipo:
-                base_tendenze['rebound_tendency'] = max(85, base_tendenze.get('rebound_tendency', 60))
-        
-        elif archetipo == "Mid-Range Specialist": # DeRozan
-            base_tendenze['mid_range_shot_tendency'] = max(85, base_tendenze['mid_range_shot_tendency'])
-            base_tendenze['three_point_shot_tendency'] = min(35, base_tendenze['three_point_shot_tendency'])
-            base_tendenze['touch_tendency'] = max(75, base_tendenze['touch_tendency'])
-
-        # --- Bigs ---
-        elif archetipo == "Unicorno": # Porzingis
-            base_tendenze['post_up_tendency'] = min(30, base_tendenze['post_up_tendency'])
-            base_tendenze['roll_vs_pop_tendency'] = max(85, base_tendenze['roll_vs_pop_tendency']) # Only pops
-            base_tendenze['putback_tendency'] = min(20, base_tendenze['putback_tendency'])
-            base_tendenze['rebound_tendency'] = min(55, base_tendenze.get('rebound_tendency', 50))
-            
-        elif archetipo == "Point Center": # Jokic
-            base_tendenze['touch_tendency'] = max(85, base_tendenze['touch_tendency'])
-            base_tendenze['dish_to_open_man_tendency'] = max(80, base_tendenze['dish_to_open_man_tendency'])
-            base_tendenze['playmaking_tendency'] = max(88, base_tendenze.get('playmaking_tendency', 70))
-            base_tendenze['post_up_tendency'] = max(70, base_tendenze['post_up_tendency'])
-            
-        elif archetipo in ["Centro Puro", "Difensore/Rimbalzista"]: # Gobert/Rodman
-            # They must grab rebounds and block shots, but on offense they live off scraps
-            base_tendenze['touch_tendency'] = min(45, base_tendenze['touch_tendency'])
-            base_tendenze['spot_up_shot_tendency'] = 5
-            base_tendenze['post_up_tendency'] = min(40, base_tendenze['post_up_tendency'])
-            base_tendenze['putback_tendency'] = max(85, base_tendenze['putback_tendency'])
-            base_tendenze['rebound_tendency'] = max(90, base_tendenze.get('rebound_tendency', 70))
-            
-            # BUT, if they are Elite (Shaq), they break the rule and monopolize the post
-            if is_elite or valutazione >= 85:
-                base_tendenze['touch_tendency'] = max(88, base_tendenze['touch_tendency'])
-                base_tendenze['post_up_tendency'] = max(90, base_tendenze['post_up_tendency'])
+        # 6. ARCHETYPES push their tendencies (relative: a bench rookie does not take over the ball)
+        for key, push in cfg.ARCHETYPE_TENDENCY_PUSHES.get(archetipo, {}).items():
+            t[key] += push
+        if archetipo == "Centro Puro" and (is_elite or valutazione >= 85):   # an elite big (Shaq) owns the post
+            t['touch_tendency'] += 18
+            t['post_up_tendency'] += 20
 
         # Applying Flaws to the Tendencies
         if flaw == "Foul Prone":
-            base_tendenze['foul_tendency'] = 95
+            t['foul_tendency'] = 80
         elif flaw == "Black Hole":
-            base_tendenze['dish_to_open_man_tendency'] = min(20, base_tendenze['dish_to_open_man_tendency'])
-            base_tendenze['pass_out_of_shot_tendency'] = 5
+            t['dish_to_open_man_tendency'] = min(20, t['dish_to_open_man_tendency'])
+            t['pass_out_of_shot_tendency'] = 5
 
+        base_tendenze = {key: int(max(0, min(99, round(value)))) for key, value in t.items()}
         return Abilita(**base_abilita), Tendenze(**base_tendenze)
+
+    def _era_ratio(self) -> float:
+        """0 in CONFIG.ERA.START_YEAR, 1 from END_YEAR on: how modern this draft class shoots."""
+        era_cfg = CONFIG.ERA
+        year = getattr(getattr(self, 'torneo', None), 'anno_corrente', None) or era_cfg.START_YEAR
+        return min(1.0, max(0.0, (year - era_cfg.START_YEAR) / (era_cfg.END_YEAR - era_cfg.START_YEAR)))
 
 
 
@@ -555,6 +490,14 @@ class Draft:
             self.torneo.offseason_log_data['draft_in_progress'] = None
             
         return self.get_draft_state()
+
+    def simula_fino_utente(self) -> dict:
+        """CPU picks until the user is on the clock or the draft ends ("Sim to my pick" / "Sim to end").
+        CPU trades do not stop it: they stay on the draft wire."""
+        state = self.get_draft_state()
+        while not state.get("is_user_turn") and state.get("status") == "DRAFT_IN_PROGRESS":
+            state = self.simula_singolo_pick()
+        return state
 
     def esegui_scelta_utente(self, nome_giocatore_scelto: str) -> dict:
         """Registers the user's pick and advances by one pick."""

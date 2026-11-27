@@ -54,8 +54,19 @@ class WalkTests(unittest.TestCase):
         self.assertEqual(contracts.walk_reason(s, t, ctx_of("MIDDLE", win_pct=0.30, games=10)), "")
         self.assertEqual(contracts.walk_reason(s, t, ctx_of("MIDDLE", win_pct=0.50, games=40)), "")
 
+    def test_fed_up_below_line_walks(self):
+        p = self.star(ovr=83)
+        p.frustration = 100.0
+        self.assertEqual(contracts.walk_reason(p, team_of(roster_with(p)), ctx_of("CONTENDER")), contracts.FED_UP)
+
+    def test_fed_up_above_line_without_request_does_not_walk_as_fed_up(self):
+        p = self.star(ovr=85)
+        p.frustration = 100.0
+        self.assertEqual(contracts.walk_reason(p, team_of(roster_with(p)), ctx_of("CONTENDER")), "")
+
     def test_asked_out_wins_over_everything(self):
-        s = self.star(ovr=86, age=31, morale=30)   # the wants_out case of tests/test_wishes.py test_star_wants_out
+        s = self.star(ovr=86, age=31, morale=30)
+        s.trade_request = True   # an open trade request
         self.assertEqual(contracts.walk_reason(s, team_of(roster_with(s)), ctx_of("REBUILDER")), "asked out")
 
 

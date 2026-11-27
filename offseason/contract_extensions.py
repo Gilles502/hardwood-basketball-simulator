@@ -13,6 +13,7 @@ import random
 from typing import List, Dict, Tuple, TYPE_CHECKING
 from core.config import CONFIG, owner_spending_tier
 from core.front_office import contracts
+from core.front_office import trade_requests
 from core.news_generator import add_news
 
 if TYPE_CHECKING:
@@ -88,12 +89,15 @@ class ContractExtensions:
                 walkers.append(p.nome)
                 self._outcome(squadra, p, "walks")
                 main_log.info(f"WALKS AWAY: {p.nome} ({p.ovr}) will not re-sign with the {squadra.nome}: {reason}.")
+                fed_up = reason == contracts.FED_UP
+                if fed_up and int(p.ovr) < ctx.era.rotation:
+                    continue   # a fed-up bench player just leaves in the summer: no story
                 add_news(
                     category="signings",
                     title=f"🚪 {p.nome} will not re-sign with the {squadra.nome}",
                     excerpt=(f"{p.nome} (OVR {p.ovr}) has told the {squadra.nome} he will not negotiate a new deal "
                              f"({reason}). He becomes a free agent in the summer unless he is traded first."),
-                    teams=[squadra.nome], is_breaking=True, season=getattr(self.torneo, 'season_number', 0))
+                    teams=[squadra.nome], is_breaking=not fed_up, season=getattr(self.torneo, 'season_number', 0))
         return walkers
 
     def _max_contract(self) -> float:
@@ -542,7 +546,7 @@ class ContractExtensions:
         max_spesa = self.torneo.second_apron + 20.0
         tier = owner_spending_tier(team.personalita_proprietario)
         if tier == "low":
-            max_spesa = self.torneo.luxury_tax_threshold + 5.0
+            max_spesa = self.torneo.luxury_tax_threshold + CONFIG.ECONOMY.LOW_OWNER_OVER_TAX_SHARE * self.torneo.salary_cap
         elif tier == "mid":
             max_spesa = self.torneo.first_apron + 10.0
 
@@ -620,6 +624,7 @@ class ContractExtensions:
         player.contract.team_option = team_opt
         player.is_flight_risk = False
         player.walks_away = ""
+        trade_requests.clear_request(player)   # he signed on: the request is over
         player.morale = min(100, player.morale + 5)
         
         opt_str = " [Player Opt]" if player_opt else (" [Team Opt]" if team_opt else "")

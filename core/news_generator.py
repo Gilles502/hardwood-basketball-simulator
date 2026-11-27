@@ -284,7 +284,7 @@ def generate_game_performance_news(player_stats, player_name, team_name, opponen
 
 
 def generate_injury_news(player_name, team_name, injury_days, is_serious=False, season=None, ovr=None):
-    """News for an injury that keeps a player out at least CONFIG.NEWS.INJURY_MIN_DAYS."""
+    """News for an injury that keeps a player out at least CONFIG.NEWS.INJURY_MIN_DAYS calendar days."""
     if injury_days < CONFIG.NEWS.INJURY_MIN_DAYS:
         return
     # The same injury is not told twice (the caller's memory of it is lost when a save is reloaded).
@@ -358,8 +358,27 @@ def generate_rivalry_postgame_news(winner, loser, winner_score, loser_score, riv
         title = f"{winner} rout rival {loser} {winner_score}-{loser_score}"
     else:
         return
+    pair = {winner, loser}
+    told = sum(1 for item in NEWS_FEED if item["kind"] == "rivalry" and item["season"] == season
+               and set(item["teams"]) == pair)
+    if told >= CONFIG.NEWS.RIVALRY_MAX_PER_PAIR_SEASON:
+        return
     add_news("rivalry", title, "Another chapter in a heated rivalry.", teams=[winner, loser], season=season,
              kind="rivalry", tier=1)
+
+
+def generate_front_office_news(event: str, team: str, role: str, name: str, detail: str = "", season=None):
+    """A head coach or GM fired, hired or retired in the offseason. event: 'fired' | 'hired' | 'retired';
+    role: 'coach' | 'GM'. Firings and hirings are medium stories, retirements minor."""
+    label = "head coach" if role == "coach" else "GM"
+    if event == "fired":
+        title, kind, tier = f"{team} fire {label} {name}", "firing", firing_tier(name)
+    elif event == "hired":
+        title, kind, tier = f"{team} hire {name} as {label}", "hiring", 2
+    else:
+        title, kind, tier = f"{label[0].upper() + label[1:]} {name} retires", "league", 1
+    add_news("general", title, detail or title + ".", teams=[team] if team else [], season=season, kind=kind,
+             tier=tier, details={"role": role, "event": event})
 
 
 def generate_playoff_elimination_news(winner, loser, series_score, round_name, season=None):

@@ -12,14 +12,14 @@ from core.config import CONFIG, normalize_owner_personality
 from core.league.draft_source import draft_class_file
 from core.league.registry import current_league_era, get_active_registry
 from core.roles import normalize_role, normalize_role_keys
-from core.models import Squadra, Giocatore, Abilita, Tendenze, Contract, CumulativeStats, POSITION_COMPATIBILITY_PENALTY, applica_regole_anni_opzioni_contratto
+from core.models import Squadra, Giocatore, Abilita, Tendenze, Contract, CumulativeStats, POSITION_COMPATIBILITY_PENALTY, applica_regole_anni_opzioni_contratto, add_retired_player, league_season_scales
 from core.game_engine import Partita # We assume it exists
 from core.models import Coach
 
 # Import extracted modules
 from trades.calendar import deadline_passed
 from trades.trade_finder import TradeFinder
-from trades.windows import run_trade_window
+from trades.windows import refresh_untouchables, run_trade_window
 from offseason.draft import Draft
 from offseason.free_agency import FreeAgency
 from core.podcast_logger import PodcastLogger
@@ -33,6 +33,7 @@ from core.front_office.plans import checkpoint_deadline, checkpoint_new_season, 
 from core.front_office.seasons import (close_season, ensure_season_marks, expected_wins, league_avg_ovr,
                                        mark_coach_change, mark_season_end)
 from core.front_office.state import build_front_office, current_year, ensure_front_office
+from core.front_office import trade_requests
 
 # Import news generation functions for in-game events
 from core.news_generator import (generate_game_performance_news, generate_injury_news,
@@ -160,6 +161,43 @@ def stampa_report_squadre_fine_stagione(torneo: 'Tournament'):
 
     print("-" * len(header))
 
+def coach_retires_now(age: int, roll: float) -> bool:
+    """A head coach this old retires this offseason (roll in [0, 1)): never before CONFIG.COACHING.RETIRE_MIN_AGE,
+    then RETIRE_BASE_CHANCE plus RETIRE_CHANCE_PER_YEAR a year, always at RETIRE_MAX_AGE."""
+    cc = CONFIG.COACHING
+    if age < cc.RETIRE_MIN_AGE:
+        return False
+    if age >= cc.RETIRE_MAX_AGE:
+        return True
+    return roll < cc.RETIRE_BASE_CHANCE + (age - cc.RETIRE_MIN_AGE) * cc.RETIRE_CHANCE_PER_YEAR
+
+
+def tag_season1_rookies(torneo) -> Tuple[int, str]:
+    """Tags the rookies already on the starting rosters (is_rookie), so season 1 has a Rookie of the Year.
+
+    The starting year's draft file (DRAFT_<start year>.json, names under "name" or "nome") when the league has one;
+    otherwise the young players in their first year on the team (CONFIG.LEAGUE.SEASON1_ROOKIE_*), because league
+    files carry no draft year. Returns (players tagged, source)."""
+    players = [p for s in torneo.squadre for p in s.roster]
+    year = int(getattr(torneo, 'starting_year', 2002))
+    path = draft_class_file(torneo, year)
+    if path:
+        with open(path, 'r', encoding='utf-8') as f:
+            names = {e.get("name") or e.get("nome") for e in json.load(f) if isinstance(e, dict)}
+        rookies = [p for p in players if p.nome in names]
+        source = f"DRAFT_{year}.json"
+    else:
+        cfg = CONFIG.LEAGUE
+        rookies = [p for p in players if p.eta <= cfg.SEASON1_ROOKIE_MAX_AGE
+                   and getattr(p, '_start_years_on_team', 99) <= cfg.SEASON1_ROOKIE_MAX_YEARS_ON_TEAM]
+        source = "first-year young players"
+    for p in rookies:
+        p.is_rookie = True
+    for p in players:
+        p.__dict__.pop('_start_years_on_team', None)
+    return len(rookies), source
+
+
 def calcola_hof_score(player_career_data: List[Dict]) -> Tuple[int, Dict]:
     """
     Computes a player's Hall of Fame score by analyzing his whole career.
@@ -259,20 +297,14 @@ def calcola_hof_score(player_career_data: List[Dict]) -> Tuple[int, Dict]:
                 # Weighted contribution index (points + rebounds + assists)
                 contrib = ppg_season + rpg_season * 1.2 + apg_season * 1.5
                 
-                if has_mvp or has_finals_mvp or has_all_nba or contrib >= 18:
-                    # Super Star / Team leader
-                    score += 75
+                title_points = CONFIG.HISTORY.HOF_TITLE_POINTS
+                if has_mvp or has_finals_mvp or has_all_nba or contrib >= title_points[0][0]:
+                    # Team leader: the only titles that count for the multi-title bonus
+                    score += title_points[0][1]
                     titoli_contribuiti += 1
-                elif contrib >= 10:
-                    # Great rotation player / Secondary starter
-                    score += 35
-                    titoli_contribuiti += 1
-                elif contrib >= 5:
-                    # Minor bench player
-                    score += 10
                 else:
-                    # Last man on the bench / No contribution (e.g. 2 ppg)
-                    score += 0
+                    # Starter / rotation player / bench: less, and nothing for a garbage-time ring
+                    score += next((pts for bar, pts in title_points[1:] if contrib >= bar), 0)
 
     # Compute the final career averages
     if num_stagioni > 0:
@@ -282,8 +314,9 @@ def calcola_hof_score(player_career_data: List[Dict]) -> Tuple[int, Dict]:
 
     # ### APPLYING BONUSES TO THE FINAL SCORE ###
     # Additional milestone bonus for significant titles as a protagonist
-    if titoli_contribuiti >= 3: score += 60
-    if titoli_contribuiti >= 5: score += 80
+    for titles_needed, bonus in CONFIG.HISTORY.HOF_TITLES_BONUS:
+        if titoli_contribuiti >= titles_needed:
+            score += bonus
     
     # Longevity bonus
     score += num_stagioni * 5
@@ -451,12 +484,17 @@ def build_season_entry(torneo: 'Tournament', record_standings: bool = False) -> 
                 playoff_round = "Finali NBA"
             elif any(isinstance(s, dict) and (s.get('s1_nome') == squadra.nome or s.get('s2_nome') == squadra.nome) for s in f_east + f_west):
                 playoff_round = "Finali Conference"
-            elif conf_seed <= 8:
-                playoff_round = "Playoffs"
-            elif conf_seed <= 10:
-                playoff_round = "Play-In"
             else:
-                playoff_round = "Lottery"
+                # The real bracket, not the seed: a 7-8 seed out in the play-in is a play-in team, and seeds
+                # 9-10 are lottery teams in a season without the play-in.
+                in_playoffs = any(s is squadra or getattr(s, 'nome', None) == squadra.nome
+                                  for side in (getattr(torneo, 'playoff_teams', None) or {}).values() for s in side)
+                if in_playoffs:
+                    playoff_round = "Playoffs"
+                elif getattr(torneo, 'enable_play_in', False) and conf_seed <= CONFIG.DASHBOARD.PLAY_IN_LAST_SEED:
+                    playoff_round = "Play-In"
+                else:
+                    playoff_round = "Lottery"
 
         # Record onto the team model history (only when the season is archived)
         if record_standings:
@@ -1302,6 +1340,14 @@ class Tournament:
                     self.offseason_log_data['ritiri_sviluppo'].append(log_msg)
                 main_log.info(log_msg)
                 
+                try:   # news never break the offseason
+                    from core.news_generator import generate_front_office_news
+                    generate_front_office_news("fired", squadra.nome, "coach", coach.nome,
+                                               f"The {squadra.nome} part ways with {coach.nome} after a "
+                                               f"{squadra.vittorie}-{squadra.sconfitte} season.", season=self.season_number)
+                except Exception as exc:
+                    main_log.warning("coach firing news failed: %s", exc)
+
                 if not hasattr(self, 'unemployed_coaches'):
                     self.unemployed_coaches = []
                 self.unemployed_coaches.append(coach)
@@ -1365,6 +1411,14 @@ class Tournament:
                     self.unemployed_coaches.remove(miglior_candidato)
 
                 log_msg = f"HIRING: The {squadra.nome} hired coach {miglior_candidato.nome} (Style: {miglior_candidato.stile_gioco}, Deal {miglior_candidato.contratto_totale_anni} years at ${miglior_candidato.salario:.1f}M/year)."
+                try:   # news never break the offseason
+                    from core.news_generator import generate_front_office_news
+                    generate_front_office_news("hired", squadra.nome, "coach", miglior_candidato.nome,
+                                               f"{miglior_candidato.nome} signs for {miglior_candidato.contratto_totale_anni} "
+                                               f"years and brings a {miglior_candidato.stile_gioco} system.",
+                                               season=self.season_number)
+                except Exception as exc:
+                    main_log.warning("coach hiring news failed: %s", exc)
                 if 'ritiri_sviluppo' in self.offseason_log_data:
                     self.offseason_log_data['ritiri_sviluppo'].append(log_msg)
                 main_log.info(log_msg)
@@ -1442,6 +1496,23 @@ class Tournament:
             coach.years_with_current_team += 1
             coach.contratto_anni_rimanenti = max(0, coach.contratto_anni_rimanenti - 1)
 
+            # Retirement by age (CONFIG.COACHING RETIRE_*): a CPU head coach under contract retired only if his
+            # contract ran out unrenewed, so one coached at 84. The user's coach is the user's call.
+            is_user_bench = (self.squadra_giocatore and squadra.nome == self.squadra_giocatore.nome
+                             and not getattr(self, 'is_spectator', False))
+            if not is_user_bench and coach_retires_now(coach.eta, random.random()):
+                main_log.info(f"   🎓 COACH RETIREMENT: {coach.nome} ({coach.eta}) retires from the {squadra.nome} bench.")
+                try:   # news never break the offseason
+                    from core.news_generator import generate_front_office_news
+                    generate_front_office_news("retired", squadra.nome, "coach", coach.nome,
+                                               f"{coach.nome} retires at {coach.eta} after "
+                                               f"{coach.years_with_current_team} seasons with the {squadra.nome}.",
+                                               season=self.season_number)
+                except Exception as exc:
+                    main_log.warning("coach retirement news failed: %s", exc)
+                squadra.coach = None
+                continue
+
             # End-of-season XP bonus
             season_xp = 200 + (squadra.vittorie * 15)
             if squadra in self.playoff_teams.get('east', []) or squadra in self.playoff_teams.get('west', []):
@@ -1451,19 +1522,19 @@ class Tournament:
             
             coach.add_xp(season_xp)
 
-            # OVR development
-            if coach.ovr_totale < coach.potenziale and coach.eta < 60:
+            # OVR development (CONFIG.COACHING): only a season over expectations, before the growth age limit
+            cc = CONFIG.COACHING
+            if coach.ovr_totale < coach.potenziale and coach.eta < cc.GROWTH_MAX_AGE:
                 performance_delta = squadra.vittorie - squadra.vittorie_attese
-                guadagno = 1 + int(performance_delta / 12)
-                guadagno = max(0, min(3, guadagno))
+                guadagno = max(0, min(cc.GROWTH_MAX_PER_SEASON, int(performance_delta / cc.GROWTH_WINS_PER_POINT)))
                 if guadagno > 0:
                     coach.ovr_offensivo = min(99, coach.ovr_offensivo + guadagno)
                     coach.ovr_difensivo = min(99, coach.ovr_difensivo + guadagno)
                     coach.player_development = min(99, coach.player_development + guadagno)
                     coach.tactical_acumen = min(99, coach.tactical_acumen + guadagno)
-            elif coach.eta > 65:
-                coach.ovr_offensivo = max(60, coach.ovr_offensivo - 1)
-                coach.ovr_difensivo = max(60, coach.ovr_difensivo - 1)
+            elif coach.eta >= cc.DECLINE_AGE:
+                coach.ovr_offensivo = max(cc.DECLINE_FLOOR, coach.ovr_offensivo - 1)
+                coach.ovr_difensivo = max(cc.DECLINE_FLOOR, coach.ovr_difensivo - 1)
 
             # Handling of Expiring Contracts (0 years remaining)
             if coach.contratto_anni_rimanenti <= 0:
@@ -1491,6 +1562,14 @@ class Tournament:
                             rows = ensure_front_office(self).records.get(squadra.nome)
                             if rows:
                                 rows[-1]["coach_fired"] = True
+                            try:   # news never break the offseason
+                                from core.news_generator import generate_front_office_news
+                                generate_front_office_news("fired", squadra.nome, "coach", coach.nome,
+                                                           f"The {squadra.nome} let {coach.nome} go at the end of "
+                                                           f"his contract after {squadra.vittorie}-{squadra.sconfitte}.",
+                                                           season=self.season_number)
+                            except Exception as exc:
+                                main_log.warning("coach firing news failed: %s", exc)
                         if coach.eta < 68:
                             if not hasattr(self, 'unemployed_coaches'):
                                 self.unemployed_coaches = []
@@ -2468,6 +2547,9 @@ class Tournament:
         self.fase_torneo = "OFFSEASON"
         main_log.info(f"\n\n{'='*25} OFF-SEASON START (pre-Season {self.season_number + 1}) {'='*25}")
         mark_season_end(self, ensure_front_office(self))
+        # Trade requests: the summer check, while playoff_teams still holds the season just played (once a season)
+        if trade_requests.summer_due(self):
+            trade_requests.end_of_season(self)
 
         # Reset trade cooldowns for all players at the start of the offseason
         for squadra in self.squadre:
@@ -2519,7 +2601,7 @@ class Tournament:
                     log_msg = f"RETIREMENT: {player.nome} ({player.eta} years old, {player.ovr} OVR) retires from {squadra.nome}."
                     all_logs.append(log_msg); main_log.info(log_msg)
                     self.offseason_log_data['retirements'].append({"name": player.nome, "team": squadra.nome, "age": player.eta, "ovr": player.ovr})
-                    self.giocatori_ritirati.append(player)
+                    add_retired_player(self, player)
                     retired_player_ids.add(player.nome.replace(" ", "-").lower())
                     self.podcast_logger.log_retirement({
                         "name": player.nome, "team": squadra.nome, "age": player.eta, "ovr": player.ovr
@@ -2556,7 +2638,7 @@ class Tournament:
                 log_msg = f"RETIREMENT (FA): {player.nome} ({player.eta} years old, {player.ovr} OVR) retires from Free Agency."
                 all_logs.append(log_msg); main_log.info(log_msg)
                 self.offseason_log_data['retirements'].append({"name": player.nome, "team": "Free Agency", "age": player.eta, "ovr": player.ovr})
-                self.giocatori_ritirati.append(player)
+                add_retired_player(self, player)
                 retired_player_ids.add(player.nome.replace(" ", "-").lower())
                 self.podcast_logger.log_retirement({
                     "name": player.nome, "team": "Free Agency", "age": player.eta, "ovr": player.ovr
@@ -2617,7 +2699,7 @@ class Tournament:
                 log_msg = f"RETIREMENT: {player.nome} ({player.eta} years old, {player.ovr} OVR) retires from {squadra_nome}."
                 all_logs.append(log_msg)
                 main_log.info(log_msg)
-                self.giocatori_ritirati.append(player)
+                add_retired_player(self, player)
                 player_id = player.nome.replace(" ", "-").lower()
                 retired_player_ids.add(player_id)
                 continue
@@ -2760,17 +2842,11 @@ class Tournament:
 
         print(f"📊 HOF: Evaluating {len(candidati)} available retired candidates...", flush=True)
             
-        # Primary threshold for stars / champions
-        soglia_primaria = 110
-        candidati_idonei = [c for c in candidati if c["score"] >= soglia_primaria]
-        
-        # Smart fallback: if no candidate passes the primary threshold (e.g. early years of the sim or a weak class),
-        # select the best veterans with score >= 45 (long careers or All-Stars/occasional title)
-        if not candidati_idonei:
-            candidati_idonei = [c for c in candidati if c["score"] >= 45]
-            candidati_idonei = sorted(candidati_idonei, key=lambda x: x["score"], reverse=True)[:3]
-        else:
-            candidati_idonei = sorted(candidati_idonei, key=lambda x: x["score"], reverse=True)[:6]
+        # The bar the History page shows (CONFIG.HISTORY.HOF_MIN_SCORE): a weak year elects nobody. The old bar (110,
+        # or the best three at 45+) put 74 of 97 inductees under it in a 25-season save.
+        hof_cfg = CONFIG.HISTORY
+        candidati_idonei = sorted((c for c in candidati if c["score"] >= hof_cfg.HOF_MIN_SCORE),
+                                  key=lambda x: x["score"], reverse=True)[:hof_cfg.HOF_MAX_CLASS]
 
         classe_di_quest_anno = candidati_idonei
 
@@ -2818,7 +2894,7 @@ class Tournament:
         giocatore.squadra = None
         giocatore.contract = None
         if giocatore.eta > 34 and giocatore.ovr < 76:
-            self.giocatori_ritirati.append(giocatore)
+            add_retired_player(self, giocatore)
             main_log.info(f"  -> {giocatore.nome} announces his retirement.")
         else:
             self.free_agents_pool.append(giocatore)
@@ -2903,7 +2979,7 @@ class Tournament:
                 self.offseason_log_data['ritiri_sviluppo'].append(log_msg)
                 main_log.info(log_msg)
                 
-                self.giocatori_ritirati.append(fa)
+                add_retired_player(self, fa)
                 if hasattr(self, 'podcast_logger'):
                     self.podcast_logger.log_retirement({
                         "name": fa.nome, "team": "Free Agency", "age": fa.eta, "ovr": fa.ovr
@@ -3020,6 +3096,18 @@ class Tournament:
     # The awards calculation methods are perfect, we will use them to populate the API data.
     # ... (methods _calcola_e_stampa_premi_stagionali, _calcola_all_nba_teams, etc.)
     # Include all the methods of your Tournament class here.
+    @staticmethod
+    def _clear_stale_offensive_options(squadra: 'Squadra') -> None:
+        """Clears a designated offensive option whose player is no longer on the roster (traded, released, retired)."""
+        tp = getattr(squadra, 'tactical_plan', None)
+        if not tp:
+            return
+        on_roster = {p.nome for p in squadra.roster} | {str(getattr(p, 'id', '')) for p in squadra.roster}
+        for field in ('offensive_first_option', 'offensive_second_option', 'offensive_third_option'):
+            name = getattr(tp, field, None)
+            if name and name not in on_roster:
+                setattr(tp, field, None)
+
     def check_and_adjust_user_rotations(self, squadra: 'Squadra') -> bool:
         """
         Handles the rotations and minutes for the team controlled by the user.
@@ -3097,13 +3185,15 @@ class Tournament:
 
         return changed
 
-    def imposta_rotazioni_stagione(self, force_user=False):
+    def imposta_rotazioni_stagione(self, force_user=False, squadre=None):
+        """### REWORK v17.0: Hierarchical rotation logic. ###
+        `squadre`: only these teams (default: the whole league). The team state still compares with the league."""
         gcounter = 0
-        """### REWORK v17.0: Hierarchical rotation logic. ###"""
         #main_log.info("\n--- Setting Team Rotations for the Season ---")
-        for squadra in self.squadre:
+        for squadra in (self.squadre if squadre is None else squadre):
             if squadra == self.squadra_giocatore and not force_user:
                 # Check and fix if necessary (e.g. injuries/returns), otherwise skip to preserve the user's choices
+                self._clear_stale_offensive_options(squadra)
                 self.check_and_adjust_user_rotations(squadra)
                 continue
 
@@ -3190,6 +3280,10 @@ class Tournament:
             if not rotazione_effettiva: continue
 
             # 3. Distribute the total 240 minutes based on the importance "shares"
+            year = getattr(self, 'anno_corrente', 2002)
+            minutes_cap = next(cap for last, cap in CONFIG.COACHING.MINUTES_CAP_BY_YEAR if year <= last)
+            if is_playoff_context:
+                minutes_cap += CONFIG.COACHING.PLAYOFF_MINUTES_EXTRA
             somma_punteggi = sum(punteggi_importanza[p.nome] for p in rotazione_effettiva)
             
             if somma_punteggi == 0: continue
@@ -3229,6 +3323,8 @@ class Tournament:
                         min_minuti = 4 if not is_playoff_context else 0
                         max_minuti = 10 if not is_playoff_context else 6
                 
+                max_minuti = min(max_minuti, minutes_cap)
+                min_minuti = min(min_minuti, max_minuti)
                 giocatore.minuti_target = max(min_minuti, min(max_minuti, minuti_assegnati))
                 minuti_distribuiti += giocatore.minuti_target
 
@@ -3238,12 +3334,20 @@ class Tournament:
                 for g in reversed(rotazione_effettiva):
                     if diff == 0: break
                     step = 1 if diff > 0 else -1
-                    if (step > 0 and g.minuti_target < 40) or (step < 0 and g.minuti_target > 4):
+                    if (step > 0 and g.minuti_target < minutes_cap) or (step < 0 and g.minuti_target > 4):
                         g.minuti_target += step
                         diff -= step
 
-            # Automatic designation of offensive options for CPU teams if not set manually
-            if getattr(squadra, 'tactical_plan', None) and not squadra.tactical_plan.offensive_first_option:
+            # Offensive options. A CPU team picks them again every time (they used to be set once in season 1 and
+            # kept the 2002 names for good: retired or traded players, and no later star ever became an option).
+            # The user's team keeps its manual choices: only names no longer on the roster are cleared.
+            tp = getattr(squadra, 'tactical_plan', None)
+            is_user_team = squadra == self.squadra_giocatore
+            if tp and not is_user_team:
+                tp.offensive_first_option = tp.offensive_second_option = tp.offensive_third_option = None
+            elif tp:
+                self._clear_stale_offensive_options(squadra)
+            if tp and not tp.offensive_first_option:
                 titolari = rotazione_effettiva[:5]
                 if titolari:
                     def score_opzione(p):
@@ -3665,16 +3769,10 @@ class Tournament:
         """
         ### REWORKED (v20.6) ###
         Sets the base target minutes for a SINGLE team.
-        This method temporarily "tricks" the main function `imposta_rotazioni_stagione`
-        into believing there is only one team in the league, forcing it to compute
-        the rotations only for that team.
+        It used to swap self.squadre for [squadra_singola]: the team state then compared the team with itself, so
+        Contender, Rebuilding and Mediocre never came up in season (and young players lost their minutes boost).
         """
-        squadre_originali = self.squadre
-        self.squadre = [squadra_singola]
-        try:
-            self.imposta_rotazioni_stagione(force_user=force_user)
-        finally:
-            self.squadre = squadre_originali
+        self.imposta_rotazioni_stagione(force_user=force_user, squadre=[squadra_singola])
     def _simula_e_registra_partita(self, s1: Squadra, s2: Squadra, is_playoff: bool = False, giorni_di_riposo: int = 1, round_name: str = "Regular Season", series_score: Optional[Tuple[int, int]] = None, enable_play_log: bool = False, giorni_di_riposo_s1: Optional[int] = None, giorni_di_riposo_s2: Optional[int] = None) -> Squadra:
         """
         UPDATED VERSION: Integrates the Seasonal Stamina logic before and after the game.
@@ -3690,8 +3788,10 @@ class Tournament:
             for giocatore in squadra.roster:
                 giocatore.is_resting_today = False # Reset the rest flag
                 if getattr(giocatore, 'giorni_infortunio_rimanenti', 0) > 0:
-                    if not getattr(self, '_daily_injury_ticked', False):
-                        giocatore.giorni_infortunio_rimanenti -= 1
+                    if is_playoff:   # no calendar days in the playoffs: a game is DAYS_PER_GAME days (simula_giornata
+                        # takes one day a day in the regular season)
+                        giocatore.giorni_infortunio_rimanenti = max(
+                            0, giocatore.giorni_infortunio_rimanenti - round(CONFIG.INJURIES.DAYS_PER_GAME))
                     if giocatore.giorni_infortunio_rimanenti <= 0:
                         giocatore.giorni_infortunio_rimanenti = 0
                         giocatore.infortunato = False
@@ -3725,7 +3825,7 @@ class Tournament:
                         # With a moderate probability (20% for superstars, 15% for minor stars, 5% for others),
                         # players will rest only sporadically when fatigued.
                         prob_riposo = 20.0 if giocatore.ovr > 85 else (15.0 if giocatore.ovr > 78 else 5.0)
-                        if random.uniform(0, 100) < prob_riposo:
+                        if random.uniform(0, 100) < prob_riposo * self._load_management_factor():
                             giocatore.is_resting_today = True
                             # main_log.info(f"LOAD MANAGEMENT: {giocatore.nome} ({squadra.nome}) rests to recover energy.")
                     
@@ -3739,8 +3839,8 @@ class Tournament:
                             
                             # If we are a strong team (>60% W) and play against a weak one (<35% W)
                             if win_pct_att > 0.60 and win_pct_opp < 0.35:
-                                # 25% chance of resting the star against a poor team
-                                if random.uniform(0, 100) < 25.0:
+                                # 25% chance of resting the star against a poor team (in today's league)
+                                if random.uniform(0, 100) < 25.0 * self._load_management_factor():
                                     giocatore.is_resting_today = True
 
         # --- FIX v20.5: Centralized and corrected pre-game reset logic ---
@@ -3775,11 +3875,11 @@ class Tournament:
         
         punteggio1, punteggio2 = partita.gioca()
         
-        # ... (all your score and win/loss recording logic remains unchanged) ...
-        s1.punti_fatti_stagione += punteggio1
-        s1.punti_subiti_stagione += punteggio2
-        s2.punti_fatti_stagione += punteggio2
-        s2.punti_subiti_stagione += punteggio1
+        if not is_playoff:   # season points are read per regular-season game (W + L); playoff points inflated PPG
+            s1.punti_fatti_stagione += punteggio1
+            s1.punti_subiti_stagione += punteggio2
+            s2.punti_fatti_stagione += punteggio2
+            s2.punti_subiti_stagione += punteggio1
         
         vincitore = s1 if punteggio1 > punteggio2 else s2
         perdente = s2 if punteggio1 > punteggio2 else s1
@@ -3794,7 +3894,7 @@ class Tournament:
         if vincitore.coach:
             vc = vincitore.coach
             vc.xp = getattr(vc, 'xp', 0) + xp_gain
-            vc.historical_wins = getattr(vc, 'historical_wins', 0) + 1
+            # historical_wins / historical_losses are counted once, in Partita.gioca (they were counted twice)
             
             # Check Level Up
             current_level = getattr(vc, 'level', 1)
@@ -3803,14 +3903,8 @@ class Tournament:
                 vc.xp -= xp_needed
                 vc.level = current_level + 1
                 vc.badge_points = getattr(vc, 'badge_points', 0) + 1
-                
-                # OVR development
-                if vc.ovr_totale < getattr(vc, 'potenziale', 95):
-                    if random.random() < 0.5:
-                        vc.ovr_offensivo = min(99, vc.ovr_offensivo + 1)
-                    else:
-                        vc.ovr_difensivo = min(99, vc.ovr_difensivo + 1)
-                        
+                # A level brings badge points only: ratings grow once a season (_gestisci_progressione_coach)
+
                 # Auto-upgrade badges for the CPU (for the user the user does it himself)
                 is_user_team = getattr(self, 'squadra_giocatore', None) and vincitore.nome == self.squadra_giocatore.nome
                 if not is_user_team:
@@ -3832,9 +3926,6 @@ class Tournament:
                         vc.badges[chosen_badge] = current_badge_level + 1
                         vc.badge_points = max(0, vc.badge_points - 1)
                         
-        if perdente.coach:
-            pc = perdente.coach
-            pc.historical_losses = getattr(pc, 'historical_losses', 0) + 1
 
         self._aggiorna_morale_e_intesa_post_partita(vincitore, perdente)
         
@@ -3882,7 +3973,8 @@ class Tournament:
         if NEWS_ENABLED:
             try:
                 rivalry_context = self.rivalry_tracker.get_matchup_context(vincitore.nome, perdente.nome)
-                if rivalry_context.get('has_rivalry') and rivalry_context.get('intensity', 0) >= 30:
+                if (not is_playoff and rivalry_context.get('has_rivalry')   # the playoffs have their series stories
+                        and rivalry_context.get('intensity', 0) >= CONFIG.NEWS.RIVALRY_NEWS_MIN_INTENSITY):
                     generate_rivalry_postgame_news(
                         vincitore.nome, perdente.nome, 
                         winner_score, loser_score,
@@ -4144,7 +4236,13 @@ class Tournament:
             except Exception:
                 pass  # news never break the simulation
 
-        # 1. Global daily injury ticking for the whole league (only once per day)
+        # 0b. Trade requests: the weekly frustration check (core/front_office/trade_requests.py), regular season only
+        if (day_index > 0 and day_index % CONFIG.TRADE_REQUESTS.TICK_DAYS == 0 and self.fase_torneo == "SEASON"
+                and trade_requests.tick_due(self, day_index)):
+            trade_requests.weekly_tick(self)
+
+        # 1. Injuries are calendar days: every roster heals one day a day (playoff games take theirs in
+        # _simula_e_registra_partita). Before, a day also came off before each game: injuries lasted a third.
         if not getattr(day, '_injuries_ticked', False):
             for s in self.squadre:
                 for g in s.roster:
@@ -4265,11 +4363,12 @@ class Tournament:
 
         if not hasattr(self, '_last_played_day'):
             self._last_played_day = {}
-        if not hasattr(self, 'team_map'):
-            self.team_map = {s.nome: s for s in self.squadre}
+        self.team_map = {s.nome: s for s in self.squadre}   # live teams by name (see simula_giornata)
 
-        home_team = getattr(target_game, 'home_team_obj', None) or self.team_map.get(target_game.home_team)
-        away_team = getattr(target_game, 'away_team_obj', None) or self.team_map.get(target_game.away_team)
+        home_team = self.team_map.get(target_game.home_team)
+        away_team = self.team_map.get(target_game.away_team)
+        if not (home_team and away_team):
+            main_log.error(f"Calendar game {game_id} has a team that is not in the league: not played")
 
         vincitore = None
         partita_obj = None
@@ -4356,15 +4455,20 @@ class Tournament:
 
         if not hasattr(self, '_last_played_day'):
             self._last_played_day = {}
-        if not hasattr(self, 'team_map'):
-            self.team_map = {s.nome: s for s in self.squadre}
+        # Resolve the teams of today's games by name from the live league: a cached object (team_map,
+        # home_team_obj) left over from an older copy recorded the game on a team outside the league
+        # (a 25-season save had two teams at 81 games).
+        self.team_map = {s.nome: s for s in self.squadre}
 
         for game in day.games:
             if game.played:
                 continue
 
-            home_team = getattr(game, 'home_team_obj', None) or self.team_map.get(game.home_team)
-            away_team = getattr(game, 'away_team_obj', None) or self.team_map.get(game.away_team)
+            home_team = self.team_map.get(game.home_team)
+            away_team = self.team_map.get(game.away_team)
+            if not (home_team and away_team):
+                main_log.error(f"Calendar game {game.game_id} ({game.away_team} @ {game.home_team}) has a team "
+                               f"that is not in the league: not played")
 
             if home_team and away_team:
                 last_h = self._last_played_day.get(home_team.nome, -2)
@@ -4452,9 +4556,10 @@ class Tournament:
         for fa in self.free_agents_pool:
             fa.is_rookie = False
         
+        scales = league_season_scales(self)   # PVS on the reference era's level
         for squadra in self.squadre:
             for player in squadra.roster:
-                player.calcola_pvs()
+                player.calcola_pvs(scales)
         
         self.podcast_logger.log_standings(
             sorted([s for s in self.squadre if s.conference == 'East'], key=lambda x: x.vittorie, reverse=True),
@@ -4673,33 +4778,8 @@ class Tournament:
         if not tutti_giocatori: self.regular_season_mvp = None; return
 
         # --- VOTER FATIGUE RECOVERY & HISTORY CHECK ---
-        last_season_mvp = None
-        two_seasons_ago_mvp = None
-        career_mvp_counts = {}
-
-        try:
-            history_file = get_historical_file_path("league_history.json")
-            if os.path.exists(history_file):
-                with open(history_file, 'r', encoding='utf-8') as f:
-                    storia = json.load(f)
-                for s in storia:
-                    st_num = s.get("stagione")
-                    p_winner = s.get("premi", {}).get("mvp")
-                    if p_winner and p_winner != "N/A":
-                        career_mvp_counts[p_winner] = career_mvp_counts.get(p_winner, 0) + 1
-                        if st_num == self.season_number - 1:
-                            last_season_mvp = p_winner
-                        elif st_num == self.season_number - 2:
-                            two_seasons_ago_mvp = p_winner
-        except Exception as e:
-            main_log.warning(f"Error reading league_history for MVP voter fatigue: {e}")
-
-        # Integrate the count with p.premi
-        for p in tutti_giocatori:
-            premi = getattr(p, 'premi', []) or []
-            if isinstance(premi, list):
-                mvp_in_premi = premi.count("MVP")
-                career_mvp_counts[p.nome] = max(career_mvp_counts.get(p.nome, 0), mvp_in_premi)
+        last_season_mvp, two_seasons_ago_mvp, career_mvp_counts = self._award_winner_history(
+            "mvp", "MVP", tutti_giocatori)
 
         def mvp_metric(p: Giocatore) -> float:
             st = p.season_stats
@@ -4741,7 +4821,11 @@ class Tournament:
         Year 1: Differential between OVR-based expected performance and actual production.
         Year 2+: Growth in (PPG + RPG + APG) from previous season.
         """
-        tutti_giocatori = [p for s in self.squadre for p in s.roster if p.season_stats.partite_giocate >= 60]
+        cfg = CONFIG.AWARDS
+        mvp = getattr(self, 'regular_season_mvp', None)
+        tutti_giocatori = [p for s in self.squadre for p in s.roster if p.season_stats.partite_giocate >= 60
+                           and p is not mvp and not getattr(p, 'is_rookie', False)
+                           and p.season_stats.minuti_giocati / p.season_stats.partite_giocate >= cfg.MIP_MIN_MPG]
         if not tutti_giocatori: return None
         
         # Load career data for Year 2+ growth calculation
@@ -4773,35 +4857,89 @@ class Tournament:
                         prev_season = s
                         break
                 
-                if prev_season:
+                if prev_season and (prev_season.get('partite_giocate_rs') or prev_season.get('gp') or 0) >= cfg.MIP_PREV_MIN_GP:
                     s_rs = prev_season.get('stats_rs', {})
                     prev_total = s_rs.get('ppg', 0) + s_rs.get('rpg', 0) + s_rs.get('apg', 0)
                     # Significant growth score
                     return current_total - prev_total
                 else:
-                    # Fallback if no history (e.g. rookie who skipped Year 1 record)
-                    return (current_total - ((p.ovr - 50) * 0.65)) * 0.5 
+                    return float('-inf')   # no real season to improve on (short or missing year)
 
-        return max(tutti_giocatori, key=get_mip_score, default=None)
+        best = max(tutti_giocatori, key=get_mip_score, default=None)
+        return best if best is not None and get_mip_score(best) > float('-inf') else None
     
+    def _award_winner_history(self, history_key: str, award_label: str, players) -> tuple:
+        """Last season's and two seasons ago's winner of an award, and career counts by name, from league_history.json
+        (`premi[history_key]`) and the players' own awards list (`award_label`). For voter fatigue."""
+        last_winner = two_ago_winner = None
+        career_counts = {}
+        try:
+            history_file = get_historical_file_path("league_history.json")
+            if os.path.exists(history_file):
+                with open(history_file, 'r', encoding='utf-8') as f:
+                    storia = json.load(f)
+                for s in storia:
+                    st_num = s.get("stagione")
+                    winner = (s.get("premi") or {}).get(history_key)
+                    if winner and winner != "N/A":
+                        career_counts[winner] = career_counts.get(winner, 0) + 1
+                        if st_num == self.season_number - 1:
+                            last_winner = winner
+                        elif st_num == self.season_number - 2:
+                            two_ago_winner = winner
+        except Exception as e:
+            main_log.warning(f"Error reading league_history for {award_label} voter fatigue: {e}")
+        for p in players:
+            premi = getattr(p, 'premi', []) or []
+            if isinstance(premi, list):
+                career_counts[p.nome] = max(career_counts.get(p.nome, 0), premi.count(award_label))
+        return last_winner, two_ago_winner, career_counts
+
     def _calcola_defensive_player_of_the_year(self):
-        """Calculates DPOY based on stocks, defensive rebounds, defensive ratings, and team win %."""
+        """DPOY: stocks, defensive rebounds and defensive ratings, times the team's record and its defense (points
+        allowed against the league), with voter fatigue like the MVP and a small discount for the season's MVP. It
+        had no fatigue, a record worth +-4% and rebounds worth so much that one center won 14 in a row on a .500
+        team (CONFIG.AWARDS.DPOY_*)."""
+        cfg = CONFIG.AWARDS
         tutti_giocatori = [p for s in self.squadre for p in s.roster if p.season_stats.partite_giocate >= 60]
         if not tutti_giocatori: self.defensive_player_of_the_year = None; return
-        
+
+        last_dpoy, two_ago_dpoy, career_dpoy = self._award_winner_history("dpoy", "DPOY", tutti_giocatori)
+        season_mvp = getattr(self, 'regular_season_mvp', None)   # set just before (_calcola_mvp_regular_season)
+
+        def allowed_per_game(s):
+            gp = (s.vittorie + s.sconfitte) or 0
+            return s.punti_subiti_stagione / gp if gp and s.punti_subiti_stagione else None
+        allowed = [a for a in (allowed_per_game(s) for s in self.squadre) if a]
+        league_allowed = sum(allowed) / len(allowed) if allowed else None
+
         def dpoy_metric(p: Giocatore) -> float:
             st = p.season_stats
             pg = st.partite_giocate or 1
             spg = st.steals / pg
             bpg = st.blocks / pg
-            drpg = (st.rimbalzi * 0.7) / pg
+            drpg = max(0, st.rimbalzi - (getattr(st, 'oreb', 0) or 0)) / pg
             def_iq = getattr(p.abilita, 'defensive_iq_rating', 70)
             int_def = getattr(p.abilita, 'interior_defense_rating', 70)
             per_def = getattr(p.abilita, 'perimeter_defense_rating', 70)
             rating_bonus = (def_iq * 0.05) + (max(int_def, per_def) * 0.05)
+            raw = (spg * cfg.DPOY_STEAL_WEIGHT) + (bpg * cfg.DPOY_BLOCK_WEIGHT) + (drpg * cfg.DPOY_DREB_WEIGHT) + rating_bonus
+
             tot_g = (p.squadra.vittorie + p.squadra.sconfitte) or 1
             win_pct = p.squadra.vittorie / tot_g
-            return ((spg * 2.2) + (bpg * 2.5) + (drpg * 0.5) + rating_bonus) * (0.85 + win_pct * 0.3)
+            team_mult = cfg.DPOY_WIN_BASE + win_pct * cfg.DPOY_WIN_WEIGHT
+            team_allowed = allowed_per_game(p.squadra)
+            if league_allowed and team_allowed:
+                team_mult *= 1.0 + (league_allowed / team_allowed - 1.0) * cfg.DPOY_TEAM_DEFENSE_WEIGHT
+
+            fatigue = 1.0
+            if p.nome == last_dpoy:
+                fatigue -= cfg.DPOY_FATIGUE_REPEAT
+                if p.nome == two_ago_dpoy:
+                    fatigue -= cfg.DPOY_FATIGUE_THREE_PEAT
+            fatigue -= min(cfg.DPOY_FATIGUE_CAREER_MAX, career_dpoy.get(p.nome, 0) * cfg.DPOY_FATIGUE_CAREER_EACH)
+            mvp_share = cfg.DPOY_MVP_SHARE if p is season_mvp else 1.0
+            return raw * team_mult * max(cfg.DPOY_FATIGUE_FLOOR, fatigue) * mvp_share
 
         self.defensive_player_of_the_year = max(tutti_giocatori, key=dpoy_metric)
     def _calcola_mvp_finali(self, campione, finalista):
@@ -4854,6 +4992,24 @@ class Tournament:
                 # Key: "R{round}-{original_team}", Value: current_owner
                 self.pick_ownership[year][f"R1-{squadra.nome}"] = squadra.nome
                 self.pick_ownership[year][f"R2-{squadra.nome}"] = squadra.nome
+
+    def _load_management_factor(self) -> float:
+        """Share of today's rest days a star takes in this league year (CONFIG.SIM.LOAD_MANAGEMENT_*): stars of the
+        early 2000s rarely sat healthy, load management grew in the 2010s. It was the same in every era."""
+        cfg = CONFIG.SIM
+        start, full = cfg.LOAD_MANAGEMENT_RAMP_YEARS
+        ratio = min(1.0, max(0.0, (getattr(self, 'anno_corrente', full) - start) / max(1, full - start)))
+        return cfg.LOAD_MANAGEMENT_EARLY_FACTOR + (1.0 - cfg.LOAD_MANAGEMENT_EARLY_FACTOR) * ratio
+
+    def _fade_rivalries(self):
+        """Season rollover of the rivalries: intensity decays (RivalryTracker.apply_season_decay). It was never
+        called, so every pair that met in the playoffs climbed for good: ~115 'heated' rivalries and as many
+        rivalry stories a season after 20 years."""
+        tracker = getattr(self, 'rivalry_tracker', None)
+        if tracker is None:
+            return
+        tracker.current_season = self.season_number   # the tracker is rebuilt on load: keep it on the league's count
+        tracker.advance_season()
 
     def _age_draft_picks(self):
         """Moves the draft pick ownership forward by one year."""
@@ -5205,6 +5361,8 @@ def caricamento_squadre() -> Tuple[List[Squadra], List[Giocatore]]:
                     abilita=abilita,
                     tendenze=tendenze
                 )
+                # Read once by tag_season1_rookies (then removed): contracts set anni_nella_squadra again
+                giocatore._start_years_on_team = player_data.get('years_on_team') or 0
                 squadra.roster.append(giocatore)
             
             lista_squadre.append(squadra)
@@ -5638,6 +5796,7 @@ def run_full_season_cycle(torneo: 'Tournament'):
     # 4. New Season Preparation
     main_log.info(f"--- AUTO-SIM: Preparing Season {torneo.season_number + 1}... ---")
     torneo._age_draft_picks()
+    torneo._fade_rivalries()
     torneo.season_number += 1
     torneo.box_scores = {}  # as the server's new-season step does: last season's games must not count in the next one
     torneo._gestisci_crescita_economica() # type: ignore
@@ -5705,6 +5864,7 @@ def run_full_season_cycle(torneo: 'Tournament'):
     
     for squadra in torneo.squadre:
         squadra.reset_record_stagionale()
+    refresh_untouchables(torneo)   # draft-night flags and last season's cores must not pile up
 
     torneo.genera_calendario()
     torneo.imposta_rotazioni_stagione()
@@ -5880,24 +6040,9 @@ def setup_simulation(league_settings: Optional[Dict[str, Any]] = None,
     # No expansion draft needed - all 30 NBA teams are pre-populated
     
     # === SEASON 1 ROOKIE TAGGING ===
-    # The 2025 Draft rookies are already on the rosters from the DB.
-    # We load the names from DRAFT_2025.json and tag them as is_rookie = True.
     try:
-        # Modern era only in practice (2002 rosters hold none of these names); no file = nothing tagged
-        draft_2025_path = draft_class_file(torneo, 2025)
-        if draft_2025_path:
-            with open(draft_2025_path, 'r', encoding='utf-8') as f:
-                draft_2025_data = json.load(f)
-            rookie_names = {entry["nome"] for entry in draft_2025_data if "nome" in entry}
-            tagged_count = 0
-            for squadra in torneo.squadre:
-                for player in squadra.roster:
-                    if player.nome in rookie_names:
-                        player.is_rookie = True
-                        tagged_count += 1
-            main_log.info(f"Season 1 Rookies: {tagged_count} players tagged as rookies from the 2025 Draft.")
-        else:
-            main_log.warning("DRAFT_2025.json not found. No rookies tagged for Season 1.")
+        tagged_count, source = tag_season1_rookies(torneo)
+        main_log.info(f"Season 1 Rookies: {tagged_count} players tagged as rookies ({source}).")
     except Exception as e:
         main_log.error(f"Error tagging the Season 1 rookies: {e}")
     
@@ -5964,6 +6109,7 @@ def _get_player_details(player: Giocatore) -> dict:
         "anni_nella_squadra": getattr(player, 'anni_nella_squadra', 1),
         "stamina_stagionale": getattr(player, 'stamina_stagionale', 100.0),
         "morale": getattr(player, 'morale', 85),
+        "trade_request": bool(getattr(player, 'trade_request', False)),   # asked to be traded
         "abilita": abilita_dict,
         "tendenze": tendenze_dict,
         "valutazioni_posizionali": getattr(player, 'valutazioni_posizionali', {}),

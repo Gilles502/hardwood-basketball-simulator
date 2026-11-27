@@ -4,7 +4,8 @@ A team joins only for a wish of its own. The rule, for a team whose salary check
 for what it sends): it sends one more contract (its least valuable tradeable player outside the deal) to a team
 with real room, which sends nothing back; when that team's wish asks for picks (ABSORB_SALARY, WANT_PICKS) the
 stuck team adds its cheapest pick that fulfils it. The extra team is taken only when the stuck team and the
-extra team both pass their salary checks and the extra team's wish is fulfilled.
+extra team both pass their salary checks and the extra team's wish is fulfilled. The pick follows the tax dump's
+price: a first-rounder only for a high long contract (era.is_high_contract), never a projected top-5 pick.
 """
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 
@@ -32,9 +33,19 @@ def _dump_candidates(finder: 'TradeFinder', team: 'Squadra', deal: Deal) -> list
 
 
 def _payment_picks(finder: 'TradeFinder', team: 'Squadra', deal: Deal) -> List[str]:
-    """The team's picks outside the deal ("N:R1-X", N relative), cheapest first."""
+    """The team's picks outside the deal ("N:R1-X", N relative), cheapest first, never a projected top-5."""
     moving = {asset for _src, _dst, asset in deal.moves if isinstance(asset, str)}
-    return [f"{year}:{key}" for year, key in finder._collect_team_picks(team) if f"{year}:{key}" not in moving]
+    return [f"{year}:{key}" for year, key in finder._collect_team_picks(team)
+            if f"{year}:{key}" not in moving and not finder._is_top5_pick(f"{year}:{key}")]
+
+
+def _price_for(finder: 'TradeFinder', player, picks: List[str]) -> List[str]:
+    """The picks that may pay for taking `player`'s contract: seconds, firsts only for a high long contract (a
+    25-season save had a top-3 pick paid to drop a near-minimum contract)."""
+    contract = player.contract
+    if finder.era().is_high_contract(float(contract.salario_annuale), int(contract.anni_rimanenti)):
+        return picks
+    return [k for k in picks if ":R1-" not in k]
 
 
 def _absorb(finder: 'TradeFinder', deal: Deal, stuck: 'Squadra') -> Optional[Tuple[Deal, 'Squadra', Wish]]:
@@ -50,7 +61,7 @@ def _absorb(finder: 'TradeFinder', deal: Deal, stuck: 'Squadra') -> Optional[Tup
             if not (common.salary_ok(stuck, trial) and common.salary_ok(team, trial)):
                 continue
             for wish in team_wishes:
-                for pick in [None] + (picks if wish.kind in PAID_KINDS else []):
+                for pick in [None] + (_price_for(finder, player, picks) if wish.kind in PAID_KINDS else []):
                     paid = trial if pick is None else Deal(trial.teams, trial.moves + [(stuck.nome, team.nome, pick)],
                                                            reason=trial.reason)
                     if common.wish_fulfilled(finder, team, wish, paid.receives(team.nome), paid.gives(team.nome)):

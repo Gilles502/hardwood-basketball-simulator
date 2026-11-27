@@ -30,7 +30,7 @@ class TestShippedData(unittest.TestCase):
 
 class TestVersion(unittest.TestCase):
     def test_version_is_semver(self):
-        self.assertRegex(version.VERSION, r"^\d+\.\d+\.\d+$")
+        self.assertRegex(version.VERSION, r"^\d+\.\d+\.\d+(-dev)?$")  # dev builds carry -dev
         self.assertTrue(version.label().startswith(f"v{version.VERSION}"))
 
     def test_frontend_package_matches(self):

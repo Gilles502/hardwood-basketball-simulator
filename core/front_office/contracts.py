@@ -7,7 +7,8 @@ import random
 from typing import NamedTuple, Optional
 
 from core.config import CONFIG
-from core.front_office.wishes import WishContext, wants_out, young_future
+from core.front_office.trade_requests import can_request, fed_up
+from core.front_office.wishes import FED_UP, WishContext, wants_out, young_future
 
 ASKED_OUT = "asked out"
 HOPELESS = "hopeless team"
@@ -30,11 +31,14 @@ def _hopeless(team, ctx: WishContext) -> bool:
 
 
 def walk_reason(player, team, ctx: WishContext) -> str:
-    """Why the player will not re-sign with his team ("asked out" / "hopeless team"), or "" when he would listen."""
+    """Why the player will not re-sign with his team ("asked out" / "hopeless team" / "fed up with the team"), or ""
+    when he would listen."""
     if wants_out(player, team, ctx):
         return ASKED_OUT
     if int(player.ovr) >= ctx.era.star and player.eta >= CONFIG.CONTRACTS.WALK_MIN_AGE and _hopeless(team, ctx):
         return HOPELESS
+    if fed_up(player) and not can_request(player, ctx.era):   # too small to ask out: he leaves in free agency
+        return FED_UP
     return ""
 
 

@@ -67,11 +67,11 @@ class BuildWishesTests(unittest.TestCase):
 
     def test_star_wants_out(self):
         star = make_player("Star", ovr=86, age=31, role="SF")
-        star.morale = 30
+        star.trade_request = True   # an open request (core/front_office/trade_requests.py)
         t = team_of(roster_with(star))
         w = [x for x in build_wishes(t, ctx_of("REBUILDER")) if x.kind == "STAR_WANTS_OUT"]
         self.assertEqual([x.player for x in w], ["Star"])
-        star.morale = 90
+        star.trade_request = False
         self.assertNotIn("STAR_WANTS_OUT", kinds(build_wishes(t, ctx_of("REBUILDER"))))
 
     def test_sell_veterans(self):
@@ -205,7 +205,7 @@ class BuildWishesTests(unittest.TestCase):
         t = team_of(roster_with(sad))
         self.assertEqual([x.player for x in build_wishes(t, ctx_of()) if x.kind == "UNHAPPY_PLAYER"], ["Sad"])
         star = make_player("Star", ovr=86, age=31, role="PG")
-        star.morale = 30
+        star.morale, star.trade_request = 30, True
         w = build_wishes(team_of(roster_with(star)), ctx_of("REBUILDER"))
         self.assertIn("STAR_WANTS_OUT", kinds(w))
         self.assertNotIn("UNHAPPY_PLAYER", kinds(w))
@@ -481,54 +481,15 @@ class HardNoTests(unittest.TestCase):
 
 
 class WantsOutTests(unittest.TestCase):
-    def _old_logic(self, p, team, plan, win_rate):
-        """trade_finder.get_tradeable_players at a 2002 start, copied verbatim (85/88, 84/87)."""
-        if p.ovr < 85:
-            return False
-        if p.morale >= 70 or (p.morale >= 60 and p.anni_nella_squadra >= 4):
-            return False
-        young = [q for q in team.roster if q.eta < 24 and q.potenziale >= 84]
-        future = len(young) >= 2 or any(q.eta < 23 and q.potenziale >= 87 for q in team.roster)
-        if p.ovr >= 88 and win_rate < 0.38 and p.eta >= 25:
-            thr = 55 - p.anni_nella_squadra * 2
-            if future and p.eta < 30:
-                thr = 35 - p.anni_nella_squadra * 2
-            return p.morale < thr
-        elif plan == "REBUILDER" and p.eta >= 30:
-            thr = 60
-            if future and p.eta <= 31:
-                thr = 45
-            return p.morale < thr
-        return False
-
-    def test_matches_old_code_over_a_grid(self):
-        checked = 0
-        for ovr in (84, 85, 87, 88, 92):
-            for age in (24, 25, 29, 30, 31, 33):
-                for morale in (20, 34, 40, 50, 58, 62, 65, 75):
-                    for tenure in (0, 2, 5):
-                        for plan in ("REBUILDER", "CONTENDER"):
-                            for wp, games in ((0.30, 60), (0.30, 10), (0.55, 60)):
-                                for kids in (0, 1, 2):
-                                    star = make_player("S", ovr=ovr, age=age, role="SF")
-                                    star.morale, star.anni_nella_squadra = morale, tenure
-                                    prospects = [make_player(f"k{i}", ovr=60, age=21, pot=86) for i in range(kids)]
-                                    t = team_of([star] + prospects)
-                                    ctx = ctx_of(plan, win_pct=wp, games=games)
-                                    rate = wp if games > 20 else 0.5
-                                    self.assertEqual(wants_out(star, t, ctx), self._old_logic(star, t, plan, rate),
-                                                     (ovr, age, morale, tenure, plan, wp, games, kids))
-                                    checked += 1
-        self.assertGreater(checked, 1000)
-
-    def test_follows_era_lines(self):
-        high = EraLines(year=2003, cap=40.0, tax=49.0, minimum=0.5, mle=5.0, no_cap=False, star=90, core=84,
-                        starter=78, rotation=72, bench=64, salary_pcts={0.9: 15.0, 0.6: 5.0}, pick_scale=1.0)
-        star = make_player("S", ovr=88, age=31, role="SF")
-        star.morale = 30
-        t = team_of([star])
-        self.assertTrue(wants_out(star, t, ctx_of("REBUILDER")))
-        self.assertFalse(wants_out(star, t, ctx_of("REBUILDER", era=high)))   # 88 is no star on that scale
+    def test_wants_out_is_the_request(self):
+        star = make_player("Star", ovr=86, age=31, role="SF")
+        star.morale = 10
+        t = team_of(roster_with(star))
+        self.assertFalse(wants_out(star, t, ctx_of("REBUILDER", win_pct=0.2)))   # miserable, but never asked
+        star.morale, star.trade_request = 90, True
+        self.assertTrue(wants_out(star, t, ctx_of("CONTENDER", win_pct=0.7)))
+        w = [x for x in build_wishes(t, ctx_of("CONTENDER")) if x.kind == "STAR_WANTS_OUT"]
+        self.assertEqual([x.player for x in w], ["Star"])
 
 
 class TextTablesTests(unittest.TestCase):

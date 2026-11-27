@@ -1,4 +1,5 @@
 """The season's two CPU trade windows (main.Tournament) run on wishes: trades/windows.run_trade_window."""
+import types
 import unittest
 from types import SimpleNamespace
 from unittest import mock
@@ -118,6 +119,36 @@ class RemovedEnginesTests(unittest.TestCase):
                 "era", "_bench", "_get_team_positional_needs", "execute_trade", "execute_3_team_trade",
                 "execute_4_team_trade")
         self.assertEqual([n for n in kept if not hasattr(TradeFinder, n)], [])
+
+
+
+class UntouchableRefreshTests(unittest.TestCase):
+    """Stale untouchable flags (draft night, an old core) are recomputed before every window: in one long session
+    they used to pile up until 82% of the league could not be traded."""
+
+    def setUp(self):
+        from core.models import Squadra
+        self.t, self.teams = fw.league({"A": fw.SF_RICH, "B": fw.C_RICH}, {"A": "CONTENDER", "B": "PLAYOFF"})
+        for team in self.teams.values():   # the real rule on the fixture's team doubles
+            team.designa_intoccabili = types.MethodType(Squadra.designa_intoccabili, team)
+            team._limit_veteran_untouchables = types.MethodType(Squadra._limit_veteran_untouchables, team)
+
+    def test_window_clears_a_stale_flag(self):
+        t, teams = self.t, self.teams
+        bench = min(teams["B"].roster, key=lambda p: p.ovr)
+        bench.eta = 33
+        bench.is_untouchable = True
+        with mock.patch.object(windows.engines, "engines_for", return_value=[]):
+            windows.run_trade_window(t, "deadline")
+        self.assertFalse(bench.is_untouchable)
+
+    def test_refresh_keeps_the_franchise_player(self):
+        t, teams = self.t, self.teams
+        star = max(teams["A"].roster, key=lambda p: p.ovr)
+        star.valutazione = 88
+        star.is_untouchable = False
+        windows.refresh_untouchables(t)
+        self.assertTrue(star.is_untouchable)
 
 
 if __name__ == "__main__":

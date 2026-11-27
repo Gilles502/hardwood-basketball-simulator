@@ -187,6 +187,24 @@ def _seeds(text: str):
     return out
 
 
+def _seed_frustration(torneo) -> list:
+    """Fixtures predate trade requests (frustration 0): a player stuck today gets a full meter, as if the whole
+    season had gone like this. Returns the requests opened."""
+    from core.config import CONFIG
+    from core.front_office import trade_requests as tr
+    era = tr.era_lines_for(torneo)
+    opened = []
+    for team in torneo.squadre:
+        games = team.vittorie + team.sconfitte
+        win_pct = team.vittorie / games if games else 0.5
+        for p in team.roster:
+            if tr.is_stuck(p, team, era=era, plan=tr._plan(torneo, team), win_pct=win_pct, games=games):
+                p.frustration = CONFIG.TRADE_REQUESTS.REQUEST_AT
+                if tr._settle(p, era, "lab") == tr.REQUESTED:
+                    opened.append(f"{p.nome} ({int(p.ovr)}, {team.nome} {team.vittorie}-{team.sconfitte})")
+    return opened
+
+
 def _inner_run(args):
     import main as sim  # noqa: F401  (registers the game's modules)
     from trades.trade_finder import TradeFinder
@@ -236,6 +254,9 @@ def _inner_run(args):
         for _team in torneo.squadre:   # frozen flags predate the veteran limit: apply it
             _team._limit_veteran_untouchables(torneo)
         random.seed(seed)
+        if args.seed_frustration:
+            opened = _seed_frustration(torneo)
+            print(f"\n  trade requests seeded: {len(opened)}: {', '.join(opened)}")
         captured.clear()
         t0 = time.time()
         run_trade_window(torneo, window)
@@ -292,6 +313,8 @@ def main():
             p.add_argument("--seeds", default="1-5")
             p.add_argument("--with-draft", action="store_true", help="predraft: also run the draft (draft-night trades)")
             p.add_argument("--quiet", action="store_true")
+            p.add_argument("--seed-frustration", action="store_true",
+                           help="give every player stuck today a full frustration meter (trade requests)")
             p.add_argument("--refusals", action="store_true", help="count why deals were not closed (top reasons)")
     args = ap.parse_args(argv)
 

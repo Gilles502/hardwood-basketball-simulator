@@ -8,13 +8,14 @@ from core.save_manager import get_active_save_name, get_save_path, get_historica
 from core.models import Giocatore, Squadra
 from trades.trade_validator import TradeValidator
 from trades import execution
-from trades.execution import Deal
+from trades.execution import Deal, stored_pick_protection
 from trades.motive import TradeMotive
 from core.front_office import trade_brain
 from core.front_office.era_lines import EraLines, era_lines_for
 from core.front_office.state import user_team_name
 from core.front_office.wishes import Wish, WishContext, build_wishes, fulfils, plan_hard_no
-from core.front_office.wishes import wants_out as wants_out_of
+from core.front_office.wishes import asked_out, demands_out
+from core.front_office import trade_requests
 
 if TYPE_CHECKING:
     from main import Tournament
@@ -40,13 +41,30 @@ def _root_trade_log_path() -> str:
     """The league-wide trade log, in the user root (the project folder in dev)."""
     return paths.user_path("trades_history.txt")
 
+
+
+def team_form(torneo, team) -> dict:
+    """A team's season so far for the trade analytics: points for/against per game and ratings per 100
+    estimated possessions (as league_history does). Teams that have not played show 0s."""
+    gp = team.vittorie + team.sconfitte
+    if gp <= 0:
+        return {"ppg": 0.0, "opp_ppg": 0.0, "off_rtg": 0.0, "def_rtg": 0.0, "net_rtg": 0.0}
+    pts_for = getattr(team, 'punti_fatti_stagione', 0) or 0
+    pts_against = getattr(team, 'punti_subiti_stagione', 0) or 0
+    pace = 100.0 * (torneo.get_era_pace_factor() if hasattr(torneo, 'get_era_pace_factor') else 0.95)
+    off_rtg = round(pts_for / (gp * pace) * 100, 1)
+    def_rtg = round(pts_against / (gp * pace) * 100, 1)
+    return {"ppg": round(pts_for / gp, 1), "opp_ppg": round(pts_against / gp, 1), "off_rtg": off_rtg,
+            "def_rtg": def_rtg, "net_rtg": round(off_rtg - def_rtg, 1)}
 
 class TradeFinder:
     """
     Advanced Trade System v4.0 - Needs & Rules Based
     """
     
-    def __init__(self, torneo: 'Tournament', squadre: List['Squadra'], squadra_giocatore: Optional['Squadra'] = None):
+    def __init__(self, torneo: 'Tournament', squadre: List['Squadra'], squadra_giocatore: Optional['Squadra'] = None,
+                 manual: bool = False):
+        """`manual`: this finder answers a trade the user is building by hand (CONFIG.TRADES.MANUAL_*)."""
         self.torneo = torneo
         self.squadre = squadre
         user_role = getattr(torneo, 'user_role', 'gm_coach')
@@ -55,6 +73,7 @@ class TradeFinder:
             self.squadra_giocatore = None
         else:
             self.squadra_giocatore = squadra_giocatore
+        self.manual = manual and self.squadra_giocatore is not None
         self.logscambi = []
         self.window = "user"          # "deadline" | "predraft" | "draft" | "user" (a user trade, any day)
         self._league_lines = None
@@ -482,6 +501,9 @@ class TradeFinder:
             if isinstance(asset, Giocatore) and asset.contract.anni_rimanenti >= 3 and asset.contract.salario_annuale > era.money(15.0):
                 if asset.ovr < era.star: # The TRUE STARS are worth their max contract, they are not a burden
                     base_value *= 0.80 # Moderated from 0.60
+        if (isinstance(asset, Giocatore) and getattr(asset, 'trade_request', False)
+                and any(p is asset for p in (getattr(team, 'roster', None) or []))):
+            base_value *= trade_requests.own_value_share(asset)   # he asked out: his team has lost its leverage
         return base_value * self._gm_value_multiplier(asset, team)
 
     def _gm_value_multiplier(self, asset: Any, team: 'Squadra') -> float:
@@ -536,6 +558,12 @@ class TradeFinder:
         except Exception:
             return None
 
+    @staticmethod
+    def _pick_regression(year: int) -> float:
+        """How far a first `year` drafts out has moved from its team's record to an average pick: 0 next draft, 1 at
+        CONFIG.TRADES.MANUAL_PICK_REGRESSION_YEARS."""
+        return min(1.0, max(0, year - 1) / max(1, CONFIG.TRADES.MANUAL_PICK_REGRESSION_YEARS - 1))
+
     def get_pick_value(self, pick_key: str, year: int = 1, protection: str = "Unprotected",
                        on_curve: bool = False) -> float:
         """A pick's worth. Raw (default): the old 40-150 first-round scale the rule lines are written in.
@@ -585,8 +613,11 @@ class TradeFinder:
                             base = 50.0  # Projected Late 1st
                         else:
                             base = 55.0  # Middle of the pack
+                        if self.manual:
+                            base += (CONFIG.TRADES.MANUAL_PICK_AVERAGE_BASE - base) * self._pick_regression(year)
         else:
-            base = CONFIG.TRADES.PICK_R2_BASE_VALUE if on_curve and CONFIG.TRADES.VALUE_CURVE_SCALE > 0 else 22.0
+            second = CONFIG.TRADES.MANUAL_R2_VALUE if self.manual else CONFIG.TRADES.PICK_R2_BASE_VALUE
+            base = second if on_curve and CONFIG.TRADES.VALUE_CURVE_SCALE > 0 else 22.0
         prospect_value = self._prospect_pick_value(pick_key) if on_curve and year == 1 else None
         if prospect_value is not None:
             base = prospect_value / max(self.era().pick_scale, 1e-6)   # already in player units: no curve, no scale
@@ -595,7 +626,8 @@ class TradeFinder:
             (b0, o0), (b1, o1) = CONFIG.TRADES.PICK_CURVE_POINTS
             base = max(CONFIG.TRADES.PICK_R2_BASE_VALUE, trade_curve_value(o0 + (base - b0) * (o1 - o0) / (b1 - b0)))
 
-        base *= (0.85 ** (year - 1)) # Depreciate the future picks
+        discount = CONFIG.TRADES.MANUAL_PICK_YEAR_DISCOUNT if self.manual else CONFIG.TRADES.PICK_YEAR_DISCOUNT
+        base *= discount ** (year - 1)   # Depreciate the future picks
         
         # Apply protection discounts
         if protection == "Top 3":
@@ -661,8 +693,17 @@ class TradeFinder:
         return self._get_pick_position(pick_key)
 
     def _is_top5_pick(self, pick_asset: str) -> bool:
-        """Returns True if this pick is a known top-5 pick OR has top-5 projected value (>=120.0)."""
-        pos = self._get_pick_draft_position_from_asset(pick_asset)
+        """Returns True if this pick is a known top-5 pick OR has top-5 projected value (>=120.0).
+
+        The lottery order only places this draft's picks: a future first of a lottery team is no top-5 pick
+        (its value, already discounted by the years, still decides)."""
+        year = pick_asset.split(":", 1)[0] if ":" in pick_asset else "1"
+        try:
+            n = int(year)
+        except ValueError:
+            n = 1
+        this_draft = n == 1 or n == self.era().year   # finder keys count years from now; wish keys carry the year
+        pos = self._get_pick_draft_position_from_asset(pick_asset) if this_draft else 0
         if 0 < pos <= 5:
             return True
         # Fallback: check by value (covers projected picks without lottery order)
@@ -762,10 +803,13 @@ class TradeFinder:
         if any("R1" in a for a in given_picks) and not gets_first and best_in < first_line:
             return (f"First-Round Pick Rule: a first-round pick goes only for a {first_line}+ OVR player "
                     f"({old_line}+ if older than {pick_cfg.FIRST_PICK_MAX_AGE_BELOW}) or another first")
+        max_picks = pick_cfg.MANUAL_STARTER_SWAP_MAX_PICKS if self.manual else pick_cfg.STARTER_SWAP_MAX_PICKS
+        if any(isinstance(a, Giocatore) and getattr(a, 'trade_request', False) for a in receiving_assets):
+            # a player who asked out is no swap of two starters: his price may carry more picks
+            max_picks = max(max_picks, CONFIG.TRADE_REQUESTS.STARTER_SWAP_MAX_PICKS)
         if (any(isinstance(a, Giocatore) and a.ovr >= era.starter for a in giving_assets)
-                and len(given_picks) > pick_cfg.STARTER_SWAP_MAX_PICKS):
-            return (f"Starter Swap Rule: a team sending a starter adds at most "
-                    f"{pick_cfg.STARTER_SWAP_MAX_PICKS} pick(s)")
+                and len(given_picks) > max_picks):
+            return f"Starter Swap Rule: a team sending a starter adds at most {max_picks} pick(s)"
         return ""
 
     def would_accept_trade(self, receiving_team: 'Squadra', receiving_assets: list, giving_assets: list, pick_protections: Optional[Dict[str, str]] = None) -> bool:
@@ -787,11 +831,14 @@ class TradeFinder:
         trade_cfg = CONFIG.TRADES
         is_user_team = self._is_user_team(receiving_team)
         untouchable_given = None   # the untouchable this CPU team gives without asking out (it raises the price)
+        manual_premium = 1.0       # what a manual trade pays for a deal this CPU team would not look for itself
         if not is_user_team:
             # ======== THE PLAN QUESTION ========
             plan_ok, plan_reason, _wish = self.plan_check(receiving_team, receiving_assets, giving_assets)
             if not plan_ok:
-                return False, plan_reason
+                if not self._plan_refusal_has_a_price(receiving_team, plan_reason):
+                    return False, plan_reason
+                manual_premium *= trade_cfg.MANUAL_PLAN_PREMIUM
 
             # ======== SUPERSTAR PACKAGING RESTRICTION ========
             # A CPU team does not package a superstar WITH a first-round pick unless it receives a
@@ -808,15 +855,20 @@ class TradeFinder:
             # An untouchable who does not ask out moves only for an exceptional price (UNTOUCHABLE_PREMIUM, applied
             # once to the final threshold below) and only when the deal fulfils a wish (the plan question above).
             # A team paying on purpose (waive_price) never gives one. Promising young rookies (<= 23 years, high
-            # potential) are refused for anything short of a superstar.
+            # potential) are refused for anything short of a superstar; a manual trade pays a premium for them.
+            young_cornerstone_given = False
             for a in giving_assets:
                 if isinstance(a, Giocatore):
-                    if getattr(a, 'is_untouchable', False) and not getattr(a, '_wants_out', False):
+                    if getattr(a, 'is_untouchable', False) and not asked_out(a):
                         untouchable_given = a
-                    if a.eta <= 23 and a.potenziale >= ovr_at(80) and not getattr(a, '_wants_out', False):
+                    if a.eta <= 23 and a.potenziale >= ovr_at(80) and not asked_out(a):
                         best_rec_ovr = max([r.ovr for r in receiving_assets if isinstance(r, Giocatore)], default=0)
                         if best_rec_ovr < ovr_at(88):
-                            return False, f"Rookie Cornerstone: The {receiving_team.nome} consider {a.nome} the future of the franchise and categorically refuse to give him up for non-superstar veterans."
+                            if not self.manual:
+                                return False, f"Rookie Cornerstone: The {receiving_team.nome} consider {a.nome} the future of the franchise and categorically refuse to give him up for non-superstar veterans."
+                            young_cornerstone_given = True
+            if young_cornerstone_given:
+                manual_premium *= trade_cfg.MANUAL_CORNERSTONE_PREMIUM
             if untouchable_given is not None and waive_price:
                 return False, self._untouchable_reason(receiving_team, untouchable_given)
             if not waive_price:
@@ -912,7 +964,7 @@ class TradeFinder:
 
         # FRANCHISE PLAYER PROTECTION / TRADE DEMAND
         giving_stars = [a for a in giving_assets if isinstance(a, Giocatore) and a.ovr >= era.star]
-        star_demanding_out = any(getattr(p, '_wants_out', False) for p in giving_stars)
+        star_demanding_out = any(asked_out(p) for p in giving_stars)
 
         trade_diff = getattr(self.torneo, 'trade_difficulty', 'realistic') if self.torneo else 'realistic'
 
@@ -1013,15 +1065,17 @@ class TradeFinder:
             threshold *= CONFIG.FRONT_OFFICE.TRADE_HAPPY_THRESHOLD_MULT
         if skill is not None and self._comes_from_user(receiving_assets):
             threshold *= 1.0 + trade_brain.user_squeeze(skill)
-        misjudgement = trade_brain.disaster_factor(skill, random)
+        misjudgement = 1.0 if self.manual else trade_brain.disaster_factor(skill, random)   # a manual answer is stable
         threshold *= misjudgement
         min_allowed *= misjudgement
         if untouchable_given is not None:   # once per deal, not once per untouchable
             threshold *= trade_cfg.UNTOUCHABLE_PREMIUM
             min_allowed *= trade_cfg.UNTOUCHABLE_PREMIUM
+        threshold *= manual_premium
+        min_allowed *= manual_premium
 
         # Natural GM valuation tolerance (+/- 2% organic variation) to avoid hard rigid rejection boundaries
-        gm_flexibility = random.uniform(-0.02, 0.015)
+        gm_flexibility = 0.0 if self.manual else random.uniform(-0.02, 0.015)
         effective_threshold = max(min_allowed, threshold + gm_flexibility)
         
         accepted = waive_price or rec_val >= (give_val * effective_threshold)
@@ -1034,7 +1088,7 @@ class TradeFinder:
         # player has to come back (CONFIG.TRADES.STAR_SALE_MIN_OVR / STAR_RETURN_MIN_OVR). Not for a player who asked out.
         if not is_user_team:
             sold = [a for a in giving_assets if isinstance(a, Giocatore) and a.ovr >= ovr_at(trade_cfg.STAR_SALE_MIN_OVR)
-                    and not getattr(a, '_wants_out', False)]
+                    and not asked_out(a)]
             return_line = ovr_at(trade_cfg.STAR_RETURN_MIN_OVR)
             if sold and not (any(isinstance(a, str) and "R1" in a for a in receiving_assets)
                              or any(isinstance(a, Giocatore) and a.ovr >= return_line for a in receiving_assets)):
@@ -1043,6 +1097,10 @@ class TradeFinder:
 
         return True, "Accepted"
         
+    def _plan_refusal_has_a_price(self, team: 'Squadra', refusal: str) -> bool:
+        """In a manual trade a team that simply has no need for the deal can be paid to do it; a hard no stays a no."""
+        return self.manual and refusal == PLAN_REFUSAL.format(team=team.nome)
+
     @staticmethod
     def _untouchable_reason(team: 'Squadra', player: 'Giocatore') -> str:
         return f"Untouchable Cornerstone: {player.nome} is the face of the {team.nome}: only an exceptional offer moves him."
@@ -1075,7 +1133,7 @@ class TradeFinder:
         for p in team.roster:
             # SUPERSTAR TRADE DEMAND: an unhappy star asks out (core/front_office/wishes.py `wants_out`,
             # the one source of truth, also behind the STAR_WANTS_OUT wish).
-            wants_out = wants_out_of(p, team, demand_ctx) or bool(getattr(p, 'walks_away', ''))   # he will not re-sign
+            wants_out = demands_out(p, team, demand_ctx)   # an open request, or a star who will not re-sign
 
             # The flag mirrors the CURRENT situation: a star whose morale recovered (or whose
             # team improved) no longer demands a trade. Set it before any 'continue' below.
@@ -1182,7 +1240,7 @@ class TradeFinder:
         fase = getattr(self.torneo, 'fase_torneo', 'SEASON') if self.torneo else 'SEASON'
 
         season_num = getattr(self.torneo, 'season_number', 1)
-        game_day = getattr(self.torneo, 'giorno_corrente', 1)
+        game_day = getattr(self.torneo, '_current_gameday', 0) + 1   # 1-based calendar day ('giorno_corrente' never existed)
         
         structured_teams = []
         for t_entry in teams_data:
@@ -1195,13 +1253,10 @@ class TradeFinder:
             gp = w + losses
             win_pct = round(w / gp, 3) if gp > 0 else 0.5
             
-            stats = getattr(team, 'statistiche_squadra', None)
-            ppg = round(stats.punti_fatti / gp, 1) if stats and gp > 0 else (round(stats.punti_fatti, 1) if stats else 100.0)
-            opp_ppg = round(stats.punti_subiti / gp, 1) if stats and gp > 0 else (round(stats.punti_subiti, 1) if stats else 100.0)
-            
-            off_rtg = round(getattr(team, 'offensive_rating', 105.0), 1)
-            def_rtg = round(getattr(team, 'defensive_rating', 105.0), 1)
-            net_rtg = round(off_rtg - def_rtg, 1)
+            # The fields it read (statistiche_squadra, offensive_rating) never existed: every trade had 100 / 105
+            form = team_form(self.torneo, team)
+            ppg, opp_ppg = form["ppg"], form["opp_ppg"]
+            off_rtg, def_rtg, net_rtg = form["off_rtg"], form["def_rtg"], form["net_rtg"]
             
             players_out = []
             picks_out = []
@@ -1462,8 +1517,10 @@ class TradeFinder:
                 
         compensation_options.sort(key=sort_comp_key, reverse=True)
         
+        # a star who asked out goes for a bigger package (CONFIG.TRADE_REQUESTS.BID_MAX_ASSETS)
+        max_assets = CONFIG.TRADE_REQUESTS.BID_MAX_ASSETS if getattr(player, 'trade_request', False) else 4
         for opt_type, opt_val in compensation_options:
-            if len(assets) >= 4:
+            if len(assets) >= max_assets:
                 break
                 
             if package_value >= player_value * target_multiplier:
@@ -1648,6 +1705,133 @@ class TradeFinder:
         bench = [p for p in self.get_tradeable_players(team) if not any(p is k for k in keep)]
         return sorted(bench, key=lambda p: p.ovr)
 
+    # ========================================================================
+    # THE USER'S MANUAL SEARCH: real return packages from every team
+    # ========================================================================
+
+    def _market_value(self, asset: Any) -> float:
+        """What an asset is worth whoever owns it: a player's trade value, a pick's value on the same curve."""
+        if not isinstance(asset, str):
+            return float(asset.trade_value)
+        year, key = asset.split(":", 1) if ":" in asset else ("1", asset)
+        return self.get_pick_value(key, int(year), on_curve=True)
+
+    def _manual_salary_fit(self, partner: 'Squadra', giving_players: list, back: list, spare: list) -> Optional[list]:
+        """The players the user sends so the salaries and rosters work: the package, or the package plus one spare
+        contract of the user's. None when nothing works."""
+        team, limits = self.squadra_giocatore, CONFIG.OFFSEASON
+        salary_in = sum(p.contract.salario_annuale for p in back)
+
+        def works(out: list) -> bool:
+            salary_out = sum(p.contract.salario_annuale for p in out if p.contract)
+            net = len(back) - len(out)
+            return (limits.TRADE_ROSTER_MIN_SIZE <= len(team.roster) + net <= limits.ROSTER_SIZE_LIMIT
+                    and limits.TRADE_ROSTER_MIN_SIZE <= len(partner.roster) - net <= limits.ROSTER_SIZE_LIMIT
+                    and team.check_trade_salary_match(salary_in, salary_out)[0]
+                    and partner.check_trade_salary_match(salary_out, salary_in)[0])
+
+        return next((out for out in ([list(giving_players)] + [list(giving_players) + [p] for p in spare]) if works(out)),
+                    None)
+
+    def _manual_return_picks(self, partner: 'Squadra', assets: list, back: list, room: float,
+                             protections: Optional[dict]) -> List[str]:
+        """The partner's picks that fill the value still owed, best first, while the partner would still do the deal."""
+        picks: List[str] = []
+        owned = [f"{year}:{key}" for year, key in self._collect_team_picks(partner)]
+        for pick in sorted(owned, key=self._market_value, reverse=True):
+            if len(picks) >= CONFIG.TRADES.MANUAL_MAX_RETURN_PICKS:
+                break
+            worth = self._market_value(pick)
+            if worth > room:
+                continue
+            if "R2" in pick and sum("R2" in k for k in picks) >= CONFIG.TRADES.MANUAL_MAX_RETURN_SECONDS:
+                continue
+            if "R1" in pick and not TradeValidator.check_stepien_rule(self.torneo, partner.nome, picks + [pick])[0]:
+                continue
+            if self.would_accept_trade_with_reason(partner, assets, back + picks + [pick], pick_protections=protections)[0]:
+                picks.append(pick)
+                room -= worth
+        return picks
+
+    def _manual_offer_shape(self, back: list, picks: List[str]) -> str:
+        """The kind of return, so that a team's offers differ from each other."""
+        t, era = CONFIG.TRADES, self.era()
+        if sum(1 for p in back if p.ovr >= era.starter) >= 2:
+            return "haul" if any("R1" in k for k in picks) else "starters"
+        if any(p.eta <= t.YOUNG_MAX_AGE for p in back):
+            return "youth"
+        return "picks" if any("R1" in k for k in picks) else "veteran"
+
+    def _manual_offers_from(self, partner: 'Squadra', giving_players: list, giving_picks: List[str],
+                            protections: Optional[dict]) -> List[Dict]:
+        """The partner's best return packages for what the user gives, one per kind of return."""
+        import itertools
+
+        t, team, era = CONFIG.TRADES, self.squadra_giocatore, self.era()
+        worth = sum(self._market_value(a) for a in giving_players + giving_picks)
+        budget, floor = worth * t.MANUAL_RETURN_TARGET, worth * t.MANUAL_MIN_RETURN_SHARE
+        value = {id(p): self._market_value(p) for p in partner.roster}
+        pool = sorted((p for p in self.get_tradeable_players(partner, allow_stars=True)
+                       if p.contract and value[id(p)] <= budget), key=lambda p: value[id(p)], reverse=True)
+        pool = pool[:t.MANUAL_SEARCH_CANDIDATES]
+        spare = sorted((p for p in team.roster if p.contract and p not in giving_players
+                        and p.ovr < era.starter and getattr(p, 'giorni_cooldown_scambio', 0) <= 0),
+                       key=lambda p: self.get_strategic_value(p, team))[:t.MANUAL_SPARE_CONTRACTS]
+
+        best: Dict[str, tuple] = {}
+        for size in (1, 2, 3):
+            for combo in itertools.combinations(pool, size):
+                back = list(combo)
+                back_worth = sum(value[id(p)] for p in back)
+                if back_worth > budget or (size > 1 and min(p.ovr for p in back) < era.rotation):
+                    continue
+                gives = self._manual_salary_fit(partner, giving_players, back, spare)
+                if gives is None:
+                    continue
+                assets = gives + giving_picks
+                if not self.would_accept_trade_with_reason(partner, assets, back, pick_protections=protections)[0]:
+                    continue
+                picks = self._manual_return_picks(partner, assets, back, budget - back_worth, protections)
+                total = back_worth + sum(self._market_value(k) for k in picks)
+                shape = self._manual_offer_shape(back, picks)
+                if total < floor or (shape in best and total <= best[shape][0]):
+                    continue
+                if TradeValidator.validate_trade(team, partner, assets, back + picks, torneo=self.torneo)[0]:
+                    best[shape] = (total, gives, back, picks)
+
+        # two starters plus firsts is the offer a seller looks for: it leads whenever the team can make it
+        ranked = sorted(best.items(), key=lambda item: (item[0] == "haul", item[1][0]), reverse=True)
+        return [self._manual_offer(partner, gives, giving_picks, back, picks)
+                for _shape, (_total, gives, back, picks) in ranked[:t.MANUAL_OFFERS_PER_TEAM]]
+
+    def _manual_offer(self, partner: 'Squadra', gives: list, giving_picks: List[str], back: list, picks: List[str]) -> Dict:
+        team = self.squadra_giocatore
+
+        def serialize(players: list) -> List[Dict]:
+            return [{"name": p.nome, "team": p.squadra.nome if p.squadra else "", "position": p.ruolo, "ovr": p.ovr,
+                     "potential": p.potenziale, "salary": p.contract.salario_annuale,
+                     "contract_years": p.contract.anni_rimanenti, "trade_value": round(float(p.trade_value), 1)}
+                    for p in players]
+
+        received = sum(self.get_strategic_value(a, team) for a in back + picks)
+        given = sum(self.get_strategic_value(a, team) for a in gives + giving_picks)
+        return {"partner_team": partner.nome, "partner_strategy": self.get_team_strategy(partner),
+                "giving_players": serialize(gives), "giving_picks": giving_picks,
+                "receiving_players": serialize(back), "receiving_picks": picks,
+                "value_differential": round(received - given, 1), "is_fair": True, "likelihood": "High",
+                "why": self.user_motive(self.pair_deal(team, partner, gives + giving_picks, back + picks)).why}
+
+    def _manual_package_search(self, giving_players: list, giving_picks: List[str], protections: Optional[dict]) -> List[Dict]:
+        """Every team's offers for the user's package: each team's best first, so one team never fills the list."""
+        ranked = []
+        for partner in self.squadre:
+            if self._is_user_team(partner):
+                continue
+            offers = self._manual_offers_from(partner, giving_players, giving_picks, protections)
+            ranked.extend((rank, -offer["value_differential"], len(ranked), offer) for rank, offer in enumerate(offers))
+        ranked.sort(key=lambda row: row[:3])
+        return [row[3] for row in ranked[:CONFIG.TRADES.MANUAL_SEARCH_RESULTS]]
+
     def find_trades_for_package(self, giving_players: List['Giocatore'], giving_picks: List[str], user_pick_protections: dict = None) -> List[Dict]:
         """
         Find all possible trades for a customized user package (1-3 players + 0-3 picks).
@@ -1658,6 +1842,8 @@ class TradeFinder:
 
         if not self.squadra_giocatore:
             return []
+        if self.manual:
+            return self._manual_package_search(giving_players, giving_picks, user_pick_protections)
             
         team = self.squadra_giocatore
         total_giving_salary = sum(p.contract.salario_annuale for p in giving_players if p.contract)
@@ -2676,17 +2862,21 @@ class TradeFinder:
 
         # 1. The plan question: ask for the asset that fulfils the CPU's wish
         plan_ok, plan_reason, _wish = self.plan_check(partner_team, giving, receiving_assets)
+        plan_premium = 1.0
         if not plan_ok:
             asked = self.asset_for_wish(partner_team, user_team, giving, receiving_assets)
-            if asked is None or not self.plan_check(partner_team, giving + [asked[0]], receiving_assets)[0]:
+            if asked is not None and self.plan_check(partner_team, giving + [asked[0]], receiving_assets)[0]:
+                giving.append(asked[0])
+                (add_picks if isinstance(asked[0], str) else add_players).append(asked[0] if isinstance(asked[0], str) else asked[0].nome)
+            elif self._plan_refusal_has_a_price(partner_team, plan_reason):
+                plan_premium = CONFIG.TRADES.MANUAL_PLAN_PREMIUM
+            else:
                 return answer(False, plan_reason)
-            giving.append(asked[0])
-            (add_picks if isinstance(asked[0], str) else add_players).append(asked[0] if isinstance(asked[0], str) else asked[0].nome)
 
         # 2. The price
         rec_val = sum(self.get_strategic_value(a, partner_team, pick_protections) for a in giving)
         give_val = sum(self.get_strategic_value(a, partner_team, pick_protections) for a in receiving_assets)
-        deficit = give_val - rec_val
+        deficit = give_val * plan_premium - rec_val
 
         current_user_players = {id(a) for a in giving if not isinstance(a, str)}
         current_user_picks = {a for a in giving if isinstance(a, str)}
@@ -2696,7 +2886,8 @@ class TradeFinder:
 
         if pick_protections:
             for pk_key, prot in pick_protections.items():
-                if pk_key in current_user_picks and prot != "Unprotected":
+                if (pk_key in current_user_picks and prot != "Unprotected"
+                        and stored_pick_protection(self.torneo, pk_key) == "Unprotected"):   # old terms stay
                     unprotected_val = self.get_strategic_value(pk_key, partner_team, {pk_key: "Unprotected"})
                     protected_val = self.get_strategic_value(pk_key, partner_team, {pk_key: prot})
                     val_gain = unprotected_val - protected_val
@@ -2795,6 +2986,15 @@ class TradeFinder:
         random.shuffle(candidate_b)
         candidate_b = candidate_b[:12]
 
+        trade_cfg = CONFIG.TRADES
+        seen_targets = set()   # a manual search shows a player once
+
+        def closest(players: list) -> list:
+            """In a manual search, the players nearest in value to what the user gives come first."""
+            if not self.manual:
+                return players
+            return sorted(players, key=lambda p: abs(self.get_strategic_value(p, team) - total_giving_val))
+
         for team_b in candidate_b:
             b_tradeables = self.get_tradeable_players(team_b, allow_stars=(total_giving_val >= 85))
             if not b_tradeables:
@@ -2814,12 +3014,14 @@ class TradeFinder:
                 if not c_targets:
                     continue
 
-                for target_c in c_targets[:3]:
+                for target_c in closest(c_targets)[:3]:
+                    if target_c.nome in seen_targets:
+                        continue
                     b_candidates = [p for p in b_tradeables if p.contract and p != target_c and normalize_role(p.ruolo) != normalize_role(target_c.ruolo)]
                     if not b_candidates:
                         b_candidates = [p for p in b_tradeables if p.contract and p != target_c]
                     
-                    for player_b in b_candidates[:3]:
+                    for player_b in closest(b_candidates)[:3]:
                         # 1. CBA salary check for all three franchises
                         valid_u, _ = team.check_trade_salary_match(target_c.contract.salario_annuale, total_giving_salary)
                         if not valid_u:
@@ -2848,6 +3050,8 @@ class TradeFinder:
                         accepts_b, _ = self.would_accept_trade_with_reason(team_b, cand_in_b, cand_out_b)
                         if not accepts_b:
                             for py, pk in user_picks:
+                                if self.manual and len(user_picks_to_b) - len(giving_picks) >= trade_cfg.MANUAL_MULTI_MAX_USER_PICKS:
+                                    break
                                 pk_asset = f"{py}:{pk}"
                                 if pk_asset not in user_picks_to_b and pk_asset not in user_picks_to_c:
                                     user_picks_to_b.append(pk_asset)
@@ -2861,7 +3065,7 @@ class TradeFinder:
                         cand_in_c = [player_b] + user_picks_to_c
                         cand_out_c = [target_c]
                         accepts_c, _ = self.would_accept_trade_with_reason(team_c, cand_in_c, cand_out_c)
-                        if not accepts_c:
+                        if not accepts_c and not self.manual:   # the user does not pay for the other two teams' deal
                             for py, pk in user_picks:
                                 pk_asset = f"{py}:{pk}"
                                 if pk_asset not in user_picks_to_b and pk_asset not in user_picks_to_c:
@@ -2889,6 +3093,10 @@ class TradeFinder:
                         total_user_giving_val = sum(self.get_strategic_value(p, team) for p in giving_players) + \
                                                 sum(self.get_strategic_value(pk, team) for pk in user_picks_to_b + user_picks_to_c)
                         val_diff = self.get_strategic_value(target_c, team) - total_user_giving_val
+                        if self.manual:
+                            if val_diff + total_user_giving_val < total_user_giving_val * trade_cfg.MANUAL_MIN_RETURN_SHARE:
+                                continue
+                            seen_targets.add(target_c.nome)
 
                         three_team_trades.append({
                             "trade_type": "3-team",
@@ -2966,6 +3174,14 @@ class TradeFinder:
         other_teams = [t for t in self.squadre if not self._is_user_team(t) and self.wishes_for(t)]
         random.shuffle(other_teams)
         candidate_teams = other_teams[:8]
+        trade_cfg = CONFIG.TRADES
+        seen_targets = set()   # a manual search shows a player once
+
+        def closest(players: list) -> list:
+            """In a manual search, the players nearest in value to what the user gives come first."""
+            if not self.manual:
+                return players
+            return sorted(players, key=lambda p: abs(self.get_strategic_value(p, team) - total_giving_val))
         
         for t2 in candidate_teams:
             t2_tradeables = self.get_tradeable_players(t2, allow_stars=(total_giving_val >= 85))
@@ -2982,12 +3198,12 @@ class TradeFinder:
                     if not t4_tradeables: continue
 
                     # Search players that fit salary & strategic acceptance
-                    for p2 in t2_tradeables[:3]:
+                    for p2 in closest(t2_tradeables)[:3]:
                         if not p2.contract: continue
-                        for p3 in t3_tradeables[:3]:
+                        for p3 in closest(t3_tradeables)[:3]:
                             if not p3.contract: continue
-                            for p4 in t4_tradeables[:3]:
-                                if not p4.contract: continue
+                            for p4 in closest(t4_tradeables)[:3]:
+                                if not p4.contract or p4.nome in seen_targets: continue
 
                                 # 1. CBA Salary Matching
                                 v1, _ = team.check_trade_salary_match(p4.contract.salario_annuale, total_giving_salary)
@@ -3012,6 +3228,8 @@ class TradeFinder:
                                 acc2, _ = self.would_accept_trade_with_reason(t2, giving_players + user_pks_to_t2, [p2])
                                 if not acc2:
                                     for py, pk in user_picks:
+                                        if self.manual and len(user_pks_to_t2) - len(giving_picks) >= trade_cfg.MANUAL_MULTI_MAX_USER_PICKS:
+                                            break
                                         pk_asset = f"{py}:{pk}"
                                         if pk_asset not in user_pks_to_t2:
                                             user_pks_to_t2.append(pk_asset)
@@ -3030,6 +3248,10 @@ class TradeFinder:
                                 total_user_giving_val = sum(self.get_strategic_value(p, team) for p in giving_players) + \
                                                         sum(self.get_strategic_value(pk, team) for pk in user_pks_to_t2)
                                 val_diff = self.get_strategic_value(p4, team) - total_user_giving_val
+                                if self.manual:
+                                    if val_diff + total_user_giving_val < total_user_giving_val * trade_cfg.MANUAL_MIN_RETURN_SHARE:
+                                        continue
+                                    seen_targets.add(p4.nome)
 
                                 flow_steps = [
                                     {"from": team.nome, "to": t2.nome, "player": ", ".join(p.nome for p in giving_players) + (f" + {', '.join(user_pks_to_t2)}" if user_pks_to_t2 else ""), "role": "/".join(p.ruolo for p in giving_players), "ovr": round(sum(p.ovr for p in giving_players)/len(giving_players)), "salary": total_giving_salary},
@@ -3136,7 +3358,7 @@ class TradeFinder:
         target_val = self.get_strategic_value(target_player, owner)
         # An untouchable who does not ask out costs the premium: aim the package there (acceptance still decides).
         stop_val = target_val * 1.05
-        if getattr(target_player, 'is_untouchable', False) and not getattr(target_player, '_wants_out', False):
+        if getattr(target_player, 'is_untouchable', False) and not asked_out(target_player):
             stop_val *= CONFIG.TRADES.UNTOUCHABLE_PREMIUM
         target_sal = target_player.contract.salario_annuale if target_player.contract else 5.0
 
@@ -3160,6 +3382,8 @@ class TradeFinder:
             asked = self.asset_for_wish(owner, team, package_players, [target_player])
             if asked is not None:
                 (package_picks if isinstance(asked[0], str) else package_players).append(asked[0])
+            elif self.manual:
+                stop_val *= CONFIG.TRADES.MANUAL_PLAN_PREMIUM
 
         cur_val = sum(self.get_strategic_value(a, owner) for a in package_players + package_picks)
         if cur_val < target_val:

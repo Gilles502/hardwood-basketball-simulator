@@ -307,7 +307,6 @@ class RivalryTracker:
             else:
                 rivalry.intensity = max(0.0, rivalry.intensity)
     
-    # [UNWIRED] Implemented but not called by the game yet; see docs/UNWIRED_FEATURES.md.
     def advance_season(self):
         """Move to the next season. Apply decay first."""
         self.apply_season_decay()

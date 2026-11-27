@@ -225,3 +225,21 @@
   .bp-stub::before, .bp-stub::after { display: none; }
   .os-body { grid-template-columns: 1fr; }
 }
+
+/* ---------- Trade requests ---------- */
+.trq-scroll { overflow-x: auto; }
+.trq-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.trq-table th {
+  padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border-hover);
+  font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.trq-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text-secondary); white-space: nowrap; }
+.trq-table td b { color: var(--text-primary); }
+.trq-table .is-num { text-align: right; }
+.trq-table .is-action { text-align: right; }
+.trq-table tr.is-mine { background: var(--primary-trans); }
+.trq-team { display: inline-flex; align-items: center; gap: 8px; }
+.trq-btn { font-size: 13px; padding: 5px 12px; }
+.trq-mine { font-size: 12.5px; color: var(--text-muted); }
+

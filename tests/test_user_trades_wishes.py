@@ -294,12 +294,12 @@ class RouteTests(UserToolsCase):
     def body(self, give, get):
         return {"partner_team": "C", "giving_players": [give.nome], "receiving_players": [get.nome]}
 
-    def test_a_refused_proposal_returns_the_plan_sentence(self):
+    def test_a_proposal_the_cpu_has_no_need_for_is_refused_at_an_even_price(self):
         t, teams, f = self.league({"C": NO_STARTING_C})
-        wing = valued(next(p for p in teams[0].roster if p.ruolo == "SF" and p.ovr == 71), 100.0)
+        wing = valued(next(p for p in teams[0].roster if p.ruolo == "SF" and p.ovr == 71), 10.0)
         resp = self.call(t, "/api/execute-user-trade", self.body(wing, teams[1].roster[3]))
         self.assertEqual(resp.status_code, 400)
-        self.assertEqual(resp.get_json()["error"], "The partner team rejects the trade: C has no use for this deal right now")
+        self.assertIn("The partner team rejects the trade: Value mismatch", resp.get_json()["error"])
 
     def test_the_validation_says_why_when_the_cpu_agrees(self):
         t, teams, f = self.league({"C": NO_STARTING_C})
@@ -317,7 +317,7 @@ class RouteTests(UserToolsCase):
         self.assertEqual((motive.trade_type, motive.why), ("user", "C needed a starting C"))
         self.assertEqual(sum(1 for s in motive.sides if s.plan != "USER"), 1)
 
-    def test_a_four_team_flow_is_refused_when_a_cpu_team_has_no_wish(self):
+    def test_a_four_team_flow_is_refused_when_a_cpu_team_is_not_paid_for_a_deal_it_does_not_need(self):
         t, teams, f = self.league({"B": NO_STARTING_C, "D": SATISFIED, "E": SATISFIED})
         u, b, d, e = teams
         flow = [{"from": "U", "to": "B", "players": [self.user_center(teams).nome]},
@@ -327,7 +327,7 @@ class RouteTests(UserToolsCase):
         with mock.patch.object(TradeFinder, "execute_4_team_trade", return_value=True) as execute:
             resp = self.call(t, "/api/trades/execute-4-team", {"flow": flow})
         self.assertEqual(resp.status_code, 400)
-        self.assertIn("rejects the trade: D has no use for this deal right now", resp.get_json()["error"])
+        self.assertIn("D rejects the trade: Value mismatch", resp.get_json()["error"])
         execute.assert_not_called()
 
     @mock.patch.object(TradeFinder, "_move_up_slot", return_value=1)

@@ -1,7 +1,8 @@
 """Tax dump (catalog #10): a team over the tax, or stuck with a long heavy contract, hands the contract to a team
 with room under the tax and pays for it with its own picks.
 
-Price: `TAX_DUMP_R2_COUNT` second-rounders for an ordinary contract, a first-rounder for a high long one
+Price: `TAX_DUMP_R2_COUNT` second-rounders for an ordinary contract (a first only with `TAX_DUMP_R1_FALLBACK`), a
+first-rounder for a high long one
 (`era.is_high_contract`). An expiring (1 year) player in band starter or better is never dumped. A tax cut sends bench money: never one of the
 team's `TAX_DUMP_KEEP_TOP` best by OVR. A projected top-5 pick is never the price.
 """
@@ -52,7 +53,8 @@ def _prices(finder: 'TradeFinder', team: 'Squadra', player) -> List[List[str]]:
     options = []
     if len(seconds) >= t.TAX_DUMP_R2_COUNT:
         options.append(seconds[:t.TAX_DUMP_R2_COUNT])
-    options.extend([k] for k in firsts)   # a team without enough seconds can still pay with a first
+    if t.TAX_DUMP_R1_FALLBACK:
+        options.extend([k] for k in firsts)   # a team without enough seconds pays with a first
     return options
 
 

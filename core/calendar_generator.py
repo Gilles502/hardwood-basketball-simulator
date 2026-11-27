@@ -6,6 +6,7 @@ Generates a complete 82-game regular season schedule for all teams across ~175 c
 division/conference weighting, holiday slates (Christmas, MLK, Opening Night), and no 3-in-3s.
 """
 
+import logging
 import math
 import random
 from datetime import date, timedelta
@@ -812,11 +813,26 @@ class NBACalendarGenerator:
                         score = len(calendar_days[d].games) + b2b_add * 50.0 + t_cost / 20.0 + long_flight_penalty
                         candidate_fallbacks.append((score, d))
 
+                    if not candidate_fallbacks:
+                        # Last resort: the game is never dropped (a dropped pair left two teams at 81 games, about
+                        # one calendar in 40). Any playable day both teams are free, a 3-in-3 allowed, fewest games
+                        # first; then any day at all, the finale and off days included.
+                        for allow_special in (False, True):
+                            candidate_fallbacks = [
+                                (len(calendar_days[d].games), d) for d in range(total_days)
+                                if h not in day_teams[d] and a not in day_teams[d]
+                                and (allow_special or not (calendar_days[d].is_off_day
+                                                           or "FINALE_EVE_REST" in calendar_days[d].events
+                                                           or "REGULAR_SEASON_FINALE" in calendar_days[d].events))]
+                            if candidate_fallbacks:
+                                break
                     if candidate_fallbacks:
                         candidate_fallbacks.sort(key=lambda x: x[0])
                         best_d = candidate_fallbacks[0][1]
                         gid = f"g_{calendar_days[best_d].date}_{h[:3].upper()}_{a[:3].upper()}_{len(calendar_days[best_d].games)}"
                         record_game(best_d, h, a, gid)
+                    else:
+                        logging.getLogger('main_sim').error(f"Calendar: no free day for {a} @ {h}, game not scheduled")
 
         # Re-tag back-to-backs accurately
         for d in range(total_days):

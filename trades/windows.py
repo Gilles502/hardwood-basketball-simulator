@@ -13,6 +13,16 @@ if TYPE_CHECKING:
 main_log = logging.getLogger('main_sim')
 
 
+def refresh_untouchables(torneo: 'Tournament') -> None:
+    """Recomputes every team's untouchables (Squadra.designa_intoccabili). The flag is saved on each player and
+    was set only at league setup, on load and on draft night, so in one long session it piled up (a 25-season
+    save had 82% of the league untouchable and trades died out). Run before each window and at a new season."""
+    for team in getattr(torneo, 'squadre', []):
+        refresh = getattr(team, 'designa_intoccabili', None)   # test doubles of a team may not have it
+        if refresh is not None:
+            refresh(torneo)
+
+
 def run_trade_window(torneo: 'Tournament', window: str) -> Tuple[int, TradeFinder]:
     """Runs the CPU trades of one window ("deadline" | "predraft" | "draft").
 
@@ -20,6 +30,7 @@ def run_trade_window(torneo: 'Tournament', window: str) -> Tuple[int, TradeFinde
     Each wish is tried once: its engines in order until one closes a deal. A team that traded has its wishes
     rebuilt (the trade clears its cache); a wish no longer among them is skipped. Returns (trades completed,
     the finder) - the finder's `logscambi` feeds the window's UI and podcast logging."""
+    refresh_untouchables(torneo)
     finder = TradeFinder(torneo, torneo.squadre, getattr(torneo, 'squadra_giocatore', None))
     finder.begin_window(window)
     teams = {team.nome: team for team in common.cpu_teams(finder)}

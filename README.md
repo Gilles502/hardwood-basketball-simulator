@@ -4,23 +4,34 @@ A basketball front-office simulator for Windows. You take over a franchise in a 
 2002 and run it season after season: roster, contracts, the salary cap, trades, the draft, coaching and the
 owner's patience. Every other team is run by a CPU general manager with its own plan, wishes and trade logic.
 
-**Early Access, v0.1.1.** The league, teams and players are fictional. Leagues are plain data files, so other
+**Early Access, v0.1.2.** The league, teams and players are fictional. Leagues are plain data files, so other
 leagues can be added as mods (see [mods/README.md](mods/README.md)).
 
 Not affiliated with, endorsed by or connected to any real basketball league, team or player.
 
-## What is in v0.1
+## Highlights
 
-- **CPU general managers.** Each CPU team has a GM with skills, traits and a franchise plan (contend, retool,
-  rebuild). Their trades come from what they want, and every trade says why it happened.
-- **Contracts and free agency.** Extensions, player and team options, players who walk away from losing teams,
-  same-night free-agency auctions between teams.
-- **Draft.** Lottery, scouting, a draft board, CPU picks by fit and GM skill, trades on draft night.
-- **Owners and the carousel.** Owners judge their coaches and GMs; coaches and GMs get fired and hired.
-- **Simulation.** Possession by possession, day by day with a Stop button, or straight to a target (trade
-  deadline, All-Star break, end of the regular season). Playoffs with a play-in.
-- **Numbers.** Player database with full careers, League Analytics (advanced, rebounding, clutch and shot-zone
-  stats, team four factors), awards, records, Hall of Fame, news.
+- **29 CPU general managers with a mind of their own.** Each has a philosophy (pick hoarder, star chaser, cap
+  guardian, patient builder...), skills, a multi-season plan and an owner who judges the results. Two teams with the same
+  goal go about it differently, and you can read why.
+- **Trades that make sense.** Every CPU trade starts from something a GM wants: a starter, a star, picks, getting
+  under the tax, renting a veteran for a title run. Star upgrades, auctions, tax dumps, deadline rentals,
+  three- and four-team deals, draft-night moves. Every trade is explained and graded.
+- **Players who decide too.** Loyalty is earned, stars walk away from hopeless teams, frustrated stars ask to be
+  traded, and free agents get real bidding wars that run night after night.
+- **A league that moves.** Owners fire coaches and GMs, GMs are hired from a market and grow over their careers,
+  plans change after failures, rebuilders become champions.
+- **The era changes the game.** A 2002 league plays slow and inside; over the years it moves toward pace, space and
+  threes, with the cap, contracts and every AI threshold following the years.
+- **Possession-by-possession engine** with 14 coaching styles, points of emphasis, lineups, minutes and an opponent
+  scouting tab. Simulate day by day with a Stop button, or straight to the deadline or the playoffs.
+- **The whole offseason**: options, development and retirements, staff carousel, lottery, draft room, 12-day free
+  agency, cut-down day.
+- **Numbers for decades**: player database with full careers, league analytics, finances and CBA, awards, records,
+  Hall of Fame, trophy rooms, All-Star Weekend, news.
+
+**Everything in the game, system by system: [FEATURES.md](FEATURES.md).**
+**What is coming next: [ROADMAP.md](ROADMAP.md).**
 
 ## Install and play
 

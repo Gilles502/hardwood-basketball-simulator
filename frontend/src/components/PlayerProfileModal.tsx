@@ -171,6 +171,7 @@ export const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({ playerNa
               <div className="pq-chips">
                 {titles > 0 && <span className="pq-chip is-ring">🏆 ×{titles}</span>}
                 {chips.map((c) => <span key={c} className="pq-chip">{c}</span>)}
+                {player?.trade_request && <span className="pq-chip is-warn">Asked for a trade</span>}
                 {player?.on_trade_block && <span className="pq-chip is-warn">On the block</span>}
               </div>
               {player?.lore?.status_narrative && <p className="pq-note" title={player.lore.status_narrative}>“{player.lore.status_narrative}”</p>}
@@ -182,7 +183,7 @@ export const PlayerProfileModal: React.FC<PlayerProfileModalProps> = ({ playerNa
             <div className={`pq-injury${player.is_day_to_day ? ' is-dtd' : ''}`} role="status">
               <b>{player.is_day_to_day ? 'Day-to-day' : 'Out'}</b>
               {' · '}{player.infortunio_nome || player.tipo_infortunio || 'Injury'}
-              {player.giorni_infortunio_rimanenti ? ` · ${player.giorni_infortunio_rimanenti} games left` : ''}
+              {player.giorni_infortunio_rimanenti ? ` · ${player.giorni_infortunio_rimanenti} days left` : ''}
             </div>
           )}
 

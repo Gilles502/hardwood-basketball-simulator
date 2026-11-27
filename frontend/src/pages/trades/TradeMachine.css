@@ -212,6 +212,11 @@
 }
 .tm-chip button:hover { color: var(--danger); }
 .tm-chip button:focus-visible { outline: 2px solid var(--primary); }
+.tm-protect {
+  padding: 2px 4px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px;
+  font: inherit; font-size: 13px; font-weight: 500; color: var(--text-primary); cursor: pointer;
+}
+.tm-protect:focus-visible { outline: 2px solid var(--primary); }
 .tm-hint { margin: 0; font-size: 14px; color: var(--text-muted); }
 
 .tm-flows { display: flex; flex-direction: column; gap: 8px; }

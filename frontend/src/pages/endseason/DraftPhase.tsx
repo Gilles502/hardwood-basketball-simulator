@@ -14,7 +14,7 @@ import { DraftSummary } from './draft/DraftSummary';
 import { picksPerRound, type DraftState } from './draft/draftRoom';
 import './Draft.css';
 
-const AUTO_MS = 1500;
+const AUTO_MS = 400;
 
 export const DraftPhase: React.FC<PhaseProps> = ({ readOnly, onBar }) => {
   const { leagueData, fetchLeagueData } = useLeagueStore();

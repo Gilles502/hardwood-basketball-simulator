@@ -10,7 +10,8 @@ import { normalizeRole } from '../utils/roles';
 import { TradeRosterTable } from './trades/TradeRosterTable';
 import { TradeFinderPanel } from './trades/TradeFinderPanel';
 import { TradeBlockPanel } from './trades/TradeBlockPanel';
-import type { PlayerAsset, PickAsset, TeamAssets, TradeOffer, TradeBlockOffer } from './trades/types';
+import { TradeRequestsPanel } from './trades/TradeRequestsPanel';
+import type { PlayerAsset, PickAsset, TeamAssets, TradeOffer, TradeBlockOffer, TradeRequestRow } from './trades/types';
 import './dashboard/Dashboard.css'; // dash-header / dash-tabs, shared with the Dashboard
 import './trades/TradeMachine.css';
 import './trades/TradeTabs.css';
@@ -46,9 +47,13 @@ interface TradesProps {
   initialTarget?: TradeTarget | null;
 }
 
+/** The protection each selected pick carries in the deal: the one chosen here, else the one it already has. */
+const dealProtections = (selected: string[], chosen: Record<string, string>, assets: TeamAssets): Record<string, string> =>
+  Object.fromEntries(selected.map((key) => [key, chosen[key] || assets.picks.find((p) => p.key === key)?.protection || 'Unprotected']));
+
 export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
   const { leagueData, fetchLeagueData } = useLeagueStore();
-  const [activeSubTab, setActiveSubTab] = useState<'machine' | 'finder' | 'block' | 'history'>('machine');
+  const [activeSubTab, setActiveSubTab] = useState<'machine' | 'finder' | 'block' | 'requests' | 'history'>('machine');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -60,6 +65,8 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
   const [partnerTeam, setPartnerTeam] = useState<string>(initialTarget?.team ?? '');
   // Selected once the partner's assets arrive, so the reset in fetchCustomTradeAssets doesn't wipe it.
   const pendingPartnerPlayer = useRef<string | null>(initialTarget?.player ?? null);
+  // The team that player plays for: from initialTarget, or from "Trade for" on the Requests tab.
+  const pendingPartnerTeam = useRef<string | null>(initialTarget?.team ?? null);
   const [teamC, setTeamC] = useState<string>('');
   const [threeTeamView, setThreeTeamView] = useState<'A' | 'B' | 'C'>('A');
   
@@ -74,6 +81,7 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
   const [selectedPartnerPicks, setSelectedPartnerPicks] = useState<string[]>([]);
   const [userPickProtections, setUserPickProtections] = useState<Record<string, string>>({});
   const [partnerPickProtections, setPartnerPickProtections] = useState<Record<string, string>>({});
+  const [protectionOptions, setProtectionOptions] = useState<string[]>(['Unprotected']);
   
   // Selected 3-Team routing
   // Team A assets routing: { playerName: 'B' | 'C', pickKey: 'B' | 'C' }
@@ -127,6 +135,9 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
   // -------------------------------------------------------------
   const [blockOffers, setBlockOffers] = useState<TradeBlockOffer[]>([]);
   const [blockLoading, setBlockLoading] = useState(false);
+  // Requests tab: players who asked to be traded (GET /api/trade-requests)
+  const [tradeRequests, setTradeRequests] = useState<TradeRequestRow[]>([]);
+  const [requestsLoading, setRequestsLoading] = useState(false);
 
   useEffect(() => {
     if (!leagueData) {
@@ -153,12 +164,13 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
       } else {
         setUserAssets(data.player_team_assets || { players: [], picks: [] });
         setPartnerAssets(data.partner_team_assets || { players: [], picks: [] });
+        setProtectionOptions(data.pick_protection_options || ['Unprotected']);
         setIsTradeWindowOpen(data.trade_window_open);
         setTradeWindowMessage(data.trade_window_message || '');
         setLeagueState(data.league_state);
         
         // Kept (not consumed) so a repeated load of the same partner still selects him.
-        const pending = pTeamName === initialTarget?.team ? pendingPartnerPlayer.current : null;
+        const pending = pTeamName === pendingPartnerTeam.current ? pendingPartnerPlayer.current : null;
         const partnerPlayers: PlayerAsset[] = data.partner_team_assets?.players || [];
         setSelectedUserPlayers([]);
         setSelectedUserPicks([]);
@@ -192,13 +204,15 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
       fetchFinderAssets();
     } else if (activeSubTab === 'block') {
       fetchBlockOffers();
+    } else if (activeSubTab === 'requests') {
+      fetchTradeRequests();
     }
   }, [activeSubTab, partnerTeam]);
 
   // Once the user picks another partner, the "Trade for" player no longer applies.
   useEffect(() => {
-    if (partnerTeam !== initialTarget?.team) pendingPartnerPlayer.current = null;
-  }, [partnerTeam, initialTarget]);
+    if (partnerTeam !== pendingPartnerTeam.current) pendingPartnerPlayer.current = null;
+  }, [partnerTeam]);
 
   const fetchFinderAssets = async () => {
     setLoading(true);
@@ -216,6 +230,33 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
       setLoading(false);
     }
   };
+
+  const fetchTradeRequests = async () => {
+    setRequestsLoading(true);
+    try {
+      const response = await fetch(`/api/trade-requests?_t=${Date.now()}`);
+      const data = await response.json();
+      setTradeRequests(data.requests || []);
+    } catch (err) {
+      console.error('Failed to load trade requests:', err);
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
+
+  // "Trade for" on the Requests tab: open the Machine on his team with him selected.
+  const handleTradeForRequest = (team: string, player: string) => {
+    pendingPartnerTeam.current = team;
+    pendingPartnerPlayer.current = player;
+    setTradeMode('2-team');
+    setPartnerTeam(team);
+    setActiveSubTab('machine');
+  };
+
+  // The count on the tab label, loaded once with the page.
+  useEffect(() => {
+    fetchTradeRequests();
+  }, []);
 
   const fetchBlockOffers = async () => {
     setBlockLoading(true);
@@ -244,21 +285,9 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
         return;
       }
 
-      const completeUserProtections: Record<string, string> = { ...userPickProtections };
-      selectedUserPicks.forEach(pk => {
-        if (!completeUserProtections[pk]) {
-          const found = userAssets.picks.find(p => p.key === pk);
-          completeUserProtections[pk] = found?.protection || 'Unprotected';
-        }
-      });
+      const completeUserProtections = dealProtections(selectedUserPicks, userPickProtections, userAssets);
 
-      const completePartnerProtections: Record<string, string> = { ...partnerPickProtections };
-      selectedPartnerPicks.forEach(pk => {
-        if (!completePartnerProtections[pk]) {
-          const found = partnerAssets.picks.find(p => p.key === pk);
-          completePartnerProtections[pk] = found?.protection || 'Unprotected';
-        }
-      });
+      const completePartnerProtections = dealProtections(selectedPartnerPicks, partnerPickProtections, partnerAssets);
 
       try {
         const response = await fetch('/api/validate-user-trade', {
@@ -400,21 +429,9 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
     setCounterLoading(true);
     setError(null);
 
-    const completeUserProtections: Record<string, string> = { ...userPickProtections };
-    selectedUserPicks.forEach(pk => {
-      if (!completeUserProtections[pk]) {
-        const found = userAssets.picks.find(p => p.key === pk);
-        completeUserProtections[pk] = found?.protection || 'Unprotected';
-      }
-    });
+    const completeUserProtections = dealProtections(selectedUserPicks, userPickProtections, userAssets);
 
-    const completePartnerProtections: Record<string, string> = { ...partnerPickProtections };
-    selectedPartnerPicks.forEach(pk => {
-      if (!completePartnerProtections[pk]) {
-        const found = partnerAssets.picks.find(p => p.key === pk);
-        completePartnerProtections[pk] = found?.protection || 'Unprotected';
-      }
-    });
+    const completePartnerProtections = dealProtections(selectedPartnerPicks, partnerPickProtections, partnerAssets);
 
     try {
       const response = await fetch('/api/counter-offer-trade', {
@@ -468,21 +485,9 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
     setLoading(true);
     setError(null);
 
-    const completeUserProtections: Record<string, string> = { ...userPickProtections };
-    selectedUserPicks.forEach(pk => {
-      if (!completeUserProtections[pk]) {
-        const found = userAssets.picks.find(p => p.key === pk);
-        completeUserProtections[pk] = found?.protection || 'Unprotected';
-      }
-    });
+    const completeUserProtections = dealProtections(selectedUserPicks, userPickProtections, userAssets);
 
-    const completePartnerProtections: Record<string, string> = { ...partnerPickProtections };
-    selectedPartnerPicks.forEach(pk => {
-      if (!completePartnerProtections[pk]) {
-        const found = partnerAssets.picks.find(p => p.key === pk);
-        completePartnerProtections[pk] = found?.protection || 'Unprotected';
-      }
-    });
+    const completePartnerProtections = dealProtections(selectedPartnerPicks, partnerPickProtections, partnerAssets);
 
     try {
       const response = await fetch('/api/execute-user-trade', {
@@ -642,6 +647,8 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
     setPartnerTeam(offer.partner_team);
     setActiveSubTab('machine');
     setTimeout(() => {
+      setUserPickProtections({});
+      setPartnerPickProtections({});
       if (offer.giving_players) {
         setSelectedUserPlayers(offer.giving_players.map(p => p.name));
       }
@@ -885,6 +892,34 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
     </span>
   );
 
+  // A pick in the deal: its protection can be chosen here when the sending team is free to set one.
+  const renderPickChip = (
+    key: string,
+    assets: TeamAssets,
+    chosen: Record<string, string>,
+    setChosen: React.Dispatch<React.SetStateAction<Record<string, string>>>,
+    onRemove: () => void,
+  ) => {
+    const pick = assets.picks.find((x) => x.key === key);
+    const label = pick?.display_name || key;
+    return (
+      <span key={key} className="tm-chip">
+        {label}
+        {pick?.can_protect && (
+          <select
+            className="tm-protect"
+            aria-label={`Protection for ${label}`}
+            value={chosen[key] || 'Unprotected'}
+            onChange={(e) => setChosen((prev) => ({ ...prev, [key]: e.target.value }))}
+          >
+            {protectionOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+          </select>
+        )}
+        <button type="button" aria-label={`Remove ${label}`} onClick={onRemove}><X size={14} /></button>
+      </span>
+    );
+  };
+
   const formatMoney = (millions: number): string => `$${millions.toFixed(1)}M`;
   const netLabel = `${netSalaryDiff > 0 ? '+' : netSalaryDiff < 0 ? '−' : ''}${formatMoney(Math.abs(netSalaryDiff))}`;
 
@@ -971,6 +1006,7 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
           { id: 'machine', label: 'Trade Machine' },
           { id: 'finder', label: 'Trade Finder' },
           { id: 'block', label: 'Trade Block' },
+          { id: 'requests', label: tradeRequests.length > 0 ? `Requests ${tradeRequests.length}` : 'Requests' },
           { id: 'history', label: 'History' },
         ]}
       />
@@ -1103,10 +1139,8 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
                           const p = userAssets.players.find((x) => x.name === name);
                           return renderChip(name, name, p ? formatMoney(p.salary) : '', () => setSelectedUserPlayers((prev) => prev.filter((n) => n !== name)));
                         })}
-                        {selectedUserPicks.map((key) => {
-                          const pick = userAssets.picks.find((x) => x.key === key);
-                          return renderChip(key, pick?.display_name || key, '', () => setSelectedUserPicks((prev) => prev.filter((k) => k !== key)));
-                        })}
+                        {selectedUserPicks.map((key) => renderPickChip(key, userAssets, userPickProtections, setUserPickProtections,
+                          () => setSelectedUserPicks((prev) => prev.filter((k) => k !== key))))}
                       </div>
                       <div className="tm-half tm-half-get">
                         <div className="tm-half-head"><span>You get</span><span>{formatMoney(totalIncomingSalary)}</span></div>
@@ -1117,10 +1151,8 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
                           const p = partnerAssets.players.find((x) => x.name === name);
                           return renderChip(name, name, p ? formatMoney(p.salary) : '', () => setSelectedPartnerPlayers((prev) => prev.filter((n) => n !== name)));
                         })}
-                        {selectedPartnerPicks.map((key) => {
-                          const pick = partnerAssets.picks.find((x) => x.key === key);
-                          return renderChip(key, pick?.display_name || key, '', () => setSelectedPartnerPicks((prev) => prev.filter((k) => k !== key)));
-                        })}
+                        {selectedPartnerPicks.map((key) => renderPickChip(key, partnerAssets, partnerPickProtections, setPartnerPickProtections,
+                          () => setSelectedPartnerPicks((prev) => prev.filter((k) => k !== key))))}
                       </div>
                     </div>
 
@@ -1325,7 +1357,12 @@ export const Trades: React.FC<TradesProps> = ({ initialTarget = null }) => {
             />
           )}
 
-          {/* SUB-TAB 4: HISTORY */}
+          {/* SUB-TAB 4: TRADE REQUESTS (players who asked out) */}
+          {activeSubTab === 'requests' && (
+            <TradeRequestsPanel rows={tradeRequests} loading={requestsLoading} onTradeFor={handleTradeForRequest} />
+          )}
+
+          {/* SUB-TAB 5: HISTORY */}
           {activeSubTab === 'history' && (
             <TradeHistoryLog
               initialRawTrades={[

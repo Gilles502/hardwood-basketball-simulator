@@ -149,5 +149,5 @@ def user_side_motive(team: str) -> SideMotive:
 
 def log_line(motive: TradeMotive, a_str_by_team: Dict[str, str]) -> str:
     """English line for trades_history.txt and news: who gets what, then the why."""
-    got = "; ".join(f"{team} get {text}" for team, text in a_str_by_team.items())
+    got = "; ".join(f"{team} get {text or 'salary relief'}" for team, text in a_str_by_team.items())
     return f"{got}. Why: {motive.why}" if motive.why else got

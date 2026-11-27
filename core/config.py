@@ -61,14 +61,23 @@ class Offseason:
     # How many picks the lottery draws; the other lottery teams follow in seed order.
     LOTTERY_DRAWN_PICKS: int = 4
     
-    # Parameters for rookie generation (rating and potential)
-    ROOKIE_RATING_MIN: int = 67
+    # Generated rookies (classes without a league file): OVR on a triangle, POT = OVR + a gap on a triangle.
+    # Calibrated on the curated 2003-2023 classes: mean ~68 OVR / ~75 POT, 5-13 prospects at POT 85+, 2-5 at
+    # OVR 75+ per class. The old ranges (OVR 67-78, POT 76-94) gave ~28 at POT 85+ and inflated a long save.
+    ROOKIE_RATING_MIN: int = 58
     ROOKIE_RATING_MAX: int = 78
-    ROOKIE_POTENTIAL_MIN: int = 76
-    ROOKIE_POTENTIAL_MAX: int = 94
-    
-    # Probability of generating a generational "star" with potential > 95
-    GENERATIONAL_TALENT_CHANCE: float = 2.5 # Slightly increased chance
+    ROOKIE_RATING_MODE: int = 67
+    ROOKIE_POT_GAP_MIN: int = 1
+    ROOKIE_POT_GAP_MAX: int = 26
+    ROOKIE_POT_GAP_MODE: int = 5
+    # Age of a generated prospect (weights) and the share of his POT gap he keeps at that age: a 23-year-old senior
+    # is closer to his ceiling than a 19-year-old (the age was 18-23 flat, half a class at 22-23 with any POT).
+    ROOKIE_AGE_WEIGHTS: dict = field(default_factory=lambda: {19: 30, 20: 26, 21: 20, 22: 14, 23: 10})
+    ROOKIE_POT_GAP_AGE_SCALE: dict = field(default_factory=lambda: {19: 1.0, 20: 0.9, 21: 0.8, 22: 0.65, 23: 0.5})
+    GENERATIONAL_TALENT_AGES: tuple = (18, 19)
+
+    # Probability (%) of a generational talent (POT 95-99) per generated rookie (~1 class in 4 has one)
+    GENERATIONAL_TALENT_CHANCE: float = 0.4
 
     ROSTER_SIZE_LIMIT: int = 18
     ROSTER_SIZE_MIN: int = 15
@@ -105,21 +114,16 @@ class Events:
     STEAL_ATTEMPT_BASE_CHANCE: float = 4.0 # Base probability per possession (calibrated for 7-8 team steals per game)
     STEAL_ABILITY_FACTOR: float = 16.0 # Diminishing returns naturale sui rating 90+
     MAX_STEALS_PER_GAME: int = 999 # No artificial cap on steals
-    REBOUND_RATING_EXPONENT: float = 1.52 # Sharpens separation between elite rebounders (85-95) and guards (50-65)
+    # Who gets a rebound: rating ** exponent x role multiplier. Was 1.52 with C 1.48 / PG 0.62 inside: starting
+    # guards took 2.8 a game (NBA ~4) and the leader 17-19. Engine lab, 450 games: 2002 starters C 9.4, PF 6.7,
+    # SF 4.1, SG 4.2, PG 3.6, leader 13.5.
+    REBOUND_RATING_EXPONENT: float = 1.35
     # Multipliers by type of missed shot: centers and power forwards control interior glass; long rebounds disperse more
     REBOUND_ROLE_MULTIPLIER_INTERIOR: dict = field(default_factory=lambda: {
-        'C': 1.48,   # Centers dominate the paint
-        'PF': 1.30,  # Power Forwards
-        'SF': 0.95,  # Small Forwards
-        'SG': 0.72,  # Shooting Guards
-        'PG': 0.62,  # Point Guards
+        'C': 1.35, 'PF': 1.15, 'SF': 0.95, 'SG': 0.85, 'PG': 0.80,
     })
     REBOUND_ROLE_MULTIPLIER_PERIMETER: dict = field(default_factory=lambda: {
-        'C': 1.25,   # Long perimeter rebound
-        'PF': 1.18,  # Power Forward
-        'SF': 1.00,  # Small Forward
-        'SG': 0.85,  # Shooting Guard
-        'PG': 0.78,  # Point Guard
+        'C': 1.15, 'PF': 1.08, 'SF': 1.00, 'SG': 0.95, 'PG': 0.92,
     })
     TURNOVER_MODIFIER_FACTOR: float = 10.0
     PASS_TURNOVER_ABILITY_FACTOR: float = 20.0
@@ -128,6 +132,88 @@ class Events:
 class Assist:
     """Configuration for assists."""
     MAX_PER_GAME: int = 999
+
+@dataclass(frozen=True)
+class Playmaking:
+    """Score-or-pass choices in the possession engine (core/game_engine.Partita helpers). Each used to be a hard
+    threshold (touch <= 70 to pass on a drive, -30 extra-pass chance for any good shooter...): passers like Nash
+    finished every drive and scorer-passers like Luka passed first on every DROP pick and roll."""
+    # Drive with no help (_drive_dish_chance): playmaking x PLAY + dish x DISH + (vision - 50) x VISION
+    # - hero ball x HERO - (touch - TOUCH_FROM) x TOUCH - (close/dunk - FINISHER_FROM) x FINISHER - OFFSET, 0..MAX.
+    DRIVE_DISH_PLAY: float = 0.45
+    DRIVE_DISH_DISH: float = 0.30
+    DRIVE_DISH_VISION: float = 0.35
+    DRIVE_DISH_HERO: float = 0.40
+    DRIVE_DISH_TOUCH_FROM: float = 65.0
+    DRIVE_DISH_TOUCH: float = 0.50
+    DRIVE_DISH_FINISHER_FROM: float = 78.0
+    DRIVE_DISH_FINISHER: float = 1.0
+    DRIVE_DISH_OFFSET: float = 15.0
+    DRIVE_DISH_MAX: float = 95.0
+    # Kick-out on help (_kickout_chance): vision/pass-out/playmaking minus the finisher malus (close/dunk over 78)
+    # and hero ball over HERO_FROM (it read touch, which is how often a player gets the ball, not how he uses it).
+    KICKOUT_HERO_FROM: float = 55.0
+    KICKOUT_HERO: float = 0.60
+    # Extra pass on the perimeter (_extra_pass_chance): an open good shooter loses (best shot - FROM) x PER_POINT
+    # of pass chance, up to MAX, reduced by (vision - VISION_FROM) x VISION_RELIEF (at most VISION_RELIEF_MAX).
+    # It was a flat -30 for anyone with 3PT >= 78 or MID >= 80: Nash and Curry stopped moving the ball.
+    EXTRA_PASS_SHOOTER_FROM: float = 70.0
+    EXTRA_PASS_PER_POINT: float = 2.0
+    EXTRA_PASS_MAX: float = 32.0
+    EXTRA_PASS_VISION_FROM: float = 70.0
+    EXTRA_PASS_VISION_RELIEF: float = 0.015
+    EXTRA_PASS_VISION_RELIEF_MAX: float = 0.50
+    # P&R against a DROP big (_drop_pull_up_share): the handler keeps it (pull-up) with a logistic share of
+    # (max(3PT, MID) + hero x HERO) - (playmaking x PLAY + vision x VISION), over SCALE, clamped MIN..MAX. Handlers
+    # under SKILL_FLOOR at both shooting and playmaking keep the old weak read. Before, playmaking >= 75 was tested
+    # first: Luka passed to the roller on 63% of DROP picks whatever his jumper.
+    DROP_HERO: float = 0.50
+    DROP_PLAY: float = 0.80
+    DROP_VISION: float = 0.60
+    DROP_SCALE: float = 15.0
+    DROP_SHARE_MIN: float = 0.05
+    DROP_SHARE_MAX: float = 0.85
+    DROP_SKILL_FLOOR: float = 70.0
+    # Who starts a possession (_initiation_factor): (1 + skill/130) x (1 + CREATOR_MAX x ramp) x label, where skill
+    # = vision .40 + handling .30 + shot IQ .15 + playmaking .15 and ramp goes 0 -> 1 as handling .4 + vision .4 +
+    # playmaking .2 goes CREATOR_FROM -> CREATOR_TO. The label keeps a share (PG / SG). It was PG x1.40 then steps
+    # by vision: creators not labeled PG (Harden, LeBron, Jokic) ran far fewer possessions.
+    INIT_CREATOR_FROM: float = 60.0
+    INIT_CREATOR_TO: float = 90.0
+    INIT_CREATOR_MAX: float = 0.55
+    INIT_LABEL: dict = field(default_factory=lambda: {'PG': 1.20, 'SG': 1.05})
+    # Shot volume is paid in percentage (_volume_tax), never with a cap on shots: jump shots lose (FGA - FROM) x
+    # PER_FGA points of make chance up to HIGH_FROM FGA in the game, then HIGH_PER_FGA more per shot, up to MAX;
+    # shots at the rim lose INTERIOR_SHARE of it. It stopped at -6 and spared the rim: 20-shot stars shot ~50%.
+    # The rim paid half: lone bigs (Embiid, Giannis) took 24 shots a night at 65% TS.
+    VOLUME_TAX_FROM: int = 14
+    VOLUME_TAX_PER_FGA: float = 0.5
+    VOLUME_TAX_HIGH_FROM: int = 18
+    VOLUME_TAX_HIGH_PER_FGA: float = 1.0
+    VOLUME_TAX_MAX: float = 12.0
+    VOLUME_TAX_INTERIOR_SHARE: float = 0.75
+    # Focus of a solo-carry star (Squadra.focus_rank_weights): up to this many points of focus chance move to the #1.
+    # 14 (2026-11-26) gave 7 players 30+ PPG in a modern league, lone stars 28 PPG on a higher TS% than shared ones.
+    SOLO_CARRY_P1_BONUS: float = 8.0
+    # Crowded paint at the rim (Partita._crowded_paint_malus): from CROWD_FGA_FROM shots in the game, a shooter loses
+    # PER_POINT x weakness (max MAX) of make chance, weakness = the larger of (MATES_OVR - teammates' average OVR) and
+    # (own OVR - teammates' average - STAR_GAP). Only guards and wings paid it, on an absolute line: a 95 big with
+    # 79-rated teammates never did.
+    CROWD_FGA_FROM: int = 16
+    CROWD_MATES_OVR: float = 74.5
+    CROWD_STAR_GAP: float = 10.0
+    CROWD_PER_POINT: float = 0.6
+    CROWD_MAX: float = 3.0
+    # Post-up finish (Partita._post_fade_chance): a post scorer who shoots and loves the mid-range (rating >= MID_FROM,
+    # tendency >= TEND_FROM) turns into a fadeaway jumper with BASE + PER_TEND x (tendency - TEND_FROM) + PER_EDGE x
+    # (mid rating - best of post control / close shot) percent, from 0 to MAX. Every post-up ended at the rim:
+    # Dirk (mid 93) took 16 shots a night at the rim and 3.6 from mid-range.
+    POST_FADE_MID_FROM: float = 78.0
+    POST_FADE_TEND_FROM: float = 55.0
+    POST_FADE_BASE: float = 10.0
+    POST_FADE_PER_TEND: float = 1.0
+    POST_FADE_PER_EDGE: float = 1.0
+    POST_FADE_MAX: float = 65.0
 
 @dataclass(frozen=True)
 class HomeCourt:
@@ -145,7 +231,10 @@ class HomeCourt:
 class Progression:
     """## CHANGED: Stronger regression and development tied to experience."""
 
-    DEV_FACTOR_POTENTIAL_GAP: float = 0.30
+    # Share of the gap to potential a young player (<= 25) closes in a year with full minutes. 0.30 took everyone
+    # who played to his ceiling by 25: a progression-only lab (20 offseasons, 8 seeds) had 85+ players 32 -> 48 at
+    # year 10; 0.25 keeps the talent curve near the start (top-8 77.6 -> 77.4, 85+ 32 -> 30 at year 20).
+    DEV_FACTOR_POTENTIAL_GAP: float = 0.25
     DEV_POINT_MAX_GAIN_PER_YEAR: int = 7
     DEV_SKILL_POINT_MULTIPLIER: int = 7
 
@@ -156,6 +245,35 @@ class Progression:
     BUST_THRESHOLD_OVR: int = 75
     BUST_THRESHOLD_POTENZIALE: int = 80
 
+    # Variable potential (Phase 2b): every offseason a player up to POT_DRIFT_MAX_AGE sees his potential move.
+    # A breakout (POT_BREAKOUT_CHANCE, more after a strong season with real minutes) raises it, a setback
+    # (POT_SETBACK_CHANCE) lowers it, otherwise it drifts by -1/0/+1. Before, everyone who played reached his
+    # birth potential by 25: no busts, no steals, and a long save filled with 85+ players.
+    POT_DRIFT_MAX_AGE: int = 24
+    POT_BREAKOUT_CHANCE: float = 0.05
+    POT_BREAKOUT_STRONG_SEASON_BONUS: float = 0.07   # added when the season was >= 3 over his OVR with 18+ minutes
+    POT_BREAKOUT_RANGE: tuple = (3, 8)
+    POT_SETBACK_CHANCE: float = 0.14
+    POT_SETBACK_RANGE: tuple = (2, 5)
+    POT_NOISE: tuple = (-1, 0, 0, 1)
+    # Era-neutral performance (core/models.py league_season_scales): a season's PVS and the per-game totals that
+    # push progression (24/28 PPG, 9 APG, 11.5 RPG) are measured against these league means of players with
+    # PVS_SCALE_MIN_MINUTES (2002 seasons of a long save: offense / defense index, points, assists, rebounds per 36).
+    # Without it the PVS minus OVR of the league went from -0.6 (2002) to +2.1 (2026): OVR inflation.
+    PVS_REFERENCE: dict = field(default_factory=lambda: {'off': 12.5, 'def': 13.9, 'pts': 12.9, 'ast': 2.95, 'reb': 6.3})
+    PVS_SCALE_MIN_MINUTES: float = 500.0
+    PVS_SCALE_MIN_PLAYERS: int = 60
+    # Aging stars: from 32 a player with OVR >= AGING_STAR_MIN_OVR whose season PVS is at least his OVR +
+    # AGING_STAR_GOOD_SEASON_DELTA (about the best quarter of veteran star seasons) loses at most the AGING_STAR_LOSS
+    # of his age ((max age, change), first match). Before, everyone lost 2-7 a year from 33: nobody played past 37.
+    AGING_STAR_MIN_OVR: int = 84
+    AGING_STAR_GOOD_SEASON_DELTA: float = -2.0
+    AGING_STAR_LOSS: tuple = ((34, 0), (36, -1), (38, -2), (99, -3))
+    # Usage tendencies move with every OVR point a player under 33 gains or loses (the curated league's slope).
+    USAGE_TENDENCY_PER_OVR: dict = field(default_factory=lambda: {'touch_tendency': 1.5, 'hero_ball_tendency': 0.8})
+    # ...a gain only up to the tendency's place on that slope for the new OVR (ROOKIEGEN line) + this margin.
+    USAGE_TARGET_MARGIN: float = 10.0   # curated 2002 stars sit up to ~9 above it (Kobe +7, Iverson +9, Shaq +7)
+
 
 @dataclass(frozen=True)
 class Simulation:
@@ -164,6 +282,19 @@ class Simulation:
     
     
     MVP_WIN_BONUS: float = 1.8
+    # Veterans lose touches in Partita._simula_possesso from these ages (elite = star, OVR >= ELITE_OVR or the 1st
+    # option). Non-elite players started at 30: Nash at 31 and 84 OVR lost the ball next to a 27-year-old Dirk.
+    VETERAN_TOUCH_START_AGE: int = 33
+    VETERAN_TOUCH_START_AGE_ELITE: int = 35
+    VETERAN_TOUCH_ELITE_OVR: int = 86
+    # Playoff half-court: the chance a playoff possession takes one extra second to set up. It was +1-2 s on every
+    # possession: ~12% fewer possessions than the regular season (NBA playoffs play ~2-4% slower).
+    PLAYOFF_EXTRA_SECOND_CHANCE: float = 0.35
+    # Load management by era (main.py Tournament._load_management_factor): the rest chances of tired stars are
+    # scaled by EARLY_FACTOR up to the first ramp year, then rise linearly to the full chance at the second.
+    # It was the full chance in every era: 85+ players averaged ~71 GP in 2002 as in 2026.
+    LOAD_MANAGEMENT_EARLY_FACTOR: float = 0.25
+    LOAD_MANAGEMENT_RAMP_YEARS: tuple = (2012, 2019)
 @dataclass(frozen=True)
 class Coaching:
     """Configuration for coach logic and substitutions. (v16.0 - Smart Coach)"""
@@ -180,6 +311,28 @@ class Coaching:
     FOUL_OUT_LIMIT: int = 6
     
     MINUTES_TARGET_TOLERANCE: int = 4
+
+    # Coach development, once per offseason (Tournament._gestisci_progressione_coach). Ratings grow only after a
+    # season over expectations: +1 per GROWTH_WINS_PER_POINT wins above the expected, at most
+    # GROWTH_MAX_PER_SEASON, up to the coach's potential and before GROWTH_MAX_AGE. From DECLINE_AGE offense and
+    # defense fall 1 a year (floor DECLINE_FLOOR). It was +1 a year for almost everyone plus +1 per level-up
+    # in games: after 25 seasons the 30 head coaches averaged 90.5 OFF / 91.1 DEF.
+    # Regular-season minutes cap of a rotation player's target, by season start year ((last year, cap), ...): stars
+    # played 41-42 minutes in 2002 and rarely 37 in the 2020s. Played minutes run ~1.5 over the target.
+    # Playoff targets may go PLAYOFF_MINUTES_EXTRA higher.
+    MINUTES_CAP_BY_YEAR: tuple = ((2009, 40), (2016, 38), (9999, 36))
+    PLAYOFF_MINUTES_EXTRA: int = 3
+    GROWTH_WINS_PER_POINT: int = 8
+    GROWTH_MAX_PER_SEASON: int = 2
+    GROWTH_MAX_AGE: int = 60
+    DECLINE_AGE: int = 62
+    DECLINE_FLOOR: int = 60
+    # A CPU head coach under contract retires by age (main.coach_retires_now): from RETIRE_MIN_AGE with
+    # RETIRE_BASE_CHANCE + RETIRE_CHANCE_PER_YEAR per year over it, always at RETIRE_MAX_AGE (one coached at 84).
+    RETIRE_MIN_AGE: int = 66
+    RETIRE_BASE_CHANCE: float = 0.15
+    RETIRE_CHANCE_PER_YEAR: float = 0.10
+    RETIRE_MAX_AGE: int = 75
 
 @dataclass(frozen=True)
 class Economy:
@@ -206,6 +359,9 @@ class Economy:
         "Spendaccione": "high", "Esigente": "high", "Bilanciato": "mid",
         "Ricostruttore": "low", "Risparmiatore": "low",
     })
+    # A 'low' spending owner (saver, rebuilder) pays at most this share of the cap over the luxury tax, in free
+    # agency (Bird rights) and in extensions. It was tax + $30M flat: savers ended over the second apron.
+    LOW_OWNER_OVER_TAX_SHARE: float = 0.05
     # Board profile scales (1 = low, 5 = high)
     OWNER_BOARD_PATIENCE: dict = field(default_factory=lambda: {
         "Esigente": 1, "Spendaccione": 2, "Risparmiatore": 3, "Bilanciato": 4, "Ricostruttore": 5,
@@ -247,6 +403,8 @@ class Economy:
 
     MIN_SALARY: float = 3.5
     MAX_SALARY_THEORETICAL: float = 60.0
+    # Max contract: share of the cap one player can earn in year 1 (user and CPU, every FA path).
+    MAX_CONTRACT_CAP_PCT: float = 0.35
 
     YEARLY_CAPS: dict = field(default_factory=lambda: {
         2002: 40.27, 2003: 43.84, 2004: 43.87, 2005: 49.50,
@@ -449,6 +607,14 @@ class Injuries:
     # Check at every substitution interval (~16 times per game)
     # Calibrated for realistic NBA rates (~3-4 injuries per franchise per season, 90-110 league-wide, 70% Day-to-Day)
     BASE_INJURY_CHANCE: float = 0.075
+    # Injuries are counted in calendar days (giorni_infortunio_rimanenti). The catalog in game_engine lists games:
+    # a length is games x DAYS_PER_GAME. Regular season: one day off per calendar day; playoffs (no calendar days):
+    # DAYS_PER_GAME per team game; the offseason heals OFFSEASON_HEAL_DAYS.
+    DAYS_PER_GAME: float = 2.0
+    OFFSEASON_HEAL_DAYS: int = 150
+    # Share (%) of injuries by tier: day-to-day, minor, moderate, severe; the rest is season-ending. Was 72 / 19 /
+    # 6.5 / 1.8 (0.7 season-ending): in 3 seasons not one 80+ player missed 22 games.
+    SEVERITY_SHARES: tuple = (58.0, 24.0, 10.0, 5.0)
 
     # Wear and fatigue factors
     STAMINA_IMPACT_FACTOR: float = 0.0010
@@ -474,9 +640,16 @@ class Dashboard:
 
 @dataclass(frozen=True)
 class History:
-    """What the History page shows (display only: induction rules live elsewhere)."""
-    # Hall of Fame: inductees below this score are not listed; tiers are (name, min score), highest first.
-    HOF_MIN_SCORE: int = 300
+    """What the History page shows, and the Hall of Fame election bar (Tournament Hall of Fame vote)."""
+    # Hall of Fame: the score to be elected and listed; tiers are (name, min score), highest first.
+    HOF_MIN_SCORE: int = 300     # also the election bar: a class may be empty (it took 110, or 45 in a weak year)
+    HOF_MAX_CLASS: int = 6
+    # A title's worth by the player's share in it (contribution = PPG + 1.2 RPG + 1.5 APG, main.calcola_hof_score):
+    # (min contribution, points), highest first; below the last, nothing. MVP / Finals MVP / All-NBA that season = a
+    # leader. Only leader titles count for the 3- and 5-title bonuses. The old bars (18 -> 75, 10 -> 35, 5 -> 10, all
+    # counting for the bonus) elected 5-ring bench players (5.6 PPG) above Curry and Nowitzki.
+    HOF_TITLE_POINTS: tuple = ((30.0, 75), (20.0, 25), (12.0, 10))
+    HOF_TITLES_BONUS: tuple = ((3, 60), (5, 80))
     HOF_TIERS: tuple = (("Legends", 600), ("Hall of Famers", 300))
     # Championships: league standings rows shown per season, and the window for the "N in M" title run.
     TOP_STANDINGS: int = 3
@@ -614,6 +787,106 @@ class RookieGeneration:
         "High IQ Playmaker": {"chance": 5, "min_pot": 82, "bonus_ovr": (0, 3)},
         "NBA Ready Prospect": {"chance": 8, "min_pot": 80, "bonus_ovr": (3, 6)}, # High Floor, Low Ceiling
         "Injury Prone": {"chance": 5, "min_pot": 86, "bonus_ovr": (-3, -1)}
+    })
+
+    # Role profile of a generated prospect (offseason/draft.py _genera_attributi_per_archetipo): each skill starts at
+    # OVR + this offset, the mean gap of the curated 2002 league (data/leagues/fictional_2002) for that role. Skills
+    # the archetype names (defining / supporting / negative) are then raised or lowered. Before, every unnamed skill
+    # was OVR - 10 at every role: centers shot threes like guards, guards posted up and blocked like bigs.
+    # Speed, acceleration, strength and vertical keep their absolute ranges per role (a young athlete is fast).
+    ROLE_SKILL_OFFSETS: dict = field(default_factory=lambda: {
+        'PG': {'close_shot_rating': -4, 'mid_range_shot_rating': -1, 'three_point_shot_rating': -13, 'free_throw_rating': -5,
+               'draw_foul_rating': -3, 'shot_iq': 2, 'offensive_iq_rating': 1, 'defensive_iq_rating': -1,
+               'passing_accuracy': 3, 'passing_vision': 3, 'offensive_rebound_rating': -28, 'defensive_rebound_rating': -6,
+               'perimeter_defense_rating': 0, 'interior_defense_rating': -5, 'block_rating': -45, 'steal_rating': -13,
+               'stamina': 8, 'ball_handling': 4, 'dunk_rating': -27, 'post_control_rating': -38},
+        'SG': {'close_shot_rating': -1, 'mid_range_shot_rating': 1, 'three_point_shot_rating': -11, 'free_throw_rating': -6,
+               'draw_foul_rating': -2, 'shot_iq': 2, 'offensive_iq_rating': 2, 'defensive_iq_rating': -1,
+               'passing_accuracy': -3, 'passing_vision': -4, 'offensive_rebound_rating': -21, 'defensive_rebound_rating': -5,
+               'perimeter_defense_rating': -1, 'interior_defense_rating': -5, 'block_rating': -45, 'steal_rating': -14,
+               'stamina': 8, 'ball_handling': 1, 'dunk_rating': -23, 'post_control_rating': -39},
+        'SF': {'close_shot_rating': -1, 'mid_range_shot_rating': 0, 'three_point_shot_rating': -12, 'free_throw_rating': -6,
+               'draw_foul_rating': -3, 'shot_iq': 2, 'offensive_iq_rating': 1, 'defensive_iq_rating': 0,
+               'passing_accuracy': -4, 'passing_vision': -4, 'offensive_rebound_rating': -5, 'defensive_rebound_rating': -4,
+               'perimeter_defense_rating': 0, 'interior_defense_rating': -4, 'block_rating': -25, 'steal_rating': -20,
+               'stamina': 8, 'ball_handling': 0, 'dunk_rating': -24, 'post_control_rating': -37},
+        'PF': {'close_shot_rating': 1, 'mid_range_shot_rating': -2, 'three_point_shot_rating': -37, 'free_throw_rating': -6,
+               'draw_foul_rating': -4, 'shot_iq': 0, 'offensive_iq_rating': 0, 'defensive_iq_rating': 1,
+               'passing_accuracy': -10, 'passing_vision': -15, 'offensive_rebound_rating': 0, 'defensive_rebound_rating': 2,
+               'perimeter_defense_rating': -5, 'interior_defense_rating': 0, 'block_rating': -18, 'steal_rating': -45,
+               'stamina': 8, 'ball_handling': -2, 'dunk_rating': -11, 'post_control_rating': -13},
+        'C':  {'close_shot_rating': 1, 'mid_range_shot_rating': -2, 'three_point_shot_rating': -47, 'free_throw_rating': -6,
+               'draw_foul_rating': -3, 'shot_iq': 0, 'offensive_iq_rating': 0, 'defensive_iq_rating': 2,
+               'passing_accuracy': -10, 'passing_vision': -15, 'offensive_rebound_rating': 1, 'defensive_rebound_rating': 4,
+               'perimeter_defense_rating': -4, 'interior_defense_rating': 2, 'block_rating': -8, 'steal_rating': -43,
+               'stamina': 9, 'ball_handling': -1, 'dunk_rating': -10, 'post_control_rating': -14},
+    })
+    # How often each archetype is drawn at its role (it was one in three each: a third of the centers were
+    # three-point shooting Unicorns and two SGs in three did not shoot threes).
+    ARCHETYPE_WEIGHTS: dict = field(default_factory=lambda: {
+        'PG': {"Floor General": 40, "Luka-Esque": 25, "Tiratore dal Dribbling": 35},
+        'SG': {"3&D Guard": 50, "Mid-Range Specialist": 25, "Slasher Puro": 25},
+        'SF': {"Ala Rimbalzista": 25, "Tiratrice Pura": 35, "Two-Way Wing": 40},
+        'PF': {"Difensore/Rimbalzista": 40, "Scoring Forward": 35, "Stretch Four": 25},
+        'C':  {"Centro Puro": 55, "Unicorno": 20, "Point Center": 25},
+    })
+    ROLE_SKILL_NOISE: float = 4.0      # sd of the random spread around the role profile
+    ROLE_SKILL_FLOOR: int = 25
+    # Mean tendencies of the curated 2002 league per role. Shot tendencies then follow the prospect's own ratings
+    # (a good shooter shoots more), usage (touch, hero ball, playmaking, rebounding) his OVR.
+    ROLE_TENDENCIES: dict = field(default_factory=lambda: {
+        'PG': {'touch_tendency': 49, 'spot_up_shot_tendency': 65, 'mid_range_shot_tendency': 68, 'drive_to_basket_tendency': 71,
+               'post_up_tendency': 21, 'pass_out_of_shot_tendency': 52, 'dish_to_open_man_tendency': 62, 'dunk_tendency': 31,
+               'hero_ball_tendency': 29, 'putback_tendency': 20, 'roll_vs_pop_tendency': 50, 'foul_tendency': 45,
+               'rebound_tendency': 57, 'playmaking_tendency': 74},
+        'SG': {'touch_tendency': 52, 'spot_up_shot_tendency': 66, 'mid_range_shot_tendency': 71, 'drive_to_basket_tendency': 72,
+               'post_up_tendency': 21, 'pass_out_of_shot_tendency': 46, 'dish_to_open_man_tendency': 56, 'dunk_tendency': 32,
+               'hero_ball_tendency': 33, 'putback_tendency': 20, 'roll_vs_pop_tendency': 50, 'foul_tendency': 45,
+               'rebound_tendency': 60, 'playmaking_tendency': 54},
+        'SF': {'touch_tendency': 51, 'spot_up_shot_tendency': 67, 'mid_range_shot_tendency': 70, 'drive_to_basket_tendency': 70,
+               'post_up_tendency': 23, 'pass_out_of_shot_tendency': 46, 'dish_to_open_man_tendency': 56, 'dunk_tendency': 32,
+               'hero_ball_tendency': 30, 'putback_tendency': 22, 'roll_vs_pop_tendency': 50, 'foul_tendency': 45,
+               'rebound_tendency': 51, 'playmaking_tendency': 50},
+        'PF': {'touch_tendency': 50, 'spot_up_shot_tendency': 44, 'mid_range_shot_tendency': 66, 'drive_to_basket_tendency': 46,
+               'post_up_tendency': 49, 'pass_out_of_shot_tendency': 47, 'dish_to_open_man_tendency': 57, 'dunk_tendency': 66,
+               'hero_ball_tendency': 29, 'putback_tendency': 60, 'roll_vs_pop_tendency': 66, 'foul_tendency': 45,
+               'rebound_tendency': 64, 'playmaking_tendency': 37},
+        'C':  {'touch_tendency': 46, 'spot_up_shot_tendency': 40, 'mid_range_shot_tendency': 63, 'drive_to_basket_tendency': 45,
+               'post_up_tendency': 44, 'pass_out_of_shot_tendency': 46, 'dish_to_open_man_tendency': 55, 'dunk_tendency': 67,
+               'hero_ball_tendency': 25, 'putback_tendency': 60, 'roll_vs_pop_tendency': 71, 'foul_tendency': 45,
+               'rebound_tendency': 78, 'playmaking_tendency': 37},
+    })
+    ROLE_TENDENCY_NOISE: float = 4.0
+    # Usage tendencies grow with OVR (points per OVR point over ROLE_TENDENCY_PIVOT_OVR, the curated league's mean).
+    USAGE_TENDENCY_PER_OVR: dict = field(default_factory=lambda: {
+        'touch_tendency': 1.5, 'hero_ball_tendency': 0.8, 'playmaking_tendency': 0.6, 'rebound_tendency': 0.6,
+    })
+    ROLE_TENDENCY_PIVOT_OVR: int = 74
+    # Three-point tendency from the three-point rating: slope * (rating - zero). Curated 2002: C 26 -> 1, PG 61 -> 48.
+    THREE_TENDENCY_SLOPE: float = 1.33
+    THREE_TENDENCY_ZERO_RATING: int = 25
+    # A prospect drafted in a later year shoots more threes: added at CONFIG.ERA.END_YEAR, linear from START_YEAR.
+    MODERN_THREE_RATING_SHIFT: dict = field(default_factory=lambda: {'PG': 5, 'SG': 5, 'SF': 6, 'PF': 14, 'C': 14})
+    MODERN_THREE_TENDENCY_SHIFT: int = 15
+    # Each archetype moves its tendencies from the role profile. These were absolute clamps (hero ball 5 and touch
+    # at most 50 for four wing archetypes, touch 90 for a Luka-Esque rookie): wings who became stars never took
+    # over a game, bench rookies did.
+    ARCHETYPE_TENDENCY_PUSHES: dict = field(default_factory=lambda: {
+        "Floor General": {'dish_to_open_man_tendency': 15, 'playmaking_tendency': 12, 'pass_out_of_shot_tendency': 10, 'touch_tendency': -5},
+        "Luka-Esque": {'touch_tendency': 12, 'hero_ball_tendency': 12, 'playmaking_tendency': 8},
+        "Tiratore dal Dribbling": {'three_point_shot_tendency': 8, 'hero_ball_tendency': 6},
+        "3&D Guard": {'touch_tendency': -8, 'hero_ball_tendency': -8, 'drive_to_basket_tendency': -12, 'spot_up_shot_tendency': 15},
+        "Mid-Range Specialist": {'mid_range_shot_tendency': 15, 'three_point_shot_tendency': -15, 'touch_tendency': 6},
+        "Slasher Puro": {'drive_to_basket_tendency': 12, 'dunk_tendency': 12, 'three_point_shot_tendency': -10},
+        "Ala Rimbalzista": {'touch_tendency': -8, 'hero_ball_tendency': -8, 'rebound_tendency': 15, 'putback_tendency': 10},
+        "Tiratrice Pura": {'spot_up_shot_tendency': 15, 'three_point_shot_tendency': 10, 'drive_to_basket_tendency': -10, 'touch_tendency': -5},
+        "Two-Way Wing": {'touch_tendency': -6, 'hero_ball_tendency': -6},
+        "Difensore/Rimbalzista": {'touch_tendency': -10, 'spot_up_shot_tendency': -15, 'putback_tendency': 12, 'rebound_tendency': 12},
+        "Scoring Forward": {'touch_tendency': 8, 'post_up_tendency': 8, 'dunk_tendency': 8},
+        "Stretch Four": {'spot_up_shot_tendency': 15, 'roll_vs_pop_tendency': 15, 'post_up_tendency': -10},
+        "Centro Puro": {'touch_tendency': -10, 'spot_up_shot_tendency': -15, 'putback_tendency': 12, 'rebound_tendency': 12},
+        "Unicorno": {'post_up_tendency': -15, 'roll_vs_pop_tendency': 20, 'putback_tendency': -15, 'rebound_tendency': -8},
+        "Point Center": {'touch_tendency': 8, 'dish_to_open_man_tendency': 15, 'playmaking_tendency': 25, 'post_up_tendency': 12},
     })
 
 
@@ -975,11 +1248,11 @@ class Era:
     # Game-engine constants, linear from START_YEAR (first value) to END_YEAR (second value), flat outside.
     START_YEAR: int = 2002
     END_YEAR: int = 2025
-    PERIMETER_FOUL_CHANCE: tuple = (3.8, 1.60)  # % chance per action of a perimeter foul (hand-check, holding)
-    DRAW_FOUL_MULT: tuple = (0.18, 0.082)        # draw-foul rating weight on shooting fouls
-    DRIVE_FOUL_MULT: tuple = (0.12, 0.055)       # drive tendency weight on shooting fouls
+    PERIMETER_FOUL_CHANCE: tuple = (3.8, 3.00)  # % chance per action of a perimeter foul (hand-check, holding)
+    DRAW_FOUL_MULT: tuple = (0.18, 0.125)        # draw-foul rating weight on shooting fouls
+    DRIVE_FOUL_MULT: tuple = (0.12, 0.075)       # drive tendency weight on shooting fouls
     SPEED_FOUL_MULT: tuple = (0.08, 0.03)        # speed weight on shooting fouls
-    THREE_MAKE_BASE: tuple = (36.2, 41.8)        # base make % of a three: rises to offset the extra volume
+    THREE_MAKE_BASE: tuple = (36.2, 38.8)        # base make % of a three: rises to offset the extra volume
     CLOSE_MAKE_BASE: tuple = (52.5, 56.5)        # base make % at the rim (spacing opens the paint)
     FT_BOOST: tuple = (5.0, 6.5)                 # added to the free-throw rating (real FT% 75.7 -> ~78)
     ASSIST_BASE: tuple = (80.0, 88.0)            # base % that a made basket is assisted
@@ -988,6 +1261,10 @@ class Era:
     POST_UP_ELITE_MULT: tuple = (4.6, 2.4)       # scheme multiplier for elite post scorers (post_up_tendency > 75)
     POST_UP_SUB_MULT: tuple = (2.6, 1.5)         # scheme multiplier for secondary post bigs (post_up_tendency > 65)
     CENTER_REBOUND_ERA_BOOST: tuple = (1.10, 0.96) # interior rebound presence multiplier for centers across eras
+    # Turnovers per possession fall with the era (real TOV% ~14.5 in 2002, ~12.8 in 2025). Without these the
+    # turnovers grew with the pace: 17 a game in a long save against ~14 in the real league.
+    STEAL_MULT: tuple = (1.0, 0.95)              # steal attempts and pass interceptions
+    UNFORCED_TURNOVER_MULT: tuple = (1.0, 0.82)  # lost dribbles, travels, out of bounds
     # A league that STARTS at END_YEAR or later (modern database) has rosters that already shoot like today's
     # league, so it keeps these values instead: three-point volume span / inflection, end make % and FT boost.
     MODERN_START_THREE_SPAN: float = 0.650
@@ -1317,6 +1594,7 @@ class Trades:
     # Base trade value of a second-round pick before year discount and pick_scale: next to nothing, as in the real
     # league. Seconds still pay for a salary dump or a deadline rental, never sweeten a player package.
     PICK_R2_BASE_VALUE: float = 0.5
+    PICK_YEAR_DISCOUNT: float = 0.85   # what a pick loses per year of waiting
     # The price question counts the players a team receives at these shares, best first (the last share for the
     # rest): a roster spot has a cost, so three role players never add up to the starter they replace. A young
     # second player with POT >= the old 82 line counts in full.
@@ -1376,6 +1654,32 @@ class Trades:
     # A team that sends a starter-band player in a deal adds at most this many picks to it: a swap of two starters
     # is evened out with one pick, never two.
     STARTER_SWAP_MAX_PICKS: int = 1
+    # --- The user's manual trades (TradeFinder(manual=True)); CPU-to-CPU deals never read these ---
+    # A CPU team with no need for the deal names a higher price instead of refusing (hard no's stay): this multiplier
+    # on its threshold. A young cornerstone it would never sell to another CPU team costs MANUAL_CORNERSTONE_PREMIUM.
+    MANUAL_PLAN_PREMIUM: float = 1.15
+    MANUAL_CORNERSTONE_PREMIUM: float = 1.25
+    MANUAL_STARTER_SWAP_MAX_PICKS: int = 4   # picks a team sending a starter can add to a manual trade
+    PICK_PROTECTIONS: Tuple[str, ...] = ("Unprotected", "Top 3", "Top 5", "Lottery")   # the terms a first can carry
+    MANUAL_R2_VALUE: float = 4.0             # a second closes a deal that is almost there
+    # Nobody knows how good a team will be years from now: the record sets the value of its next first, and each later
+    # first moves toward an average one (MANUAL_PICK_AVERAGE_BASE on the old 40-150 scale), reached
+    # MANUAL_PICK_REGRESSION_YEARS out. Strong and weak teams alike.
+    MANUAL_PICK_AVERAGE_BASE: float = 60.0
+    MANUAL_PICK_REGRESSION_YEARS: int = 5
+    MANUAL_PICK_YEAR_DISCOUNT: float = 0.95
+    # The search: return packages are filled up to MANUAL_RETURN_TARGET of the market value of what the user gives
+    # (trade value and pick value, whoever the team is), and an offer under MANUAL_MIN_RETURN_SHARE of it is not shown
+    # (multi-team deals too, in the user's own valuation).
+    MANUAL_RETURN_TARGET: float = 0.95
+    MANUAL_MIN_RETURN_SHARE: float = 0.60
+    MANUAL_MAX_RETURN_PICKS: int = 4
+    MANUAL_MAX_RETURN_SECONDS: int = 2
+    MANUAL_SEARCH_CANDIDATES: int = 8        # best players per team combined into return packages
+    MANUAL_SPARE_CONTRACTS: int = 6          # the user's cheapest players tried to make the salaries match
+    MANUAL_OFFERS_PER_TEAM: int = 2
+    MANUAL_SEARCH_RESULTS: int = 25
+    MANUAL_MULTI_MAX_USER_PICKS: int = 1     # picks a 3- or 4-team deal can ask the user to add
     # An untouchable who does not ask out moves only when his team's price threshold is this much higher (and the
     # deal fulfils a wish of that team). Once per deal; never waived by a tax dump.
     UNTOUCHABLE_PREMIUM: float = 1.30
@@ -1405,28 +1709,12 @@ class Trades:
     CONGESTION_COUNT: int = 3
     WISH_ROLES: Tuple[str, ...] = ("PG", "SG", "SF", "PF", "C")
     PICK_WEIGHTS: dict = field(default_factory=lambda: {"R1": 3.0, "R2": 0.0})   # "more picks" (WANT_PICKS): seconds don't count
-    # Trade demand of an unhappy star (ported from get_tradeable_players; OVR lines come from EraLines).
-    DEMAND_MIN_GAMES: int = 20            # win rate counts only after this many games
-    DEMAND_NEUTRAL_WIN_PCT: float = 0.5
-    DEMAND_HAPPY_MORALE: int = 70
-    DEMAND_LOYAL_MORALE: int = 60
-    DEMAND_LOYAL_YEARS: int = 4
+    # A young core worth waiting for (wishes.young_future; OVR lines come from EraLines): trade requests and walks.
     DEMAND_YOUNG_AGE: int = 24            # young prospect: younger than this with potential >= ovr_at(84)
     DEMAND_YOUNG_POT_OLD: int = 84
     DEMAND_FUTURE_COUNT: int = 2
     DEMAND_FUTURE_AGE: int = 23           # or one younger than this with potential >= ovr_at(87)
     DEMAND_FUTURE_POT_OLD: int = 87
-    DEMAND_SUPERSTAR_OLD: int = 88
-    DEMAND_SUPERSTAR_WIN_PCT: float = 0.38
-    DEMAND_SUPERSTAR_MIN_AGE: int = 25
-    DEMAND_TENURE_FACTOR: int = 2
-    DEMAND_MORALE_BASE: int = 55
-    DEMAND_MORALE_PATIENT: int = 35       # a young core and a star under DEMAND_PATIENT_AGE
-    DEMAND_PATIENT_AGE: int = 30
-    DEMAND_REBUILD_MIN_AGE: int = 30
-    DEMAND_REBUILD_MORALE: int = 60
-    DEMAND_REBUILD_MENTOR_MORALE: int = 45
-    DEMAND_REBUILD_MENTOR_MAX_AGE: int = 31
     # --- Acceptance price (trades/trade_finder.py would_accept_trade_with_reason) ---
     # trade_difficulty -> (threshold multiplier, minimum allowed threshold)
     DIFFICULTY: dict = field(default_factory=lambda: {
@@ -1475,6 +1763,9 @@ class Trades:
     # Tax dump (trades/engines/tax_dump.py): the price of a contract handed to a team with room under the tax.
     TAX_DUMP_R1_IF_HIGH_CONTRACT: bool = True   # a high long contract (era.is_high_contract) costs a first-rounder
     TAX_DUMP_R2_COUNT: int = 1                  # any other contract costs this many second-rounders
+    # A team short of seconds may not pay an ordinary contract with a first: the absorber took the first and passed
+    # the contract on with a second (first-for-second arbitrage, a first for $5.6M in a 30-season save).
+    TAX_DUMP_R1_FALLBACK: bool = False
     TAX_DUMP_KEEP_TOP: int = 6                  # a tax cut never sends one of the team's best by OVR: the bench goes
     # Draft night (trades/engines/draft_night.py): how many slots a team on the clock will drop for the prospect it
     # needs, added to that prospect's place on the board, by the team's plan (none listed: no change). At least 1.
@@ -1645,6 +1936,10 @@ class League:
     # Fewest players a team may start with: the hard floor the game ever plays a roster at
     # (OFFSEASON.TRADE_ROSTER_MIN_SIZE); free agency and cut-down day then fill rosters up to ROSTER_SIZE_MIN.
     MIN_ROSTER_SIZE: int = 10
+    # Season 1 rookies when the league has no draft file for its starting year (league files carry no draft year):
+    # players this young in their first year on the team (main.tag_season1_rookies). They play for Rookie of the Year.
+    SEASON1_ROOKIE_MAX_AGE: int = 22
+    SEASON1_ROOKIE_MAX_YEARS_ON_TEAM: int = 1
 
 @dataclass(frozen=True)
 class Saves:
@@ -1674,8 +1969,8 @@ class News:
     TRADE_BIG_OVR: int = 84
     TRADE_MEDIUM_OVR: int = 77
     # Injury: reported from INJURY_MIN_DAYS out. Big = a star out long; medium = a star, or anyone out long.
-    INJURY_MIN_DAYS: int = 8
-    INJURY_LONG_DAYS: int = 21
+    INJURY_MIN_DAYS: int = 14   # injury lengths are calendar days (CONFIG.INJURIES)
+    INJURY_LONG_DAYS: int = 42
     INJURY_STAR_OVR: int = 82
     # Single-game scoring: medium from PERF_POINTS, big from PERF_BIG_POINTS.
     PERF_POINTS: int = 50
@@ -1690,6 +1985,80 @@ class News:
     RUMOR_MIN_OVR: int = 78
     RUMOR_CHANCE: float = 0.15
     RUMOR_BIG_OVR: int = 85
+    # Rivalry game stories: regular season only, at most this many per pair of teams per season (in a long save
+    # most pairs turn heated and rivalry stories were 67% of the feed).
+    RIVALRY_MAX_PER_PAIR_SEASON: int = 1
+    # A rivalry game makes the news from this intensity ("heated", RivalryTracker levels). At 30 a 30-season save had
+    # 163 of 435 pairs telling a story every season (50% of the feed).
+    RIVALRY_NEWS_MIN_INTENSITY: float = 50.0
+
+@dataclass(frozen=True)
+class TradeRequests:
+    """Trade requests (core/front_office/trade_requests.py): a saved frustration meter per player, 0-100.
+
+    Every TICK_DAYS of the regular season a player who is "stuck" (morale under UNHAPPY_MORALE on a team that is
+    losing after MIN_GAMES, or rebuilding, with no young future) gains RISE_PER_TICK. Otherwise he loses
+    FALL_PER_TICK when he is happy (HAPPY_MORALE) or the team wins (WINNING_WIN_PCT), DRIFT_PER_TICK when neither.
+    At season end: +MISSED_PLAYOFFS_BUMP or -PLAYOFFS_RELIEF. The meter is not reset by the new season.
+    At REQUEST_AT a player of OVR >= ovr_at(REQUEST_MIN_OVR_OLD) asks to be traded; the request holds until he is
+    traded or the meter falls under WITHDRAW_BELOW. Under that line a player at WALK_FRUSTRATION refuses to re-sign.
+    Target: about one full bad season to reach REQUEST_AT, half a season is not enough."""
+    TICK_DAYS: int = 7
+    UNHAPPY_MORALE: int = 50
+    HAPPY_MORALE: int = 65
+    LOSING_WIN_PCT: float = 0.45
+    WINNING_WIN_PCT: float = 0.55
+    MIN_GAMES: int = 15
+    RISE_PER_TICK: float = 5.0
+    FALL_PER_TICK: float = 4.0
+    DRIFT_PER_TICK: float = 1.0
+    MISSED_PLAYOFFS_BUMP: float = 15.0
+    PLAYOFFS_RELIEF: float = 20.0
+    REQUEST_AT: float = 100.0
+    WITHDRAW_BELOW: float = 40.0
+    REQUEST_MIN_OVR_OLD: int = 84      # 2002 scale, mapped by EraLines.ovr_at (about 86 in an inflated league)
+    WALK_FRUSTRATION: float = 100.0
+    # A team getting a player who asked out may send a starter plus this many picks (TRADES.STARTER_SWAP_MAX_PICKS
+    # keeps a plain swap of two starters at one pick): the usual price of a star who wants out, up to three firsts.
+    STARTER_SWAP_MAX_PICKS: int = 3   # as many as a bid may carry (_build_bid_for_player stops at 3 picks)
+    # What a player who asked out is worth to the team he wants to leave (TradeFinder.get_strategic_value): it has
+    # lost its leverage, so its price, its auction minimum and the bids it waits for all come down. Others value him
+    # as before.
+    OWN_VALUE_SHARE: float = 0.75
+    # ...and it keeps falling while he waits: OWN_VALUE_DECAY_PER_WEEK per weekly check with the request open, down to
+    # OWN_VALUE_FLOOR. A young star nobody can pay at first goes in the end for the best package on the market.
+    OWN_VALUE_DECAY_PER_WEEK: float = 0.02
+    OWN_VALUE_FLOOR: float = 0.40
+    # Assets a bid for a player who asked out may hold (TradeFinder._build_bid_for_player; others stop at 4): a young
+    # star asking out fetches two or three players and several firsts.
+    BID_MAX_ASSETS: int = 6
+
+@dataclass(frozen=True)
+class Awards:
+    """Season award rules (main.Tournament._calcola_*)."""
+    # Most Improved: a real role now (MIP_MIN_MPG minutes a game) and a real season before (MIP_PREV_MIN_GP games);
+    # never the MVP or a rookie. It went to the MVP in season 1 and often to bench players whose raw PTS+REB+AST
+    # jumped from a few minutes a game.
+    MIP_MIN_MPG: float = 24.0
+    MIP_PREV_MIN_GP: int = 40
+    # Defensive Player of the Year (main.Tournament._calcola_defensive_player_of_the_year): stocks and defensive
+    # rebounds per game, the team's record (WIN_BASE + win% x WIN_WEIGHT) and its points allowed against the league
+    # (+-1% of points allowed = +-TEAM_DEFENSE_WEIGHT %), voter fatigue like the MVP. Steals 2.2 / blocks 2.5 /
+    # rebounds 0.5 with no fatigue and a +-4% record: one center won 14 in a row, twice on a .500 team. Then steals
+    # 3.0 / blocks 2.0 on 70% of all rebounds: a 4-block center never won in 25 seasons. The season's MVP gets
+    # MVP_SHARE of his score: voters spread the awards (MVP and DPOY went to one player in 6 of 25 seasons).
+    DPOY_STEAL_WEIGHT: float = 2.5
+    DPOY_BLOCK_WEIGHT: float = 2.5
+    DPOY_DREB_WEIGHT: float = 0.25
+    DPOY_WIN_BASE: float = 0.75
+    DPOY_WIN_WEIGHT: float = 0.5
+    DPOY_TEAM_DEFENSE_WEIGHT: float = 2.0
+    DPOY_FATIGUE_REPEAT: float = 0.08
+    DPOY_FATIGUE_THREE_PEAT: float = 0.10
+    DPOY_FATIGUE_CAREER_EACH: float = 0.015
+    DPOY_FATIGUE_CAREER_MAX: float = 0.06
+    DPOY_FATIGUE_FLOOR: float = 0.75
+    DPOY_MVP_SHARE: float = 0.90
 
 @dataclass(frozen=True)
 class Config:
@@ -1698,6 +2067,7 @@ class Config:
     FOULS: Fouls = Fouls()
     EVENTS: Events = Events()
     ASSIST: Assist = Assist()
+    PLAYMAKING: Playmaking = Playmaking()
     PROGRESSION: Progression = Progression()
     SIM: Simulation = Simulation()
     COACHING: Coaching = Coaching()
@@ -1721,6 +2091,8 @@ class Config:
     ERA: Era = Era()
     FRONT_OFFICE: FrontOffice = FrontOffice()
     TRADES: Trades = Trades()
+    TRADE_REQUESTS: TradeRequests = TradeRequests()
+    AWARDS: Awards = Awards()
     CONTRACTS: Contracts = Contracts()
     DRAFT_AI: DraftAI = DraftAI()
     POSITIONS: Positions = Positions()

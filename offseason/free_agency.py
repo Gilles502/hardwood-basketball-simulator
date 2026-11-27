@@ -16,6 +16,7 @@ from typing import List, Dict, Optional, TYPE_CHECKING, Tuple
 
 from core.config import CONFIG, owner_spending_tier
 from core.front_office.contracts import loyalty
+from core.front_office import trade_requests
 from core.models import Contract
 from core.front_office.moves import record_signing
 
@@ -188,8 +189,7 @@ class FreeAgency:
 
         min_allowed = self._min_salary if self._min_salary < 9000 else round(1.5 * (cap / 155.0), 1)
         salario_finale = max(min_allowed, salario_base)
-        max_pct_allowed = 0.40 if is_historical else 0.35
-        salario_finale = min(cap * max_pct_allowed, salario_finale)
+        salario_finale = min(cap * CONFIG.ECONOMY.MAX_CONTRACT_CAP_PCT, salario_finale)
 
         return round(salario_finale, 1)
 
@@ -415,8 +415,8 @@ class FreeAgency:
         if salary < self._min_salary:
             return False, f"Minimum salary: ${self._min_salary:.1f}M."
             
-        max_limit = self.torneo.salary_cap * 0.35
-        if salary > max_limit:
+        max_limit = self._max_contract()
+        if salary > max_limit + 0.05:
             return False, f"Maximum salary allowed for a single player: ${max_limit:.1f}M."
 
         # Hard cap verification if team was hard-capped earlier
@@ -595,7 +595,7 @@ class FreeAgency:
                 if squadra is None or self._refused_by(squadra, player):
                     continue
                 first = (o.get("first") or {}).get("salary", o["salary"])
-                ceiling = first * c.FA_RAISE_CEILING.get(self._team_plan(squadra), 1.0)
+                ceiling = min(first * c.FA_RAISE_CEILING.get(self._team_plan(squadra), 1.0), self._max_contract())
                 wished = min(o["salary"] + ask * c.FA_RAISE_STEP, ceiling)
                 _tool, money = self._get_signing_tool(squadra, wished, player)
                 target = round(min(wished, money), 2)
@@ -738,7 +738,7 @@ class FreeAgency:
                     salario = min(squadra.salary_cap_space, salario)
                 else:
                     salario = min(max_salary, salario)
-                salario = max(self._min_salary, salario)
+                salario = max(self._min_salary, min(salario, self._max_contract()))
                 
                 if option_type == "None":
                     if player.ovr >= 90 and years >= 3 and random.random() < 0.3:
@@ -1130,6 +1130,14 @@ class FreeAgency:
                 main_log.info(f"{tipo_firma}: {squadra.nome} sign {candidato.nome} ({candidato.ovr} OVR) at ${salario:.1f}M to reach the roster min/floor.")
                 self._firma_giocatore(squadra, candidato, salario, tipo_firma, 1)
 
+    def _max_contract(self) -> float:
+        """The most one player can earn in year 1: CONFIG.ECONOMY.MAX_CONTRACT_CAP_PCT of the cap the asks use."""
+        raw_cap = getattr(self.torneo, 'salary_cap', 155.0) if self.torneo else 155.0
+        anno = getattr(self.torneo, 'anno_corrente', 2025) if self.torneo else 2025
+        is_no_cap = (self.torneo and getattr(self.torneo, 'cba_mode', '') == 'no_cap') or (raw_cap >= 9000.0)
+        cap = CONFIG.ECONOMY.get_cap_for_year(anno, raw_cap, is_no_cap)
+        return round(cap * CONFIG.ECONOMY.MAX_CONTRACT_CAP_PCT, 2)
+
     def _calcola_richiesta_salariale(self, giocatore: 'Giocatore', premi: bool = True) -> float:
         if premi:
             richiesta_base = self._get_cached_salary_request(giocatore)
@@ -1139,12 +1147,14 @@ class FreeAgency:
 
     def _firma_giocatore(self, squadra: 'Squadra', giocatore: 'Giocatore', salario: float, tipo: str, anni: Optional[int] = None, player_option: Optional[bool] = None, team_option: Optional[bool] = None, raise_pct: float = 0.05, beat: Optional[list] = None, raised: int = 0, tool: Optional[str] = None):
         giocatore.walks_away = ""   # a new contract: whatever he refused, he signed
+        trade_requests.clear_request(giocatore)   # ...and whatever he asked of his old team is over
         prev = (self.squadre_precedenti or {}).get(giocatore.nome)
         if prev is not None and prev is not squadra:
             giocatore.anni_nella_squadra = 0   # a new team: his loyalty years start again
         if anni is None:
             anni = 2 if giocatore.eta > 32 else (random.randint(2, 3) if giocatore.eta > 29 else random.randint(3, 4))
         
+        salario = min(salario, self._max_contract())   # no path signs over the max (raises once went to 55%)
         salari = []
         cur = salario
         for _ in range(anni):
@@ -1416,7 +1426,7 @@ class FreeAgency:
     def _determina_limite_spesa_owner(self, squadra: 'Squadra') -> float:
         tier = owner_spending_tier(squadra.personalita_proprietario)
         if tier == "low":
-            return self.torneo.luxury_tax_threshold + 30
+            return self.torneo.luxury_tax_threshold + CONFIG.ECONOMY.LOW_OWNER_OVER_TAX_SHARE * self.torneo.salary_cap
         elif tier == "mid":
             return self.torneo.first_apron + 30
         else:

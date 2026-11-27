@@ -3,7 +3,7 @@
 
 frontend/vite.config.ts reads VERSION and CHANNEL from this file at build time, so bump them here only.
 """
-VERSION = "0.1.1"
+VERSION = "0.1.2"   # dev builds carry '-dev'; drop it when dev is squashed into main
 CHANNEL = "Early Access"
 
 

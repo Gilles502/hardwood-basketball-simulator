@@ -49,6 +49,15 @@ interface CalendarDayData {
 
 type StatusFilter = 'ALL' | 'PLAYED' | 'UPCOMING';
 
+/** The day's best line for a cell with no team picked: the top performer of the day's played games. */
+function dayHighlight(day: CalendarDayData): string | null {
+  const best = day.games.filter((g) => g.played && g.top_performer)
+    .sort((a, b) => (b.top_performer!.pts ?? 0) - (a.top_performer!.pts ?? 0))[0];
+  if (!best?.top_performer) return null;
+  const last = best.top_performer.name.split(' ').slice(-1)[0];
+  return `${last} ${best.top_performer.pts} pts`;
+}
+
 /** Events marked on the season bar, in the order they happen. */
 const RULER_EVENTS: [string, string][] = [
   ['OPENING_NIGHT', 'Opening night'],
@@ -132,6 +141,21 @@ export const CalendarView: React.FC = () => {
   useEffect(() => {
     loadCalendar();
   }, [leagueData?.season_number, leagueData?.stagione]);
+
+  // A live run: each simulated day replaces its cell (results show while the run goes on); at the end the
+  // whole calendar is reloaded once.
+  const lastSimulatedDay = useLeagueStore((s) => s.lastSimulatedDay);
+  useEffect(() => {
+    const done = lastSimulatedDay as CalendarDayData | null;
+    if (!done) return;
+    setCalendarDays((prev) => prev.map((d) => (d.day_index === done.day_index ? done : d)));
+  }, [lastSimulatedDay]);
+  const runGoingNow = useSimRunning();
+  const wasRunning = useRef(false);
+  useEffect(() => {
+    if (wasRunning.current && !runGoingNow) loadCalendar(true);
+    wasRunning.current = runGoingNow;
+  }, [runGoingNow]);
 
   const byDate = useMemo(() => new Map(calendarDays.map((d) => [d.date, d])), [calendarDays]);
   const months = useMemo(() => [...new Set(calendarDays.map((d) => monthKey(d.date)))], [calendarDays]);
@@ -387,7 +411,9 @@ export const CalendarView: React.FC = () => {
                     )}
                     {tg?.result && <span className={`sch-res is-${tg.result.toLowerCase()}`}>{tg.result} {tg.score}</span>}
                     {tg && !tg.result && tg.b2b && <span className="sch-b2b" title="Back-to-back: played the day before">B2B</span>}
-                    <span className="sch-lg">{day.is_off_day && day.games.length === 0 ? 'Rest day' : `${day.games.length} games`}</span>
+                    {!tg && dayHighlight(day) && <span className="sch-hl" title="Best game of the day">{dayHighlight(day)}</span>}
+                    <span className="sch-lg">{day.is_off_day && day.games.length === 0 ? 'Rest day'
+                      : day.games.length > 0 && day.games.every((g) => g.played) ? `${day.games.length} final` : `${day.games.length} games`}</span>
                   </button>
                 );
               })}

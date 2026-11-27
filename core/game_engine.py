@@ -61,6 +61,8 @@ class Partita:
         self._era_post_elite_mult = lerp(era.POST_UP_ELITE_MULT)
         self._era_post_sub_mult = lerp(era.POST_UP_SUB_MULT)
         self._era_center_reb_boost = lerp(era.CENTER_REBOUND_ERA_BOOST)
+        self._era_steal_mult = lerp(era.STEAL_MULT)
+        self._era_unforced_tov_mult = lerp(era.UNFORCED_TURNOVER_MULT)
 
         poe_casa = CONFIG.COACHINGTACTICS.POINTS_OF_EMPHASIS.get(getattr(squadra_casa, 'active_poe', 'Balanced Approach'), {})
         self.fatigue_mod_casa = poe_casa.get("logic_mods", {}).get("fatigue_increase_modifier", 1.0)
@@ -594,6 +596,113 @@ class Partita:
                 giocatore.energia = max(0, giocatore.energia - passive_drain)
                 giocatore.fatica = min(100, giocatore.fatica + (passive_drain * 0.3))
 
+    # --- Score-or-pass choices (CONFIG.PLAYMAKING): continuous weights of the player, no hard thresholds ---
+    @staticmethod
+    def _drive_dish_chance(p) -> float:
+        """Chance (0-100) that a driver who beat his man with no help passes to a big or a cutter instead of finishing."""
+        cfg = CONFIG.PLAYMAKING
+        t, a = p.temp_tendenze, p.temp_abilita
+        close_skill = max(getattr(a, 'close_shot_rating', 50), getattr(a, 'dunk_rating', 50))
+        chance = (getattr(t, 'playmaking_tendency', 50) * cfg.DRIVE_DISH_PLAY
+                  + getattr(t, 'dish_to_open_man_tendency', 50) * cfg.DRIVE_DISH_DISH
+                  + (getattr(a, 'passing_vision', 50) - 50) * cfg.DRIVE_DISH_VISION
+                  - getattr(t, 'hero_ball_tendency', 50) * cfg.DRIVE_DISH_HERO
+                  - max(0.0, getattr(t, 'touch_tendency', 50) - cfg.DRIVE_DISH_TOUCH_FROM) * cfg.DRIVE_DISH_TOUCH
+                  - max(0.0, close_skill - cfg.DRIVE_DISH_FINISHER_FROM) * cfg.DRIVE_DISH_FINISHER
+                  - cfg.DRIVE_DISH_OFFSET)
+        return max(0.0, min(cfg.DRIVE_DISH_MAX, chance))
+
+    @staticmethod
+    def _kickout_chance(p) -> float:
+        """Chance (15-90) that a driver met by a help defender kicks it out instead of forcing it at the rim."""
+        cfg = CONFIG.PLAYMAKING
+        t, a = p.temp_tendenze, p.temp_abilita
+        close_skill = max(getattr(a, 'close_shot_rating', 50), getattr(a, 'dunk_rating', 50))
+        chance = (getattr(a, 'passing_vision', 50) * 0.35 + getattr(t, 'pass_out_of_shot_tendency', 50) * 0.35
+                  + getattr(t, 'playmaking_tendency', 50) * 0.30)
+        if close_skill >= 78:   # elite finishers (LeBron, Giannis, Wade) go all the way more often
+            chance -= (close_skill - 75) * 1.1
+        chance -= max(0.0, getattr(t, 'hero_ball_tendency', 50) - cfg.KICKOUT_HERO_FROM) * cfg.KICKOUT_HERO
+        return max(15.0, min(90.0, chance))
+
+    @staticmethod
+    def _extra_pass_chance(p, open_look: bool) -> float:
+        """Chance (0-100) that a perimeter player who just got the ball swings it on instead of shooting."""
+        cfg = CONFIG.PLAYMAKING
+        a = p.temp_abilita
+        three, mid = getattr(a, 'three_point_shot_rating', 50), getattr(a, 'mid_range_shot_rating', 50)
+        vision = getattr(a, 'passing_vision', 50)
+        chance = 40 + vision * 0.15
+        if three < 70 and mid < 72:
+            chance += 15
+        if open_look:
+            best_shot = max(three, mid - 2)
+            malus = min(cfg.EXTRA_PASS_MAX, max(0.0, best_shot - cfg.EXTRA_PASS_SHOOTER_FROM) * cfg.EXTRA_PASS_PER_POINT)
+            relief = min(cfg.EXTRA_PASS_VISION_RELIEF_MAX,
+                         max(0.0, vision - cfg.EXTRA_PASS_VISION_FROM) * cfg.EXTRA_PASS_VISION_RELIEF)
+            chance -= malus * (1.0 - relief)
+        return max(0.0, min(100.0, chance))
+
+    @staticmethod
+    def _drop_pull_up_share(handler) -> Optional[float]:
+        """Share of DROP pick and rolls the handler keeps for a pull-up (the rest go to the roller); None when he is
+        neither a shooter nor a playmaker (CONFIG.PLAYMAKING.DROP_SKILL_FLOOR)."""
+        import math
+        cfg = CONFIG.PLAYMAKING
+        t, a = handler.temp_tendenze, handler.temp_abilita
+        shot = max(getattr(a, 'three_point_shot_rating', 50), getattr(a, 'mid_range_shot_rating', 50))
+        play = getattr(t, 'playmaking_tendency', 50)
+        if shot < cfg.DROP_SKILL_FLOOR and play < cfg.DROP_SKILL_FLOOR:
+            return None
+        keep = shot + getattr(t, 'hero_ball_tendency', 50) * cfg.DROP_HERO
+        give = play * cfg.DROP_PLAY + getattr(a, 'passing_vision', 50) * cfg.DROP_VISION
+        share = 1.0 / (1.0 + math.exp(-(keep - give) / cfg.DROP_SCALE))
+        return max(cfg.DROP_SHARE_MIN, min(cfg.DROP_SHARE_MAX, share))
+
+    @staticmethod
+    def _initiation_factor(p) -> float:
+        """How much a player's skills (and, less, his PG/SG label) make him the one who starts a possession (>= 1)."""
+        cfg = CONFIG.PLAYMAKING
+        t, a = p.temp_tendenze, p.temp_abilita
+        vision, handling = getattr(a, 'passing_vision', 50), getattr(a, 'ball_handling', 50)
+        play = getattr(t, 'playmaking_tendency', 50)
+        skill = vision * 0.40 + handling * 0.30 + getattr(a, 'shot_iq', 50) * 0.15 + play * 0.15
+        creator = handling * 0.4 + vision * 0.4 + play * 0.2
+        ramp = max(0.0, min(1.0, (creator - cfg.INIT_CREATOR_FROM) / (cfg.INIT_CREATOR_TO - cfg.INIT_CREATOR_FROM)))
+        return (1.0 + skill / 130.0) * (1.0 + cfg.INIT_CREATOR_MAX * ramp) * cfg.INIT_LABEL.get(getattr(p, 'ruolo', ''), 1.0)
+
+    @staticmethod
+    def _volume_tax(fga: int, interior: bool) -> float:
+        """Points of make chance a shooter loses for the shots he has already taken in this game (>= 0)."""
+        cfg = CONFIG.PLAYMAKING
+        tax = max(0, min(fga, cfg.VOLUME_TAX_HIGH_FROM) - cfg.VOLUME_TAX_FROM) * cfg.VOLUME_TAX_PER_FGA
+        tax += max(0, fga - cfg.VOLUME_TAX_HIGH_FROM) * cfg.VOLUME_TAX_HIGH_PER_FGA
+        tax = min(cfg.VOLUME_TAX_MAX, tax)
+        return tax * cfg.VOLUME_TAX_INTERIOR_SHARE if interior else tax
+
+    @staticmethod
+    def _crowded_paint_malus(fga: int, shooter_ovr: float, mates_ovr: float) -> float:
+        """Make chance a high-volume shooter loses at the rim when the defense can sag on him: weak teammates, or a
+        lone star far above them (CONFIG.PLAYMAKING.CROWD_*). Any role: the post and the drive both draw help."""
+        cfg = CONFIG.PLAYMAKING
+        if fga < cfg.CROWD_FGA_FROM:
+            return 0.0
+        weakness = max(cfg.CROWD_MATES_OVR - mates_ovr, shooter_ovr - mates_ovr - cfg.CROWD_STAR_GAP)
+        return max(0.0, min(cfg.CROWD_MAX, weakness * cfg.CROWD_PER_POINT))
+
+    @staticmethod
+    def _post_fade_chance(p) -> float:
+        """Percent chance a post-up ends in a turnaround fadeaway (a mid-range jumper) instead of a shot at the rim
+        (CONFIG.PLAYMAKING.POST_FADE_*): Dirk, Garnett and Webber fade, Shaq and Howard go to the rim."""
+        cfg = CONFIG.PLAYMAKING
+        skills = p.temp_abilita
+        mid, tend = skills.mid_range_shot_rating, p.temp_tendenze.mid_range_shot_tendency
+        if mid < cfg.POST_FADE_MID_FROM or tend < cfg.POST_FADE_TEND_FROM:
+            return 0.0
+        inside = max(getattr(skills, 'post_control_rating', 50), skills.close_shot_rating)
+        chance = cfg.POST_FADE_BASE + (tend - cfg.POST_FADE_TEND_FROM) * cfg.POST_FADE_PER_TEND + (mid - inside) * cfg.POST_FADE_PER_EDGE
+        return max(0.0, min(cfg.POST_FADE_MAX, chance))
+
     def _simula_possesso(self, squadra_att: Squadra, squadra_dif: Squadra) -> bool:
         """
         ### FRONT OFFICE REWORK v5.0: READ & REACT SYSTEM ###
@@ -635,29 +744,18 @@ class Partita:
             touch_weight = ((touch_val / 50.0) ** 1.10) * touch_mod_multiplier
             
             # Playmaking skill factor (orchestrators and point-forwards/centers get initiation priority)
-            playmaking_tend = getattr(p.temp_tendenze, 'playmaking_tendency', 50)
-            playmaking_skill = (p.temp_abilita.passing_vision * 0.40 + p.temp_abilita.ball_handling * 0.30 + p.temp_abilita.shot_iq * 0.15 + playmaking_tend * 0.15)
-            playmaking_factor = 1.0 + (playmaking_skill / 130.0)
-            
-            # High vision playmakers and pure Point Guards lead offense realistically
-            if p.ruolo in ['PG']:
-                playmaking_factor *= 1.80
-            if p.temp_abilita.passing_vision >= 85 or playmaking_tend >= 80:
-                playmaking_factor *= 1.45
-            elif p.temp_abilita.passing_vision >= 76 or playmaking_tend >= 70:
-                playmaking_factor *= 1.20
-            elif p.ruolo in ['SG']:
-                playmaking_factor *= 1.10
+            playmaking_factor = self._initiation_factor(p)
                 
             # --- DYNAMIC VETERAN AGE & MORALE TOUCH MODIFIER ---
             # Prevents heavily aging role players and non-elite veterans from padding unrealistic touches,
             # while protecting elite stars in their prime (30-34 yo: Curry, Durant, Jordan, Kobe, LeBron)
             veteran_modifier = 1.0
             p_age = getattr(p, 'eta', 20)
-            is_elite_scorer = p.is_star() or getattr(p, 'ovr', 70) >= 86 or (first_opt and (p.nome == first_opt or getattr(p, 'id', '') == first_opt))
-            
-            if p_age >= 35 or (p_age >= 30 and not is_elite_scorer):
-                age_thresh = 34 if is_elite_scorer else 29
+            is_elite_scorer = p.is_star() or getattr(p, 'ovr', 70) >= CONFIG.SIM.VETERAN_TOUCH_ELITE_OVR or (first_opt and (p.nome == first_opt or getattr(p, 'id', '') == first_opt))
+            start_age = CONFIG.SIM.VETERAN_TOUCH_START_AGE_ELITE if is_elite_scorer else CONFIG.SIM.VETERAN_TOUCH_START_AGE
+
+            if p_age >= start_age:
+                age_thresh = start_age - 1
                 age_over = p_age - age_thresh
                 decay_rate = 0.03 if is_elite_scorer else 0.04
                 age_factor = max(0.60, 1.0 - (age_over * decay_rate))
@@ -706,8 +804,8 @@ class Partita:
             tempo_transizione = random.randint(3, 5) # Balanced pace
         
         # Slow down the pace in the playoffs (more half-court play)
-        if getattr(self, "is_playoff", False):
-            tempo_transizione += random.randint(1, 2)
+        if getattr(self, "is_playoff", False) and random.random() < CONFIG.SIM.PLAYOFF_EXTRA_SECOND_CHANCE:
+            tempo_transizione += 1
             
         self._aggiorna_tempo_possesso(tempo_transizione)
         shot_clock -= tempo_transizione
@@ -796,11 +894,8 @@ class Partita:
                 is_cutter = (schema == "CUT_TO_BASKET" and giocatore_con_palla == attori.get("tagliante"))
                 
                 if passatore_recente and shot_clock > 4 and is_perimeter_player and not is_scoring_executor and not is_pnr_partner and not is_cutter and not ha_attaccato_closeout:
-                    extra_pass_prob = 40 + (giocatore_con_palla.temp_abilita.passing_vision * 0.15)
-                    if giocatore_con_palla.temp_abilita.three_point_shot_rating < 70 and giocatore_con_palla.temp_abilita.mid_range_shot_rating < 72:
-                        extra_pass_prob += 15
-                    if (contesto_palla.get('is_open', False) or vantaggio_offensivo >= 0.35) and (giocatore_con_palla.temp_abilita.three_point_shot_rating >= 78 or giocatore_con_palla.temp_abilita.mid_range_shot_rating >= 80):
-                        extra_pass_prob -= 30
+                    extra_pass_prob = self._extra_pass_chance(
+                        giocatore_con_palla, open_look=contesto_palla.get('is_open', False) or vantaggio_offensivo >= 0.35)
                     
                     if random.uniform(0, 100) < extra_pass_prob:
                         altri = [p for p in giocatori_in_campo if p != giocatore_con_palla]
@@ -868,6 +963,15 @@ class Partita:
 
                     # 1v1 finish from the post
                     dif_effettivo = aiuto_difensivo if aiuto_difensivo else difensore_palla
+                    if random.uniform(0, 100) < self._post_fade_chance(giocatore_con_palla):
+                        self.log.append(f"({giocatore_con_palla.nome} turns over the shoulder for the fadeaway jumper!)")
+                        contesto_fade = self._crea_contesto_difensivo(giocatore_con_palla, dif_effettivo, is_interior=False)
+                        return self._risolvi_tiro(
+                            giocatore_con_palla, dif_effettivo, squadra_att, squadra_dif,
+                            2, passatore_recente, contesto_fade,
+                            is_forced=False, vantaggio_offensivo=vantaggio_offensivo,
+                            is_jumpshot_2pt=True
+                        )
                     contesto_post = self._crea_contesto_difensivo(giocatore_con_palla, dif_effettivo, is_interior=True)
                     contesto_post['is_post_up'] = True
 
@@ -1002,18 +1106,7 @@ class Partita:
                     touch_val = getattr(giocatore_con_palla.temp_tendenze, 'touch_tendency', 50)
                     close_skill = max(giocatore_con_palla.temp_abilita.close_shot_rating, giocatore_con_palla.temp_abilita.dunk_rating)
                     
-                    prob_scarico = (giocatore_con_palla.temp_abilita.passing_vision * 0.35 + 
-                                    giocatore_con_palla.temp_tendenze.pass_out_of_shot_tendency * 0.35 + 
-                                    playmaking_tend * 0.30)
-                    
-                    # Elite finishers or main scorers (LeBron, Giannis, Kobe, Jordan, Wade) go all the way more often
-                    if close_skill >= 78:
-                        prob_scarico -= (close_skill - 75) * 1.1
-                    if touch_val >= 78:
-                        prob_scarico -= (touch_val - 75) * 1.0
-                    if giocatore_con_palla.temp_tendenze.hero_ball_tendency >= 75:
-                        prob_scarico -= 14.0
-                    prob_scarico = max(15.0, min(90.0, prob_scarico))
+                    prob_scarico = self._kickout_chance(giocatore_con_palla)
                     
                     if random.uniform(0, 100) < prob_scarico:
                         # KICK OUT!
@@ -1053,16 +1146,9 @@ class Partita:
                     touch_val = getattr(giocatore_con_palla.temp_tendenze, 'touch_tendency', 50)
                     close_skill = max(giocatore_con_palla.temp_abilita.close_shot_rating, giocatore_con_palla.temp_abilita.dunk_rating)
                     
-                    prob_dish_pass_first = 0.0
-                    if (playmaking_tend >= 82 or dish_tend >= 82) and touch_val <= 70:
-                        prob_dish_pass_first = (playmaking_tend * 0.45 + dish_tend * 0.30 + (pass_vis - 50) * 0.35)
-                        if close_skill >= 78:
-                            prob_dish_pass_first -= 25.0
-                    elif playmaking_tend >= 90 and touch_val <= 74:
-                        prob_dish_pass_first = 35.0
-                    
+                    prob_dish_pass_first = self._drive_dish_chance(giocatore_con_palla)
                     compagni = [p for p in squadra_att.giocatori_in_campo() if p != giocatore_con_palla]
-                    if prob_dish_pass_first >= 40.0 and random.uniform(0, 100) < prob_dish_pass_first and compagni:
+                    if random.uniform(0, 100) < prob_dish_pass_first and compagni:
                         # Drop-off to the big man or the cutter
                         pesi_compagni = [max(1, p.temp_abilita.close_shot_rating * 0.5 + p.temp_abilita.mid_range_shot_rating * 0.3 + p.temp_abilita.three_point_shot_rating * 0.2 + (getattr(p.temp_tendenze, 'spot_up_shot_tendency', 50) * 0.2)) for p in compagni]
                         ricevitore = random.choices(compagni, weights=pesi_compagni, k=1)[0]
@@ -1270,13 +1356,12 @@ class Partita:
 
             if pnr_cov == "DROP":
                 # The big man drops back to protect the rim: concedes pull-ups from the perimeter or a pass for the roller
-                playmaking_tend = getattr(handler.temp_tendenze, 'playmaking_tendency', 50)
-                if playmaking_tend >= 75 and random.uniform(0, 100) < (playmaking_tend * 0.70):
-                    return None, random.randint(5, 7), 0.52, roll_man
-                elif handler.temp_abilita.three_point_shot_rating >= 80 or handler.temp_abilita.mid_range_shot_rating >= 82:
-                    return None, random.randint(5, 7), 0.50, handler
-                else:
+                share = self._drop_pull_up_share(handler)
+                if share is None:   # neither a shooter nor a passer: a weak read
                     return None, random.randint(5, 7), 0.25, roll_man if random.random() < 0.6 else handler
+                if random.random() < share:
+                    return None, random.randint(5, 7), 0.50, handler
+                return None, random.randint(5, 7), 0.52, roll_man
 
             elif pnr_cov == "SWITCH":
                 # Systematic switch: dif_roll takes the handler
@@ -1841,9 +1926,8 @@ class Partita:
             delta_close = eff_rating - rating_difesa
             prob += delta_close * 0.21
 
-            # Crowded paint when a perimeter solo-carry star drives repeatedly with weak spacing teammates
-            if attaccante.ruolo in ['PG', 'SG', 'SF'] and avg_compagni_ovr < 74.5 and fga_att >= 16:
-                prob -= min(3.0, (74.5 - avg_compagni_ovr) * 0.6)
+            prob -= self._volume_tax(fga_att, interior=True)
+            prob -= self._crowded_paint_malus(fga_att, attaccante.ovr, avg_compagni_ovr)
 
             # Defensive intimidation from rim protectors
             lunghi_avversari = [p for p in squadra_dif.giocatori_in_campo() if p.ruolo in ['C', 'PF']]
@@ -1895,8 +1979,7 @@ class Partita:
         prob += (vantaggio_offensivo * 3.5)
 
         # High-volume self-creation tax & defensive crowding on solo-carry stars with weak teammates
-        if fga_att > 14:
-            prob -= min(6.0, (fga_att - 14) * 0.50)
+        prob -= self._volume_tax(fga_att, interior=False)
         if avg_compagni_ovr < 75.0 and (getattr(attaccante.temp_tendenze, 'touch_tendency', 50) >= 75 or attaccante.ovr >= 85):
             prob -= min(4.0, (75.0 - avg_compagni_ovr) * 0.85)
 
@@ -1975,7 +2058,7 @@ class Partita:
                 difensore_attivo = max(possibili_aiuti, key=lambda p: p.temp_abilita.steal_rating)
         
         # Steal attempt (subject to the defense's POE modifiers, e.g. Full-Court Press)
-        steal_chance = cfg.STEAL_ATTEMPT_BASE_CHANCE * 1.35
+        steal_chance = cfg.STEAL_ATTEMPT_BASE_CHANCE * 1.35 * self._era_steal_mult
         poe_data = CONFIG.COACHINGTACTICS.POINTS_OF_EMPHASIS.get(squadra_dif.active_poe, {})
         steal_chance *= poe_data.get("logic_mods", {}).get("steal_attempt_modifier", 1.0)
         if random.uniform(0, 100) < steal_chance:
@@ -2015,7 +2098,7 @@ class Partita:
         elif fit_palleggio.get("net_rating_mod", 0.0) <= -1.2:
             prob_errore *= 1.10
         
-        if random.uniform(0, 100) < prob_errore:
+        if random.uniform(0, 100) < prob_errore * self._era_unforced_tov_mult:
             palleggiatore.game_stats.turnover += 1
             self.log.append(f"Unforced turnover by {palleggiatore.nome}.")
             self._log_play('turnover', palleggiatore.squadra.nome, palleggiatore.nome, "Lost Ball Turnover")
@@ -2048,7 +2131,7 @@ class Partita:
         elif fit_pass.get("net_rating_mod", 0.0) <= -1.2:
             prob_intercetto *= 1.10
         
-        if random.uniform(0, 100) < prob_intercetto and difensore.game_stats.steals < cfg.MAX_STEALS_PER_GAME:
+        if random.uniform(0, 100) < prob_intercetto * self._era_steal_mult and difensore.game_stats.steals < cfg.MAX_STEALS_PER_GAME:
             passatore.game_stats.turnover += 1; difensore.game_stats.steals += 1
             self.log.append(f"Pass from {passatore.nome} INTERCEPTED by {difensore.nome}!")
             self._log_play('steal', difensore.squadra.nome, difensore.nome, f"Intercepted pass from {passatore.nome}")
@@ -2390,34 +2473,35 @@ class Partita:
             ]
 
             gravita_roll = random.uniform(0, 100)
-            if gravita_roll < 72.0:
+            dtd_share, minor_share, moderate_share, severe_share = cfg.SEVERITY_SHARES
+            if gravita_roll < dtd_share:
                 # 72% Day-to-Day (1-3 games): minor ache, plays with a penalty or misses 1-2 games
                 nome_inf, d_min, d_max = random.choice(DTD_INJURIES)
-                durata = random.randint(d_min, d_max)
+                durata = round(random.randint(d_min, d_max) * cfg.DAYS_PER_GAME)
                 is_dtd = True
                 impatto = 0.07  # 7% penalty if he takes the court with an ache
-            elif gravita_roll < 91.0:
+            elif gravita_roll < dtd_share + minor_share:
                 # 19% Minor (3-7 games): out for 1-2 weeks
                 nome_inf, d_min, d_max = random.choice(MINOR_INJURIES)
-                durata = random.randint(d_min, d_max)
+                durata = round(random.randint(d_min, d_max) * cfg.DAYS_PER_GAME)
                 is_dtd = False
                 impatto = 0.0
-            elif gravita_roll < 97.5:
+            elif gravita_roll < dtd_share + minor_share + moderate_share:
                 # 6.5% Moderate (8-18 games): out for 2-4 weeks
                 nome_inf, d_min, d_max = random.choice(MODERATE_INJURIES)
-                durata = random.randint(d_min, d_max)
+                durata = round(random.randint(d_min, d_max) * cfg.DAYS_PER_GAME)
                 is_dtd = False
                 impatto = 0.0
-            elif gravita_roll < 99.3:
+            elif gravita_roll < dtd_share + minor_share + moderate_share + severe_share:
                 # 1.8% Severe (18-32 games): out for 1-2 months
                 nome_inf, d_min, d_max = random.choice(SEVERE_INJURIES)
-                durata = random.randint(d_min, d_max)
+                durata = round(random.randint(d_min, d_max) * cfg.DAYS_PER_GAME)
                 is_dtd = False
                 impatto = 0.0
             else:
                 # 0.7% Season-Ending (45-75 games): ligament/tendon tear (very rare event)
                 nome_inf, d_min, d_max = random.choice(SEASON_ENDING_INJURIES)
-                durata = random.randint(d_min, d_max)
+                durata = round(random.randint(d_min, d_max) * cfg.DAYS_PER_GAME)
                 is_dtd = False
                 impatto = 0.0
 
@@ -2427,21 +2511,23 @@ class Partita:
             giocatore.infortunio_impatto = impatto
             giocatore.giorni_infortunio_rimanenti = durata
             
-            tipo_label = "DAY-TO-DAY" if is_dtd else "INFORTUNIO"
-            self.log.append(f"{tipo_label}! {giocatore.nome}: {nome_inf} ({durata} partite)")
+            tipo_label = "DAY-TO-DAY" if is_dtd else "INJURY"
+            self.log.append(f"{tipo_label}! {giocatore.nome}: {nome_inf} ({durata} days)")
             import logging
             team_nome = giocatore.squadra.nome if hasattr(giocatore, 'squadra') and giocatore.squadra else 'Free Agent'
-            logging.getLogger('main_sim').info(f"{tipo_label}! {giocatore.nome} ({team_nome}): {nome_inf} ({durata} partite)")
+            logging.getLogger('main_sim').info(f"{tipo_label}! {giocatore.nome} ({team_nome}): {nome_inf} ({durata} days)")
             
             # Records in the player's career history log
             if hasattr(giocatore, 'add_career_log'):
-                icon_inf = '🩹' if is_dtd else ('⚠️' if durata < 20 else '🚨')
+                icon_inf = '🩹' if is_dtd else ('⚠️' if durata < 40 else '🚨')
+                torneo_log = (getattr(giocatore.squadra, 'torneo', None) if getattr(giocatore, 'squadra', None)
+                              else None) or ACTIVE_TOURNAMENT
                 giocatore.add_career_log(
                     event_type='injury',
                     title=f"{tipo_label}: {nome_inf}",
-                    description=f"{nome_inf} (estimated absence of {durata} games).",
-                    season=1,
-                    day=0,
+                    description=f"{nome_inf} (estimated absence of {durata} days).",
+                    season=getattr(torneo_log, 'season_number', 1),
+                    day=getattr(torneo_log, '_current_gameday', getattr(torneo_log, 'current_day', 0)),
                     icon=icon_inf,
                     team=team_nome
                 )

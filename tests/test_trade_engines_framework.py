@@ -258,6 +258,21 @@ class ExtensionTests(EngineTestCase):
         self.assertFalse(common.close_deal(f, deal, "positional_swap", wishes))
         self.assertEqual(t.trade_analytics_history, [])
 
+    def test_a_small_contract_is_never_paid_with_a_first(self):
+        t, f, (c, s, x), deal, wishes = self.stuck(ABSORBER)
+        for owned in t.pick_ownership.values():   # C has only its firsts left
+            for key in [k for k, owner in owned.items() if owner == "C" and k.startswith("R2-")]:
+                owned[key] = "S"
+        bigger = multi_team.extend(f, deal, dict(wishes))
+        firsts = [a for _src, dst, a in (bigger.moves if bigger else []) if isinstance(a, str) and ":R1-" in a]
+        self.assertEqual(firsts, [])
+
+    def test_a_team_that_only_sends_gets_salary_relief_in_the_log(self):
+        from trades.motive import log_line
+        motive = mock.Mock(why="")
+        self.assertEqual(log_line(motive, {"A": "Hale (80, $9.0M)", "B": ""}),
+                         "A get Hale (80, $9.0M); B get salary relief")
+
     def test_extend_returns_none_when_the_absorber_has_no_room(self):
         t, f, (c, s, x), deal, wishes = self.stuck(ABSORBER)
         real_salary_rule(x, 50.0)   # over the cap: it can't take a contract without sending one back

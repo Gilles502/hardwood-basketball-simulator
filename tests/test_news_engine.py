@@ -130,6 +130,23 @@ class TestGenerators(NewsCase):
         news.generate_injury_news("Y", "A", 15, ovr=70, season=2)
         self.assertEqual(len(news.NEWS_FEED), 3)
 
+    def test_one_rivalry_story_per_pair_per_season(self):
+        heated = {"has_rivalry": True, "level": "heated"}
+        for _ in range(4):
+            news.generate_rivalry_postgame_news("A", "B", 101, 99, heated, season=3)
+            news.generate_rivalry_postgame_news("B", "A", 130, 100, heated, season=3)
+        news.generate_rivalry_postgame_news("A", "C", 101, 99, heated, season=3)
+        news.generate_rivalry_postgame_news("A", "B", 101, 99, heated, season=4)
+        self.assertEqual(len(news.NEWS_FEED), CONFIG.NEWS.RIVALRY_MAX_PER_PAIR_SEASON * 2 + 1)
+
+    def test_front_office_news(self):
+        news.generate_front_office_news("fired", "A", "GM", "Rick Choi", season=3)
+        news.generate_front_office_news("hired", "A", "coach", "Sam Hale", season=3)
+        news.generate_front_office_news("retired", "B", "GM", "Neal Oshay", season=3)
+        self.assertEqual([(i["kind"], i["tier"], i["title"]) for i in reversed(news.NEWS_FEED)],
+                         [("firing", 2, "A fire GM Rick Choi"), ("hiring", 2, "A hire Sam Hale as head coach"),
+                          ("league", 1, "GM Neal Oshay retires")])
+
     def test_firing_tier(self):
         self.assertEqual((news.firing_tier("Phil Gustafson"), news.firing_tier("Interim Joe Brown")), (2, 1))
 

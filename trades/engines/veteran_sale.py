@@ -6,7 +6,7 @@ fillers alone (the old "Ginobili" dump) closes nothing.
 from typing import TYPE_CHECKING
 
 from core.config import CONFIG
-from core.front_office.wishes import Wish
+from core.front_office.wishes import Wish, asked_out
 from trades.engines import auction
 
 if TYPE_CHECKING:
@@ -24,6 +24,6 @@ def run(finder: 'TradeFinder', team: 'Squadra', wish: Wish) -> bool:
     tradeable = finder.get_tradeable_players(team)   # computed once; stars and players asking out are not dumped
     veterans = sorted(
         (p for p in tradeable if p.eta >= t.VETERAN_MIN_AGE and era.rotation <= p.ovr < era.star
-         and not getattr(p, '_wants_out', False) and getattr(p, 'contract', None) is not None),
+         and not asked_out(p) and getattr(p, 'contract', None) is not None),
         key=lambda p: -p.ovr)
     return any(auction.run_auction(finder, team, vet, TRADE_TYPE, wish, BIDDER_KINDS) for vet in veterans)

@@ -16,6 +16,8 @@ export interface PickAsset {
   key: string;
   display_name: string;
   protection: string;
+  /** The user can name a protection on this pick in the deal being built. */
+  can_protect?: boolean;
 }
 
 export interface TeamAssets {
@@ -53,6 +55,20 @@ export interface TradeOffer {
   teams?: string[];
   summary?: string;
   flow?: { from: string; to: string; player: string; role: string; ovr: number; salary: number }[];
+}
+
+/** One player who asked to be traded (GET /api/trade-requests). */
+export interface TradeRequestRow {
+  player: string;
+  team: string;
+  role: string;
+  ovr: number;
+  age: number;
+  salary: number;
+  years: number;
+  /** "Season 2004" / "Summer 2004" */
+  since: string;
+  is_user_team: boolean;
 }
 
 /** One incoming offer on the user's Trade Block. */

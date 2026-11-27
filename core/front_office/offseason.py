@@ -15,6 +15,14 @@ from core.front_office.state import _unseat, current_year, ensure_front_office, 
 main_log = logging.getLogger("main_sim")
 
 
+def _news(torneo, event: str, team, name: str, detail: str = "") -> None:
+    try:   # news never break the offseason
+        from core.news_generator import generate_front_office_news
+        generate_front_office_news(event, team, "GM", name, detail, season=getattr(torneo, "season_number", None))
+    except Exception as exc:
+        main_log.warning("front office news failed: %s", exc)
+
+
 def _log(torneo, line: str) -> None:
     log_data = getattr(torneo, "offseason_log_data", None)
     if isinstance(log_data, dict) and "ritiri_sviluppo" in log_data:
@@ -39,6 +47,8 @@ def front_office_offseason(torneo, rng=None) -> dict:
         team = seats_before.get(gm.gm_id)
         events["retired"].append({"gm": gm.name, "gm_id": gm.gm_id, "team": team})
         _log(torneo, f"GM RETIREMENT: {gm.name} retired" + (f" as GM of the {team}" if team else ""))
+        if team:
+            _news(torneo, "retired", team, gm.name, f"{gm.name} steps down as GM of the {team}.")
 
     teams = sorted(getattr(torneo, "squadre", []), key=lambda s: s.nome)
     for team in teams:
@@ -51,6 +61,7 @@ def front_office_offseason(torneo, rng=None) -> dict:
             _unseat(fo, team.nome, year, "fired")
             events["fired"].append({"team": team.nome, "gm": gm.name, "gm_id": gm.gm_id, "reason": reason})
             _log(torneo, f"GM FIRING: The {team.nome} fired GM {gm.name} ({reason})")
+            _news(torneo, "fired", team.nome, gm.name, f"The ownership lets GM {gm.name} go ({reason}).")
 
     vacancies = [t.nome for t in teams if t.nome != user_team
                  and (fo.seated_gm(t.nome) is None or fo.seated_gm(t.nome).interim)]
@@ -69,4 +80,7 @@ def front_office_offseason(torneo, rng=None) -> dict:
                                 "over": list(over)})
         _log(torneo, f"GM HIRING: The {team.nome} hired GM {gm.name}"
                      + (f", chosen over {', '.join(over)}" if over else ""))
+        if gm_id != interims.get(team.nome):   # a confirmed interim is no new story
+            _news(torneo, "hired", team.nome, gm.name,
+                  f"{gm.name} takes over the front office" + (f", chosen over {', '.join(over)}." if over else "."))
     return events

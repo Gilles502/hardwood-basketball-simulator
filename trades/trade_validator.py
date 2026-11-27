@@ -93,8 +93,8 @@ class TradeValidator:
                     except Exception:
                         main_log.warning("Could not publish the waiver news for %s", p_to_cut.nome, exc_info=True)
                 if p_to_cut.eta > 34 and p_to_cut.ovr < 76:
-                    if hasattr(torneo, 'giocatori_ritirati'):
-                        torneo.giocatori_ritirati.append(p_to_cut)
+                    from core.models import add_retired_player
+                    add_retired_player(torneo, p_to_cut)
                     cut_messages.append(f"CUT/RETIREMENT: {team.nome} cut {p_to_cut.nome} ({p_to_cut.ovr} OVR), who retires.")
                 else:
                     if hasattr(torneo, 'free_agents_pool'):

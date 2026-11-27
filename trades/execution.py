@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from core.config import CONFIG
+from core.front_office import trade_requests
 from core.models import Giocatore
 from trades.motive import TradeMotive, log_line
 from trades.trade_validator import TradeValidator
@@ -43,6 +44,46 @@ class Deal:
 
     def team(self, name: str) -> Optional['Squadra']:
         return next((t for t in self.teams if t.nome == name), None)
+
+
+def _pick_year_key(asset: str) -> Optional[Tuple[int, str]]:
+    """(year, key) of a pick written "Y:R1-Team"; None for any other form."""
+    year, sep, key = asset.partition(":")
+    return (int(year), key) if sep and year.isdigit() else None
+
+
+def stored_pick_protection(torneo, asset: str) -> str:
+    """The protection a pick already carries."""
+    parsed = _pick_year_key(asset)
+    if parsed is None:
+        return "Unprotected"
+    return (getattr(torneo, 'pick_protections', None) or {}).get(parsed[0], {}).get(parsed[1], "Unprotected")
+
+
+def can_set_pick_protection(torneo, asset: str, sender: str) -> bool:
+    """Can `sender` name a protection on this pick? Only on its own first (a protected pick that lands in range goes
+    back to its original team), only once (the terms stay with the pick), and not after this draft's lottery."""
+    parsed = _pick_year_key(asset)
+    if parsed is None or not parsed[1].startswith("R1-"):
+        return False
+    year, key = parsed
+    original = key.split("-", 1)[1]
+    if original != sender or (getattr(torneo, 'pick_ownership', None) or {}).get(year, {}).get(key) != sender:
+        return False
+    drawn = (year == 1 and getattr(torneo, 'fase_torneo', '') == "OFFSEASON"
+             and original in (getattr(torneo, 'draft_lottery_order', None) or []))
+    return not drawn and stored_pick_protection(torneo, asset) == "Unprotected"
+
+
+def settle_pick_terms(torneo, sides: List[Tuple[str, List[str], dict]]) -> Dict[str, str]:
+    """The protection of every pick of a user deal. `sides`: (sending team, its picks, the protections asked for)."""
+    terms: Dict[str, str] = {}
+    for sender, picks, asked in sides:
+        for asset in picks:
+            wanted = asked.get(asset)
+            allowed = wanted in CONFIG.TRADES.PICK_PROTECTIONS and can_set_pick_protection(torneo, asset, sender)
+            terms[asset] = wanted if allowed else stored_pick_protection(torneo, asset)
+    return terms
 
 
 def _pick_protection(finder, asset: str, key: str, year: int, from_team, pick_protections: Optional[dict]) -> str:
@@ -156,10 +197,9 @@ def _move_player(p: Giocatore, src, dst) -> None:
     p.morale = 95  # fresh start morale boost
     p.on_trade_block = False
     p.giorni_cooldown_scambio = 30
-    if hasattr(p, '_wants_out'):
-        p._wants_out = False
     # Whatever he refused his old team (contracts.walk_reason), he starts fresh with the new one
     p.walks_away = ""
+    trade_requests.clear_request(p)   # a trade answers a trade request: he starts clean with the new team
     p.is_flight_risk = False
     if hasattr(p, 'invalidate_trade_value_cache'):
         p.invalidate_trade_value_cache()

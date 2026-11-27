@@ -38,7 +38,7 @@ class TradeDemandTests(EngineTestCase):
         self.f = finder(self.t)
         self.r, self.a, self.b = (self.teams[n] for n in "RAB")
         self.star = aged(player(self.r, "SF", 86), 31)
-        self.star.morale = 40
+        self.star.morale, self.star.trade_request = 40, True
         self.star._test_value = 3.0
 
     def test_star_wanting_out_goes_to_the_bidder_with_a_matching_wish(self):
@@ -72,7 +72,7 @@ class TradeDemandTests(EngineTestCase):
         self.assertIn(self.star, self.a.roster)
 
     def test_an_untouchable_who_does_not_ask_out_stays_hidden(self):
-        self.star.morale = 90
+        self.star.morale, self.star.trade_request = 90, False
         self.star.is_untouchable = True
         self.assertNotIn(self.star, self.f.get_tradeable_players(self.r, allow_stars=True))
 
@@ -80,7 +80,7 @@ class TradeDemandTests(EngineTestCase):
         t, teams = league({"R": SELLER, "B": ABSORBER}, {"R": "REBUILDER", "B": "MIDDLE"})
         f = finder(t)
         star = aged(player(teams["R"], "SF", 86), 31)
-        star.morale = 40
+        star.morale, star.trade_request = 40, True
         star._test_value = 3.0
         self.assertFalse(trade_demand.run(f, teams["R"], wish_of(f, teams["R"], "STAR_WANTS_OUT")))
         self.assertIn(star, teams["R"].roster)

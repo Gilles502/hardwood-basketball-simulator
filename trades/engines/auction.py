@@ -9,7 +9,7 @@ import logging
 from typing import Any, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING
 
 from core.config import CONFIG
-from core.front_office.wishes import Wish
+from core.front_office.wishes import Wish, asked_out
 from trades.engines import common
 from trades.execution import Deal
 
@@ -42,7 +42,7 @@ def minimum_value(finder: 'TradeFinder', seller: 'Squadra', player: 'Giocatore')
     one who asked out does not (the seller's acceptance is discounted the same way)."""
     t = CONFIG.TRADES
     share = t.AUCTION_SELLER_THRESHOLD.get(finder.get_team_strategy(seller), t.AUCTION_SELLER_THRESHOLD[None])
-    if not getattr(player, '_wants_out', False):
+    if not asked_out(player):
         ovr_at = finder.era().ovr_at
         for old_ovr, mult in t.AUCTION_STAR_PRICE_OLD:
             if player.ovr >= ovr_at(old_ovr):

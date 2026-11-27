@@ -1,5 +1,36 @@
 [
   {
+    "version": "0.1.2",
+    "date": "2026-11-27",
+    "items": [
+      { "kind": "new", "text": "Stars can ask for a trade: a frustration meter, a Requests tab on the Trades page, and a price that falls while they wait" },
+      { "kind": "new", "text": "Manual trades get real offers: packages of starters and picks, and you can choose the protection of your own first-round pick" },
+      { "kind": "new", "text": "Young players' potential can change: breakouts and setbacks every summer" },
+      { "kind": "new", "text": "Injuries are counted in days and heal over the summer; long and season-ending injuries happen again" },
+      { "kind": "new", "text": "The calendar shows results while a long simulation runs, with the best performance of each day" },
+      { "kind": "new", "text": "Coach and GM firings, hirings and retirements make the news; rivalry stories are rarer and only for heated rivalries" },
+      { "kind": "new", "text": "A faster draft: Auto runs four times quicker, and one click sims to your next pick or, once your picks are done, to the end of the draft" },
+      { "kind": "fix", "text": "Players look more like themselves on the court: passers pass, scorer-passers score more, creators who are not point guards run the offense" },
+      { "kind": "fix", "text": "Stars can take 25 shots a game, but high volume now costs them percentage" },
+      { "kind": "fix", "text": "A lone star on a weak team no longer scores 35-40 a night: the defense crowds him at the rim, bigs included" },
+      { "kind": "fix", "text": "Post scorers with a good jumper use the fadeaway instead of always going to the rim" },
+      { "kind": "fix", "text": "CPU teams choose their go-to scorers again: new stars become the first option, players who left no longer are" },
+      { "kind": "fix", "text": "Long saves stay realistic: no rating inflation in the modern era, generated draft classes as strong as the curated ones, modern box scores" },
+      { "kind": "fix", "text": "Generated players keep their role: centers no longer shoot threes like guards, guards no longer post up and block like centers" },
+      { "kind": "fix", "text": "Stars who still play well age slowly and keep their role; veterans in their early 30s are no longer pushed out of the offense" },
+      { "kind": "fix", "text": "Players who improve no longer all end up wanting every ball: after 25 seasons most stars had the maximum usage" },
+      { "kind": "fix", "text": "Rebuilding teams are recognised during the season and give minutes to their young players" },
+      { "kind": "fix", "text": "CPU trades no longer dry up in long saves, and lottery teams' future firsts are no longer priced as top-5 picks" },
+      { "kind": "fix", "text": "Money: no contract above 35% of the cap, thrifty owners stay near the tax, no first-round pick to dump a small contract" },
+      { "kind": "fix", "text": "Defensive Player of the Year weighs the team's record and defense, repeat winners face voter fatigue, blocks count as much as steals and the MVP rarely wins it too" },
+      { "kind": "fix", "text": "Awards and history: a real Most Improved Player, a Rookie of the Year in the first season, a stricter Hall of Fame" },
+      { "kind": "fix", "text": "Coaches grow only after good seasons, decline with age and retire; career records are counted correctly" },
+      { "kind": "fix", "text": "Every team plays 82 games, and the playoffs play only a little slower than the regular season" },
+      { "kind": "fix", "text": "Saves no longer store the same retired player several times" },
+      { "kind": "fix", "text": "Smaller fixes: play-in labels in the league history, injury dates in career logs, trade impact numbers" }
+    ]
+  },
+  {
     "version": "0.1.1",
     "date": "2026-11-16",
     "items": [

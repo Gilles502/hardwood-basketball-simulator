@@ -40,6 +40,8 @@ export interface PlayerDetails {
   contratto: string;
   contract_data: PlayerContract | null;
   on_trade_block: boolean;
+  /** Asked to be traded (core/front_office/trade_requests.py) */
+  trade_request?: boolean;
   infortunato?: boolean;
   tipo_infortunio?: string;
   infortunio_nome?: string;
@@ -198,6 +200,9 @@ interface LeagueState {
   simulating: boolean;
   /** The live regular-season run (null when none). Kept with its error until clearSimRunError. */
   simRun: SimRun | null;
+  /** The last day a live run simulated (/api/calendar/simulate_day "simulated_day"): the Calendar shows its
+   *  results while the run goes on, without reloading the whole calendar. */
+  lastSimulatedDay: { day_index: number; [key: string]: any } | null;
   error: string | null;
   selectedPlayerName: string | null;
   selectedTeamName: string | null;
@@ -244,6 +249,7 @@ export const useLeagueStore = create<LeagueState>((set, get) => ({
   loading: false,
   simulating: false,
   simRun: null,
+  lastSimulatedDay: null,
   error: null,
   selectedPlayerName: null,
   selectedTeamName: null,
@@ -386,6 +392,7 @@ export const useLeagueStore = create<LeagueState>((set, get) => ({
           set({ leagueData: { ...prev, ...data.league_data,
                               league_database: data.league_data.league_database ?? prev?.league_database } });
         }
+        if (data.simulated_day) set({ lastSimulatedDay: data.simulated_day });
         update({ daysDone: (get().simRun?.daysDone ?? 0) + 1 });
         if (reachedAfterDay(target, data, userTeam)) { reached = true; break; }
       }

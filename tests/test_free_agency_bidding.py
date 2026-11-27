@@ -154,6 +154,42 @@ class SigningTests(unittest.TestCase):
         self.assertEqual(s["raised"], 2)
         self.assertEqual(p.walks_away, "")
 
+    def test_signing_never_goes_over_the_max_contract(self):
+        knicks, = teams("Knicks")
+        fa = market([knicks])
+        fa.signings_log, fa.log_fa = [], []
+        p = fa.player
+        p.contract, p.squadra = None, None
+        knicks.payroll, knicks.salary_cap_space = 50.0, 90.0
+        knicks.log_financial_event = lambda *a, **k: None
+        fa._get_role_need = lambda t, role: True
+        from unittest import mock
+        with mock.patch("offseason.free_agency.record_signing"),                 mock.patch.object(FreeAgency, "_invalidate_team_cache", lambda self, t: None):
+            fa._firma_giocatore(knicks, p, 84.2, "UFA SIGNING", 3)
+        self.assertAlmostEqual(p.contract.salario_annuale, 155.0 * CONFIG.ECONOMY.MAX_CONTRACT_CAP_PCT, places=1)
+
+
+class MaxContractTests(unittest.TestCase):
+    """A 25-season save had CPU raises reach 55% of the cap (Jokic $84.2M on a $151.6M cap)."""
+
+    def test_raises_stop_at_the_max_contract(self):
+        fa = market(teams("Knicks", "Sixers"), ask=50.0, plans={"Knicks": "CONTENDER"})
+        top = 155.0 * CONFIG.ECONOMY.MAX_CONTRACT_CAP_PCT
+        fa.ai_offers["Hale"] = [cpu_offer("Knicks", 50.0), cpu_offer("Sixers", top)]
+        for day in range(3, 10):
+            fa._raise_or_withdraw(day)
+        self.assertLessEqual(fa.ai_offers["Hale"][0]["salary"], top + 0.01)
+
+
+class OwnerLimitTests(unittest.TestCase):
+    def test_a_saver_owner_stops_just_over_the_tax(self):
+        fa = FreeAgency.__new__(FreeAgency)
+        fa.torneo = SimpleNamespace(salary_cap=151.6, luxury_tax_threshold=180.9, first_apron=190.7, second_apron=200.4)
+        saver = SimpleNamespace(personalita_proprietario="Risparmiatore")
+        limit = fa._determina_limite_spesa_owner(saver)
+        self.assertAlmostEqual(limit, 180.9 + CONFIG.ECONOMY.LOW_OWNER_OVER_TAX_SHARE * 151.6)
+        self.assertLess(limit, 190.7)   # under the first apron (a 25-season save had savers over the second)
+
 
 if __name__ == "__main__":
     unittest.main()
